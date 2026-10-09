@@ -1,27 +1,43 @@
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from typing import Union
 from app.agents.orchestrator import run_verification_orchestrator
 from app.schemas.orchestrator import ContextBundle
+from app.schemas.audit import PrescriptionAuditRequest, AuditResult
+from app.engine.scoring import audit_prescription
 
 router = APIRouter()
 
-class AuditRequest(BaseModel):
-    scenario: str
-
-@router.post("/", response_model=ContextBundle)
-def audit_prescription(request: AuditRequest):
+@router.post("/", response_model=Union[AuditResult, ContextBundle])
+def audit_prescription_endpoint(request: PrescriptionAuditRequest):
     """
-    Trigger the Hybrid RAG Orchestrator to evaluate a clinical scenario.
+    Audit a prescription against the Five-Tier Verification Pipeline.
+    If structured patient & prescription_lines are provided, runs the pure-Python
+    deterministic core and returns an AuditResult.
+    If only an unstructured scenario is provided, triggers the Hybrid RAG Orchestrator.
     """
     try:
-        # 1. Orchestrator calls Hybrid RAG tools and returns a ContextBundle
-        context = run_verification_orchestrator(request.scenario)
-        
-        # 2. In a complete flow, this ContextBundle would be passed to the 
-        # Deterministic Core (app/engine/) for final scoring.
-        # For now, we return the structured context directly.
-        
-        return context
+        if request.patient and request.prescription_lines:
+            # Pure deterministic verification engine (<5ms latency)
+            result = audit_prescription(
+                patient=request.patient,
+                prescription_lines=request.prescription_lines,
+                canonical_syndrome=request.canonical_syndrome,
+                has_culture_report=request.has_culture_report,
+                has_positive_microbiology=request.has_positive_microbiology,
+                is_outpatient=request.is_outpatient,
+            )
+            return result
+        elif request.scenario:
+            # Hybrid RAG Agent Orchestrator
+            context = run_verification_orchestrator(request.scenario)
+            return context
+        else:
+            raise HTTPException(
+                status_code=400,
+                detail="Request must provide either structured patient & prescription_lines or a scenario."
+            )
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
