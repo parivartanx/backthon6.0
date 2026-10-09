@@ -144,18 +144,16 @@ export function AppSidebar({ onCloseMobile }: AppSidebarProps) {
                 key={item.label}
                 href={item.href}
                 onClick={onCloseMobile}
-                className={`group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                  item.active
-                    ? "bg-[#0D607B]/10 text-[#0D607B] font-semibold"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
-                }`}
+                className={`group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${item.active
+                  ? "bg-[#0D607B]/10 text-[#0D607B] font-semibold"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                  }`}
               >
                 <Icon
-                  className={`w-4 h-4 shrink-0 transition-colors ${
-                    item.active
-                      ? "text-[#0D607B]"
-                      : "text-slate-400 group-hover:text-slate-600"
-                  }`}
+                  className={`w-4 h-4 shrink-0 transition-colors ${item.active
+                    ? "text-[#0D607B]"
+                    : "text-slate-400 group-hover:text-slate-600"
+                    }`}
                 />
                 <span className="truncate flex-1">{item.label}</span>
                 {item.badge && (
@@ -173,11 +171,10 @@ export function AppSidebar({ onCloseMobile }: AppSidebarProps) {
           <Link
             href="/profile"
             onClick={onCloseMobile}
-            className={`flex items-center gap-3 p-2.5 rounded-xl border transition-colors group ${
-              pathname === "/profile"
-                ? "bg-[#0D607B]/5 border-[#0D607B]/30 ring-1 ring-[#0D607B]/20"
-                : "bg-slate-50/80 border-slate-200/80 hover:bg-slate-100 hover:border-slate-300"
-            }`}
+            className={`flex items-center gap-3 p-2.5 rounded-xl border transition-colors group ${pathname === "/profile"
+              ? "bg-[#0D607B]/5 border-[#0D607B]/30 ring-1 ring-[#0D607B]/20"
+              : "bg-slate-50/80 border-slate-200/80 hover:bg-slate-100 hover:border-slate-300"
+              }`}
             title="View Clinician Profile"
           >
             <Avatar className="w-9 h-9 shrink-0 ring-1 ring-slate-200">
@@ -197,7 +194,7 @@ export function AppSidebar({ onCloseMobile }: AppSidebarProps) {
             <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-600 shrink-0" />
           </Link>
 
-          <Button
+          {/* <Button
             type="button"
             variant="ghost"
             onClick={() => setShowResetConfirm(true)}
@@ -206,7 +203,7 @@ export function AppSidebar({ onCloseMobile }: AppSidebarProps) {
           >
             <RotateCcw className="w-3 h-3" />
             <span>Reset Demo Data</span>
-          </Button>
+          </Button> */}
         </div>
       </aside>
 
