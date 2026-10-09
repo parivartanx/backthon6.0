@@ -13,6 +13,7 @@ from app.engine.constraints import (
     is_tetracycline,
     is_aminoglycoside,
     is_irrational_fdc,
+    is_antibiotic_drug,
     get_aware_tier,
     PEDIATRIC_FLUOROQUINOLONES,
     PEDIATRIC_TETRACYCLINES,
@@ -20,6 +21,7 @@ from app.engine.constraints import (
     VIRAL_SELF_LIMITING_SYNDROMES,
     SYNDROMES_WITH_ACCESS_FIRST_LINE,
 )
+
 
 # ---------------------------------------------------------------------------
 # Tier 1: Hard Contraindication Rules (Zero Tolerance -> BLOCKED)
@@ -175,7 +177,11 @@ def check_viral_self_limiting_indication(
 
     if is_viral_syndrome:
         drug_name = line.canonical_drug
+        if not is_antibiotic_drug(drug_name):
+            return None
+
         remediation_text = (
+
             "Mandate symptomatic supportive therapy only: ORS + Zinc for acute watery diarrhea; "
             "Paracetamol, hydration, and steam inhalation for viral URTI/bronchitis. Discontinue antibiotic."
         )

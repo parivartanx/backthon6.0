@@ -42,23 +42,46 @@ CLINICAL_KNOWLEDGE_CORPUS = [
 
 def search_amr_guidelines(query: str, limit: int = 5) -> str:
     """
-    Search clinical knowledge base using BM25 + dense semantic retrieval + Reciprocal Rank Fusion (RRF).
+    Search clinical knowledge base using hybrid BM25 + dense semantic vector retrieval
+    from Neon PostgreSQL knowledge_chunks + Reciprocal Rank Fusion (RRF).
+    Falls back gracefully to static clinical guidelines corpus if database is empty.
     """
-    sparse_ranked = rank_with_bm25(CLINICAL_KNOWLEDGE_CORPUS, query, top_k=len(CLINICAL_KNOWLEDGE_CORPUS))
-
-    query_lower = query.lower()
-    dense_ranked = [
-        chunk for chunk in CLINICAL_KNOWLEDGE_CORPUS
-        if any(term in chunk.lower() for term in query_lower.split())
-    ]
-    if not dense_ranked:
-        dense_ranked = list(CLINICAL_KNOWLEDGE_CORPUS)
-
     ranked_lists = []
-    if sparse_ranked:
-        ranked_lists.append(sparse_ranked)
-    if dense_ranked:
-        ranked_lists.append(dense_ranked)
+
+    # 1. Attempt dynamic retrieval from Neon PostgreSQL knowledge_chunks
+    try:
+        from app.services.knowledge_service import search_vector_chunks, get_chunks_list
+        db_vector_results = search_vector_chunks(query=query, limit=limit * 2)
+        if db_vector_results:
+            dense_ranked = [r.chunk_text for r in db_vector_results]
+            ranked_lists.append(dense_ranked)
+
+            # Retrieve candidate corpus from DB for BM25 ranking
+            all_db_chunks = get_chunks_list(limit=100)
+            if all_db_chunks:
+                corpus = [c.chunk_text for c in all_db_chunks]
+                sparse_ranked = rank_with_bm25(corpus, query, top_k=limit * 2)
+                if sparse_ranked:
+                    ranked_lists.append(sparse_ranked)
+    except Exception:
+        # Fallback to local corpus below
+        pass
+
+    # 2. Fallback to static corpus if no database chunks retrieved
+    if not ranked_lists:
+        sparse_ranked = rank_with_bm25(CLINICAL_KNOWLEDGE_CORPUS, query, top_k=len(CLINICAL_KNOWLEDGE_CORPUS))
+        query_lower = query.lower()
+        dense_ranked = [
+            chunk for chunk in CLINICAL_KNOWLEDGE_CORPUS
+            if any(term in chunk.lower() for term in query_lower.split())
+        ]
+        if not dense_ranked:
+            dense_ranked = list(CLINICAL_KNOWLEDGE_CORPUS)
+
+        if sparse_ranked:
+            ranked_lists.append(sparse_ranked)
+        if dense_ranked:
+            ranked_lists.append(dense_ranked)
 
     if not ranked_lists:
         return "No relevant clinical guidelines found."
@@ -67,12 +90,13 @@ def search_amr_guidelines(query: str, limit: int = 5) -> str:
 
     chunks_output = []
     for rank_idx, (chunk, rrf_score) in enumerate(fused_results, 1):
-        chunks_output.append(f"[Reranked #{rank_idx} | RRF Score: {rrf_score:.4f}] {chunk}")
+        chunks_output.append(f"[Reranked #{rank_idx} | RRF Score: {rrf_score:.4f}]\n{chunk}")
 
     return "\n\n".join(chunks_output)
 
 # Backward-compatibility alias
 search_amr_knowledge = search_amr_guidelines
+
 
 
 # ---------------------------------------------------------------------------

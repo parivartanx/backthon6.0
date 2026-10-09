@@ -7,9 +7,11 @@ from app.schemas.extract import PrescriptionExtractionResponse
 from app.engine.scoring import audit_prescription
 from app.services.extract_service import extract_prescription_from_image
 from app.services.audit_service import record_audit
+from app.services.latency import LatencyService
 
 router = APIRouter()
 
+@router.post("", response_model=Union[AuditResult, ContextBundle])
 @router.post("/", response_model=Union[AuditResult, ContextBundle])
 def audit_prescription_endpoint(request: PrescriptionAuditRequest):
     """
@@ -20,15 +22,19 @@ def audit_prescription_endpoint(request: PrescriptionAuditRequest):
     """
     try:
         if request.patient and request.prescription_lines:
-            # 1. Pure deterministic verification engine (<5ms latency)
-            result = audit_prescription(
-                patient=request.patient,
-                prescription_lines=request.prescription_lines,
-                canonical_syndrome=request.canonical_syndrome,
-                has_culture_report=request.has_culture_report,
-                has_positive_microbiology=request.has_positive_microbiology,
-                is_outpatient=request.is_outpatient,
-            )
+            # 1. Pure deterministic verification engine (<5ms latency SLA)
+            with LatencyService.profile_stage(
+                "deterministic_verification",
+                sla_limit_ms=LatencyService.DEFAULT_DETERMINISTIC_SLA_MS,
+            ):
+                result = audit_prescription(
+                    patient=request.patient,
+                    prescription_lines=request.prescription_lines,
+                    canonical_syndrome=request.canonical_syndrome,
+                    has_culture_report=request.has_culture_report,
+                    has_positive_microbiology=request.has_positive_microbiology,
+                    is_outpatient=request.is_outpatient,
+                )
 
             # 2. Record audit run in database for dashboard surveillance
             record_audit(request, result)
@@ -36,8 +42,12 @@ def audit_prescription_endpoint(request: PrescriptionAuditRequest):
             return result
 
         elif request.scenario:
-            # Hybrid RAG Agent Orchestrator
-            context = run_verification_orchestrator(request.scenario)
+            # Hybrid RAG Agent Orchestrator (<3000ms latency SLA)
+            with LatencyService.profile_stage(
+                "rag_orchestrator",
+                sla_limit_ms=LatencyService.DEFAULT_RAG_SLA_MS,
+            ):
+                context = run_verification_orchestrator(request.scenario)
             return context
         else:
             raise HTTPException(
@@ -51,20 +61,30 @@ def audit_prescription_endpoint(request: PrescriptionAuditRequest):
 
 
 @router.post("/from-image", response_model=PrescriptionExtractionResponse)
+@router.post("/from-image/", response_model=PrescriptionExtractionResponse)
+@router.post("/from-document", response_model=PrescriptionExtractionResponse)
+@router.post("/from-document/", response_model=PrescriptionExtractionResponse)
 async def audit_prescription_from_image(file: UploadFile = File(...)):
     """
-    Multimodal Vision OCR: Transcribe and parse a photographed or scanned
-    prescription image into structured clinical entities for physician review.
+    Multimodal Vision OCR & PDF Document Extraction: Transcribe and parse a
+    photographed, scanned, or digital PDF / image prescription document
+    into structured clinical entities for physician review.
     """
     try:
-        content_type = file.content_type or "image/jpeg"
+        content_type = file.content_type or "application/octet-stream"
+        filename = file.filename or ""
         file_bytes = await file.read()
         if not file_bytes:
             raise HTTPException(status_code=400, detail="Uploaded file is empty.")
 
-        extracted = extract_prescription_from_image(file_bytes, content_type)
+        extracted = extract_prescription_from_image(
+            file_bytes=file_bytes,
+            content_type=content_type,
+            filename=filename,
+        )
         return extracted
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Image prescription OCR failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Document prescription extraction failed: {str(e)}")
+

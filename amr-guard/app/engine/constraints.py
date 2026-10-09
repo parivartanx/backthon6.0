@@ -93,12 +93,19 @@ AWARE_ACCESS_DRUGS: Set[str] = {
     "cefalexin",
     "cephalexin",
     "cefazolin",
+    "cefadroxil",
     "chloramphenicol",
     "clindamycin",
     "cloxacillin",
     "doxycycline",
     "gentamicin",
+    "amikacin",
+    "tobramycin",
+    "streptomycin",
+    "kanamycin",
     "metronidazole",
+    "tinidazole",
+    "ornidazole",
     "nitrofurantoin",
     "phenoxymethylpenicillin",
     "penicillin v",
@@ -121,11 +128,19 @@ AWARE_WATCH_DRUGS: Set[str] = {
     "ceftazidime",
     "ceftriaxone",
     "cefuroxime",
+    "cefuroxime axetil",
+    "cefdinir",
+    "cefprozil",
+    "cefoperazone",
+    "cefoperazone-sulbactam",
+    "cefoperazone + sulbactam",
     "ciprofloxacin",
     "clarithromycin",
     "erythromycin",
+    "roxithromycin",
     "levofloxacin",
     "moxifloxacin",
+    "gemifloxacin",
     "norfloxacin",
     "ofloxacin",
     "piperacillin + tazobactam",
@@ -137,17 +152,27 @@ AWARE_WATCH_DRUGS: Set[str] = {
 AWARE_RESERVE_DRUGS: Set[str] = {
     "cefiderocol",
     "ceftazidime + avibactam",
+    "ceftazidime-avibactam",
     "ceftolozane + tazobactam",
+    "ceftolozane-tazobactam",
     "colistin",
     "fosfomycin iv",
     "linezolid",
     "meropenem",
     "imipenem",
+    "imipenem-cilastatin",
     "ertapenem",
+    "doripenem",
+    "tedizolid",
+    "daptomycin",
     "polymyxin b",
     "tigecycline",
     "plazomicin",
+    "aztreonam",
+    "meropenem-vaborbactam",
 }
+
+
 
 # Syndromes that have established Access first-line alternatives
 SYNDROMES_WITH_ACCESS_FIRST_LINE = {
@@ -221,3 +246,25 @@ def is_irrational_fdc(drug_name: str) -> bool:
         if part1 in norm and part2 in norm:
             return True
     return False
+
+
+def is_antibiotic_drug(drug_name: str) -> bool:
+    """Check if the drug entity is an antimicrobial agent rather than supportive therapy."""
+    norm = normalize_text(drug_name)
+    non_antibiotics = {
+        "paracetamol", "acetaminophen", "dolo", "calpol", "crocin",
+        "cetirizine", "cetzine", "alerid", "levocetirizine", "1-al",
+        "ibuprofen", "combiflam", "brufen", "salbutamol", "asthalin",
+        "ors", "oral rehydration", "zinc", "zinc sulfate", "electral",
+        "dextromethorphan", "saline", "normal saline", "pantoprazole",
+        "omeprazole", "ranitidine", "ondansetron", "chlorpheniramine",
+    }
+    if any(na in norm for na in non_antibiotics):
+        return False
+    return (
+        get_aware_tier(drug_name) in {"Access", "Watch", "Reserve"}
+        or is_fluoroquinolone(drug_name)
+        or is_tetracycline(drug_name)
+        or is_aminoglycoside(drug_name)
+    )
+
