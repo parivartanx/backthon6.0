@@ -54,19 +54,19 @@ export function AppSidebar({ onCloseMobile }: AppSidebarProps) {
     },
     {
       label: "Audit History",
-      href: "#",
+      href: "/history",
       icon: History,
-      active: false,
-      badge: "Phase 2",
-      placeholder: true,
+      active: pathname.startsWith("/history"),
+      badge: "Log",
+      placeholder: false,
     },
     {
       label: "Guideline Library",
-      href: "#",
+      href: "/guidelines",
       icon: BookOpenText,
-      active: false,
-      badge: "ICMR",
-      placeholder: true,
+      active: pathname.startsWith("/guidelines"),
+      badge: "ICMR/WHO",
+      placeholder: false,
     },
   ];
 
@@ -154,6 +154,18 @@ export function AppSidebar({ onCloseMobile }: AppSidebarProps) {
                   />
                   <span>{item.label}</span>
                 </div>
+                {item.badge && (
+                  <Badge
+                    variant="secondary"
+                    className={`text-[10px] font-medium px-2 py-0.2 border-none ${
+                      item.active
+                        ? "bg-[#E2FAD9] text-[#0d5c36]"
+                        : "bg-slate-100 text-slate-500"
+                    }`}
+                  >
+                    {item.badge}
+                  </Badge>
+                )}
               </Link>
             );
           })}
