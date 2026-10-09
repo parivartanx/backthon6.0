@@ -54,13 +54,19 @@ APP_ENV=dev
 
 ## 3. Installation & Setup
 
-### Option A: Using Makefile (Linux / macOS / Git Bash)
+### Option A: Windows PowerShell Task Runner (`run.ps1`)
+```powershell
+cd "d:\Web Project\AMR\amr-guard"
+.\run.ps1 install
+```
+
+### Option B: Linux / macOS / Git Bash (`Makefile`)
 ```bash
 cd amr-guard
 make install
 ```
 
-### Option B: Windows Manual Setup (PowerShell)
+### Option C: Manual Command Execution
 ```powershell
 cd "d:\Web Project\AMR\amr-guard"
 
