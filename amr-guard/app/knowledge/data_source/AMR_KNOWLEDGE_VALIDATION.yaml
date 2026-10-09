@@ -1,0 +1,42 @@
+schema: amr.validation.v1
+corpus_file: AMR_KNOWLEDGE_BASE.md
+record_count: 3843
+unique_record_ids: true
+unresolved_source_ids: []
+all_source_ids_resolve: true
+null_record_ids: 0
+layer_counts:
+  ICMR_AMR_surveillance: 1353
+  NCDC_AMR_surveillance_or_consumption: 1095
+  WHO_AMR_indicator: 1019
+  antibiotic_ontology: 376
+record_type_counts:
+  page_chunk: 1353
+  structured_observation: 1019
+  document_chunk: 749
+  antibiotic_entry: 376
+  resistance_evidence: 250
+  consumption_evidence: 96
+source_counts:
+  WHO_RELAY_AMR: 1019
+  WHO_AWaRe_Essential_Medicines: 376
+  ICMR_AMRSN_2023: 243
+  ICMR_AMRSN_2022: 223
+  ICMR_AMRSN_2024: 206
+  ICMR_AMRSN_2021: 206
+  ICMR_AMRSN_2020: 188
+  NCDC_resistance_2024_NARS-Net: 170
+  NCDC_resistance_2025_NARS-Net: 164
+  ICMR_AMRSN_2019: 138
+  NCDC_resistance_2023_NARS-Net: 113
+  NCDC_consumption_2024_NACNET_SACNET: 106
+  NCDC_resistance_2022_NARS-Net: 99
+  ICMR_AMRSN_2018: 98
+  NCDC_resistance_2021_NARS-Net: 80
+  NCDC_resistance_2020_NARS-Net: 79
+  NCDC_resistance_2019_NARS-Net: 76
+  NCDC_consumption_2022_NAC-NET: 63
+  NCDC_consumption_2023_NAC-NET: 61
+  ICMR_AMRSN_2017: 51
+  NCDC_resistance_2018_NARS-Net: 48
+  NCDC_resistance_2017_NARS-Net: 36
