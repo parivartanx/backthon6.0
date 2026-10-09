@@ -1,6 +1,6 @@
 // [SOLID: SRP] Centralized API Endpoints & Route Definitions
 export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "https://nine-peaches-wash.loca.lt/api/v1";
+  process.env.NEXT_PUBLIC_API_URL || "https://nasty-dragons-own.loca.lt";
 
 export const ENDPOINTS = {
   HEALTH: "/health",
