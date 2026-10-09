@@ -18,6 +18,7 @@ import { prescriptionStore } from "@/lib/prescriptionStore";
 import { 
   ArrowLeft, 
   CheckCircle2, 
+  CheckCheck,
   ShieldCheck, 
   AlertCircle, 
   User, 
@@ -136,8 +137,22 @@ export default function VerifyPrescriptionPage() {
   const isAudited = currentCase.workflowStatus === "Audited" && Boolean(currentCase.auditResult);
   const isAlreadyAudited = currentCase.workflowStatus === "Ready for Audit" || isAudited;
   const hasIncompleteMed = currentCase.medicines.some(
-    (m) => m.verificationStatus === "Needs Verification" || !m.duration
+    (m) => m.verificationStatus !== "Verified"
   );
+
+  const handleMarkAllAsVerified = () => {
+    const updatedMeds = currentCase.medicines.map((m) => ({
+      ...m,
+      verificationStatus: "Verified" as const,
+    }));
+    const updatedCase = {
+      ...currentCase,
+      medicines: updatedMeds,
+      updatedAt: new Date().toISOString(),
+    };
+    setActiveCase(updatedCase);
+    saveCase(updatedCase);
+  };
 
   const executeAudit = async () => {
     try {
@@ -484,11 +499,23 @@ export default function VerifyPrescriptionPage() {
 
               {/* Incomplete warning banner */}
               {hasIncompleteMed && (
-                <Alert className="border-amber-300 bg-amber-50/60 text-amber-900 py-3">
-                  <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
-                  <AlertDescription className="text-xs ml-2 leading-relaxed">
-                    <strong className="font-semibold">Review Highlighted Fields:</strong> Some medications are missing duration or frequency. Click the edit icon to verify before running the safety check.
-                  </AlertDescription>
+                <Alert className="border-amber-300 bg-amber-50/70 text-amber-900 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-start gap-2.5">
+                    <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                    <AlertDescription className="text-xs leading-relaxed">
+                      <strong className="font-semibold">Review Highlighted Fields:</strong> Some medications are marked as needing verification. You can verify individual items with one click or mark all as verified if the extracted parameters are accurate.
+                    </AlertDescription>
+                  </div>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={handleMarkAllAsVerified}
+                    className="shrink-0 text-xs font-semibold bg-white text-amber-900 border-amber-300 hover:bg-amber-100 gap-1.5 shadow-2xs self-start sm:self-auto"
+                  >
+                    <CheckCheck className="w-3.5 h-3.5 text-amber-700" />
+                    <span>Mark All as Verified</span>
+                  </Button>
                 </Alert>
               )}
             </div>
@@ -498,21 +525,21 @@ export default function VerifyPrescriptionPage() {
 
       {/* Incomplete Data Confirmation Dialog */}
       <Dialog open={showIncompleteDialog} onOpenChange={setShowIncompleteDialog}>
-        <DialogContent className="sm:max-w-sm p-5 space-y-4">
+        <DialogContent className="sm:max-w-md p-5 space-y-4">
           <DialogHeader className="text-left space-y-2">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
                 <AlertTriangle className="w-5 h-5" />
               </div>
               <div>
-                <DialogTitle className="text-sm font-bold text-slate-800">Incomplete Fields Detected</DialogTitle>
+                <DialogTitle className="text-sm font-bold text-slate-800">Unverified Medications Detected</DialogTitle>
                 <DialogDescription className="text-xs text-slate-500 mt-0.5">
-                  One or more medications are marked &quot;Needs Verification&quot; (missing duration or dose). Do you want to proceed and check the prescription?
+                  One or more medications have not been verified. Would you like to mark them verified now or proceed anyway?
                 </DialogDescription>
               </div>
             </div>
           </DialogHeader>
-          <DialogFooter className="gap-2 pt-2 border-t border-slate-100">
+          <DialogFooter className="gap-2 pt-2 border-t border-slate-100 flex-wrap sm:justify-between">
             <Button
               type="button"
               variant="outline"
@@ -522,14 +549,31 @@ export default function VerifyPrescriptionPage() {
             >
               Review Fields
             </Button>
-            <Button
-              type="button"
-              size="sm"
-              onClick={executeAudit}
-              className="text-xs font-semibold text-white bg-[#169781] hover:bg-[#117866]"
-            >
-              Proceed Anyway
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  handleMarkAllAsVerified();
+                  setShowIncompleteDialog(false);
+                }}
+                className="text-xs font-semibold text-[#0d5c36] bg-[#E2FAD9]/60 hover:bg-[#E2FAD9] border-[#169781]/30"
+              >
+                Mark All Verified
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                onClick={() => {
+                  handleMarkAllAsVerified();
+                  executeAudit();
+                }}
+                className="text-xs font-semibold text-white bg-[#169781] hover:bg-[#117866]"
+              >
+                Verify & Proceed
+              </Button>
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { MedicineEntry } from "@/types/prescription";
+import { MedicineEntry, MedicineVerificationStatus } from "@/types/prescription";
 import { VerificationBadge } from "@/components/common/VerificationBadge";
 import {
   Table,
@@ -16,6 +16,7 @@ import {
   Edit2, 
   Trash2, 
   Check, 
+  CheckCheck,
   X, 
   Plus, 
   AlertCircle,
@@ -120,9 +121,39 @@ export function MedicineTable({
     setItemToDelete(null);
   };
 
+  // [SOLID: SRP] Fast 1-click verification toggles without editing
+  const handleToggleVerify = (medId: string, forcedStatus?: MedicineVerificationStatus) => {
+    if (disabled) return;
+    const updatedList = medicines.map((m) => {
+      if (m.id !== medId) return m;
+      const nextStatus: MedicineVerificationStatus =
+        forcedStatus !== undefined
+          ? forcedStatus
+          : m.verificationStatus === "Verified"
+          ? "Needs Verification"
+          : "Verified";
+      return {
+        ...m,
+        verificationStatus: nextStatus,
+      };
+    });
+    onChange(updatedList);
+  };
+
   const handleAddMedicine = (newMed: MedicineEntry) => {
     onChange([...medicines, newMed]);
   };
+
+  const handleMarkAllVerified = () => {
+    if (disabled) return;
+    const updatedList = medicines.map((m) => ({
+      ...m,
+      verificationStatus: "Verified" as MedicineVerificationStatus,
+    }));
+    onChange(updatedList);
+  };
+
+  const unverifiedCount = medicines.filter((m) => m.verificationStatus !== "Verified").length;
 
   return (
     <div className="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden">
@@ -142,21 +173,38 @@ export function MedicineTable({
               </span>
             </div>
             <p className="text-[11px] text-slate-500">
-              Verify dosage, active molecule, frequency and duration before clinical auditing
+              Verify dosage, active molecule, frequency and duration before clinical review
             </p>
           </div>
         </div>
 
-        <Button
-          type="button"
-          onClick={() => setIsAddModalOpen(true)}
-          disabled={disabled}
-          size="sm"
-          className="gap-1.5 text-xs font-semibold text-white bg-[#169781] hover:bg-[#117866] shrink-0 self-start sm:self-auto"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Add Medicine</span>
-        </Button>
+        <div className="flex items-center gap-2 shrink-0 self-start sm:self-auto flex-wrap">
+          {unverifiedCount > 0 && (
+            <Button
+              type="button"
+              onClick={handleMarkAllVerified}
+              disabled={disabled}
+              variant="outline"
+              size="sm"
+              className="gap-1.5 text-xs font-semibold text-[#0d5c36] bg-[#E2FAD9]/60 hover:bg-[#E2FAD9] border-[#169781]/30 hover:border-[#169781] shadow-2xs"
+              title="Mark all medications as verified without editing them"
+            >
+              <CheckCheck className="w-4 h-4 text-[#169781]" />
+              <span>Mark All as Verified ({unverifiedCount})</span>
+            </Button>
+          )}
+
+          <Button
+            type="button"
+            onClick={() => setIsAddModalOpen(true)}
+            disabled={disabled}
+            size="sm"
+            className="gap-1.5 text-xs font-semibold text-white bg-[#169781] hover:bg-[#117866]"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add Medicine</span>
+          </Button>
+        </div>
       </div>
 
       {/* Official shadcn Table Container */}
@@ -181,7 +229,7 @@ export function MedicineTable({
             <TableBody>
               {medicines.map((med) => {
                 const isEditing = editingId === med.id;
-                const isNeedsVerification = med.verificationStatus === "Needs Verification" || !med.duration;
+                const isNeedsVerification = med.verificationStatus !== "Verified";
 
                 if (isEditing && editFormData) {
                   return (
@@ -378,12 +426,30 @@ export function MedicineTable({
 
                     {/* Status Badge */}
                     <TableCell className="py-3 px-3">
-                      <VerificationBadge status={med.verificationStatus} />
+                      <VerificationBadge
+                        status={med.verificationStatus}
+                        onClick={disabled ? undefined : () => handleToggleVerify(med.id)}
+                      />
                     </TableCell>
 
                     {/* Row Actions */}
                     <TableCell className="py-3 px-3 text-right">
-                      <div className="flex items-center justify-end gap-1 opacity-90 group-hover:opacity-100">
+                      <div className="flex items-center justify-end gap-1.5 opacity-90 group-hover:opacity-100">
+                        {med.verificationStatus !== "Verified" && (
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleToggleVerify(med.id, "Verified")}
+                            disabled={disabled}
+                            className="h-7 px-2 text-xs font-semibold text-[#0d5c36] bg-[#E2FAD9]/70 hover:bg-[#cbf4be] border-[#169781]/35 hover:border-[#169781] gap-1 shadow-2xs mr-0.5"
+                            title="Mark this medicine as verified without editing"
+                            aria-label={`Mark ${med.brandName} as verified`}
+                          >
+                            <Check className="w-3.5 h-3.5 text-[#169781]" />
+                            <span>Verify</span>
+                          </Button>
+                        )}
                         <Button
                           type="button"
                           variant="ghost"
@@ -419,14 +485,14 @@ export function MedicineTable({
       </div>
 
       {/* Clinical Disclaimer Notice */}
-      <div className="p-3 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+      <div className="p-3 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[11px] text-slate-500">
         <div className="flex items-center gap-1.5">
-          <HelpCircle className="w-3.5 h-3.5 text-slate-400" />
+          <HelpCircle className="w-3.5 h-3.5 text-slate-400 shrink-0" />
           <span>
-            <strong>Note on data completeness:</strong> &quot;Verified&quot; confirms all dosage parameters exist; it does not endorse clinical efficacy or safety before the prescription safety check.
+            <strong>Fast Verification:</strong> Click the green <em>Verify</em> button or click any status badge to verify an item directly without manual editing.
           </span>
         </div>
-        <span className="text-slate-400 hidden sm:inline">Press Enter to save inline edits</span>
+        <span className="text-slate-400 hidden sm:inline shrink-0">Press Enter to save inline edits</span>
       </div>
 
       {/* Add Modal */}
