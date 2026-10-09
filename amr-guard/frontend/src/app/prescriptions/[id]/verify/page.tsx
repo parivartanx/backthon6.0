@@ -145,14 +145,14 @@ export default function VerifyPrescriptionPage() {
       setValidationWarning(null);
       await auditActiveCase();
     } catch (err) {
-      setValidationWarning(err instanceof Error ? err.message : "Failed to execute clinical audit");
+      setValidationWarning(err instanceof Error ? err.message : "Failed to check prescription safety");
     }
   };
 
   const handleStartAudit = () => {
     setValidationWarning(null);
     if (currentCase.medicines.length === 0) {
-      setValidationWarning("Please add at least one medication before initiating AMR audit.");
+      setValidationWarning("Please add at least one medication before running the safety check.");
       return;
     }
 
@@ -204,7 +204,7 @@ export default function VerifyPrescriptionPage() {
       <div className="space-y-6 max-w-7xl mx-auto pb-12">
         {/* Page Header with Breadcrumbs + Back Arrow */}
         <PageHeader
-          title={isAudited ? "Safety Audit Results" : "Review Prescription Medicines"}
+          title={isAudited ? "Prescription Safety Results" : "Review Prescription Medicines"}
           description={
             isAudited
               ? "View the safety check results, recommendations, and any flagged concerns for this prescription."
@@ -214,7 +214,7 @@ export default function VerifyPrescriptionPage() {
           breadcrumbs={[
             { label: "Dashboard", href: "/dashboard" },
             { label: "Prescriptions", href: "/dashboard" },
-            { label: isAudited ? "Safety Audit" : `Review ${currentCase.id}` },
+            { label: isAudited ? "Prescription Safety" : `Review ${currentCase.id}` },
           ]}
         />
 
@@ -487,7 +487,7 @@ export default function VerifyPrescriptionPage() {
                 <Alert className="border-amber-300 bg-amber-50/60 text-amber-900 py-3">
                   <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
                   <AlertDescription className="text-xs ml-2 leading-relaxed">
-                    <strong className="font-semibold">Review Highlighted Fields:</strong> Some medications are missing duration or frequency. Click the edit icon to verify before running audit.
+                    <strong className="font-semibold">Review Highlighted Fields:</strong> Some medications are missing duration or frequency. Click the edit icon to verify before running the safety check.
                   </AlertDescription>
                 </Alert>
               )}
@@ -507,7 +507,7 @@ export default function VerifyPrescriptionPage() {
               <div>
                 <DialogTitle className="text-sm font-bold text-slate-800">Incomplete Fields Detected</DialogTitle>
                 <DialogDescription className="text-xs text-slate-500 mt-0.5">
-                  One or more medications are marked &quot;Needs Verification&quot; (missing duration or dose). Do you want to proceed and run the AMR audit?
+                  One or more medications are marked &quot;Needs Verification&quot; (missing duration or dose). Do you want to proceed and check the prescription?
                 </DialogDescription>
               </div>
             </div>

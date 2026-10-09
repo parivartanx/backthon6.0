@@ -183,7 +183,7 @@ export function RiskScoreGauge({
           <ShieldCheck className="w-3.5 h-3.5 text-[#169781]" />
           <span>ICMR STG / WHO AWaRe 2023 Rules</span>
         </span>
-        <span className="font-mono text-[10px] text-slate-400">Zero-LLM Latency Gate</span>
+        <span className="font-mono text-[10px] text-slate-400">Real-Time Safety Check</span>
       </div>
     </div>
   );
