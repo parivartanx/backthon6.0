@@ -1,4 +1,7 @@
-// [SOLID: SRP] Hospital-Grade Clinical Prescription Audit History & Surveillance Log for AMR Sentinel
+// [SOLID: SRP] User-Friendly Prescription Audit History
+// Clean, mature, non-technical medical interface for clinicians and clinic staff
+// Keeps table rows single-line and un-cluttered; full details accessible via View Details
+
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
@@ -13,17 +16,18 @@ import {
   ShieldCheck, 
   AlertTriangle, 
   ShieldAlert, 
-  ArrowRight, 
-  Filter, 
-  Clock, 
-  Activity, 
-  Calendar, 
-  FileCheck2,
-  RefreshCw
+  Eye, 
+  RefreshCw, 
+  FileText, 
+  CheckCircle2,
+  Pill,
+  User,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -32,79 +36,128 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+
+function formatPrescriptionDate(dateStr?: string): string {
+  if (!dateStr) return "Today";
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return "Recent";
+    return d.toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  } catch {
+    return "Recent";
+  }
+}
 
 export default function AuditHistoryPage() {
-  const { cases, metrics, fetchCases, isLoading } = usePrescriptionStore();
+  const { cases, fetchCases, isLoading } = usePrescriptionStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [selectedSort, setSelectedSort] = useState<"NEWEST" | "RISK_DESC">("NEWEST");
+  const [quickViewCase, setQuickViewCase] = useState<PrescriptionCase | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
     fetchCases();
   }, [fetchCases]);
 
-  // [DRY & CLEAN-CODE] Filter and sort cases dynamically
+  // [DRY] User-friendly metrics calculation
+  const stats = useMemo(() => {
+    const total = cases.length;
+    const approved = cases.filter((c) => (c.auditResult?.status || "APPROVED") === "APPROVED").length;
+    const flagged = cases.filter((c) => c.auditResult?.status === "FLAGGED").length;
+    const blocked = cases.filter((c) => c.auditResult?.status === "BLOCKED").length;
+
+    return { total, approved, flagged, blocked };
+  }, [cases]);
+
+  // Filter and sort cases dynamically
   const filteredCases = useMemo(() => {
-    return cases.filter((c) => {
-      // Status filter
-      if (statusFilter !== "ALL") {
-        const auditStatus = c.auditResult?.status || "APPROVED";
-        if (auditStatus !== statusFilter) return false;
-      }
+    return cases
+      .filter((c) => {
+        // Status filter
+        if (statusFilter !== "ALL") {
+          const auditStatus = c.auditResult?.status || "APPROVED";
+          if (auditStatus !== statusFilter) return false;
+        }
 
-      // Search query filter (matches Case ID, patient name, diagnosis, or medicines)
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
-        const matchesId = c.id.toLowerCase().includes(q);
-        const matchesDiagnosis = (c.patient.suspectedDiagnosis || "").toLowerCase().includes(q);
-        const matchesSymptoms = (c.patient.symptoms || "").toLowerCase().includes(q);
-        const matchesMeds = c.medicines.some(
-          (m) =>
-            m.brandName.toLowerCase().includes(q) ||
-            m.genericName.toLowerCase().includes(q)
-        );
-        return matchesId || matchesDiagnosis || matchesSymptoms || matchesMeds;
-      }
+        // Search filter (Case ID, diagnosis, symptoms, or medicines)
+        if (searchQuery.trim()) {
+          const q = searchQuery.toLowerCase();
+          const matchesId = c.id.toLowerCase().includes(q);
+          const matchesDiagnosis = (c.patient.suspectedDiagnosis || "").toLowerCase().includes(q);
+          const matchesSymptoms = (c.patient.symptoms || "").toLowerCase().includes(q);
+          const matchesMeds = c.medicines.some(
+            (m) =>
+              m.brandName.toLowerCase().includes(q) ||
+              m.genericName.toLowerCase().includes(q)
+          );
+          return matchesId || matchesDiagnosis || matchesSymptoms || matchesMeds;
+        }
 
-      return true;
-    }).sort((a, b) => {
-      if (selectedSort === "RISK_DESC") {
-        const scoreA = a.auditResult?.score ?? 0;
-        const scoreB = b.auditResult?.score ?? 0;
-        return scoreB - scoreA;
-      }
-      return b.id.localeCompare(a.id);
-    });
+        return true;
+      })
+      .sort((a, b) => {
+        if (selectedSort === "RISK_DESC") {
+          const scoreA = a.auditResult?.score ?? 0;
+          const scoreB = b.auditResult?.score ?? 0;
+          return scoreB - scoreA;
+        }
+        return b.id.localeCompare(a.id);
+      });
   }, [cases, statusFilter, searchQuery, selectedSort]);
 
-  // CSV Export utility for Hospital Antibiotic Stewardship Committee
+  // [DRY] Derived Pagination Metrics
+  const totalItems = filteredCases.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+  const safeCurrentPage = Math.min(Math.max(1, currentPage), totalPages);
+
+  const startIndex = (safeCurrentPage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, totalItems);
+  const paginatedCases = filteredCases.slice(startIndex, endIndex);
+
+  // CSV Export utility
   const handleExportCsv = () => {
     const headers = [
-      "Case ID",
+      "Prescription ID",
       "Date",
-      "Age",
-      "Sex",
-      "Suspected Diagnosis",
+      "Patient Age",
+      "Patient Sex",
+      "Diagnosis",
+      "Medicines Count",
       "Prescribed Medicines",
-      "Risk Score",
-      "Audit Status",
-      "Triage Band",
-      "Violations Count",
-      "Latency (ms)"
+      "Safety Score",
+      "Safety Status",
+      "Safety Alerts Count"
     ];
 
     const rows = filteredCases.map((c) => [
       c.id,
-      new Date().toISOString().split("T")[0],
-      c.patient.age,
+      formatPrescriptionDate(c.createdAt),
+      c.patient.age || "N/A",
       c.patient.sex,
-      `"${c.patient.suspectedDiagnosis || 'Outpatient Consult'}"`,
+      `"${c.patient.suspectedDiagnosis || 'General OPD'}"`,
+      c.medicines.length,
       `"${c.medicines.map((m) => `${m.brandName} (${m.genericName})`).join("; ")}"`,
-      c.auditResult?.score ?? 12,
-      c.auditResult?.status ?? "APPROVED",
-      c.auditResult?.band ?? "LOW_RISK",
-      c.auditResult?.flags?.length ?? 0,
-      c.auditResult?.latency_ms ?? 3
+      c.auditResult?.score ?? 85,
+      c.auditResult?.status === "BLOCKED" 
+        ? "High Risk (Blocked)" 
+        : c.auditResult?.status === "FLAGGED" 
+        ? "Needs Review" 
+        : "Safe & Approved",
+      c.auditResult?.flags?.length ?? 0
     ]);
 
     const csvContent =
@@ -114,7 +167,7 @@ export default function AuditHistoryPage() {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `AMR_Sentinel_Audit_Log_${new Date().toISOString().split("T")[0]}.csv`);
+    link.setAttribute("download", `Prescriptions_History_${new Date().toISOString().split("T")[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -122,15 +175,15 @@ export default function AuditHistoryPage() {
 
   return (
     <AppShell
-      title="Audit History & Clinical Surveillance"
+      title="Prescription History"
       breadcrumbs={[
         { label: "Dashboard", href: "/dashboard" },
-        { label: "Audit History" },
+        { label: "Prescription History" },
       ]}
     >
       <div className="space-y-6 max-w-7xl mx-auto pb-12">
-        {/* Top Summary Banner */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+        {/* Top Header Card */}
+        <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-[#F1F8FC] border border-[#C9E9EB] flex items-center justify-center text-[#0D607B] shrink-0">
               <History className="w-5 h-5 text-[#169781]" />
@@ -138,28 +191,28 @@ export default function AuditHistoryPage() {
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-xl font-bold text-[#0D607B] tracking-tight">
-                  Hospital Audit Trail & Stewardship Archive
+                  Prescription Audit History
                 </h1>
-                <Badge variant="outline" className="text-[10px] bg-[#E2FAD9] text-[#0d5c36] border-[#169781]/30">
-                  Live Log
+                <Badge variant="outline" className="text-[10px] bg-[#E2FAD9] text-[#0d5c36] border-[#169781]/30 font-semibold">
+                  All Records
                 </Badge>
               </div>
               <p className="text-xs text-slate-500 mt-0.5">
-                Comprehensive repository of all outpatient prescriptions audited through the 5-tier deterministic engine
+                Past prescriptions checked against ICMR and WHO antibiotic safety guidelines
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 self-start md:self-auto">
+          <div className="flex items-center gap-2">
             <Button
               type="button"
               variant="outline"
               size="sm"
               onClick={handleExportCsv}
-              className="gap-1.5 text-xs h-8 px-3 border-slate-200 text-[#0D607B] hover:bg-[#F1F8FC]"
+              className="gap-1.5 text-xs h-8 px-3 text-[#0D607B] border-slate-200 hover:bg-[#F1F8FC]"
             >
               <Download className="w-3.5 h-3.5 text-[#169781]" />
-              <span>Export CSV Audit Log</span>
+              <span>Download Excel / CSV</span>
             </Button>
             <Button
               type="button"
@@ -174,86 +227,95 @@ export default function AuditHistoryPage() {
           </div>
         </div>
 
-        {/* 4 Surveillance Metric Stat Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
-          <Card className="p-4 bg-white border border-slate-200/80 shadow-2xs">
+        {/* 4 User-Friendly Summary Cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+          <Card className="p-4 bg-white border border-slate-200 shadow-2xs">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-slate-500">Total Cases Audited</span>
-              <FileCheck2 className="w-4 h-4 text-[#169781]" />
+              <span className="text-xs font-semibold text-slate-500">Total Prescriptions</span>
+              <FileText className="w-4 h-4 text-[#0D607B]" />
             </div>
-            <div className="text-2xl font-extrabold text-[#0D607B] mt-2">
-              {metrics.prescriptionsProcessed}
+            <div className="text-2xl font-black text-[#0D607B] mt-1.5">
+              {stats.total}
             </div>
-            <span className="text-[11px] text-slate-400 mt-1 block">
-              100% evaluated with deterministic rules
+            <span className="text-[11px] text-slate-400 mt-0.5 block">
+              Audited in this clinic
             </span>
           </Card>
 
-          <Card className="p-4 bg-white border border-slate-200/80 shadow-2xs">
+          <Card className="p-4 bg-white border border-slate-200 shadow-2xs">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-slate-500">Critical Interventions</span>
-              <ShieldAlert className="w-4 h-4 text-red-500" />
+              <span className="text-xs font-semibold text-slate-500">Safe & Approved</span>
+              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
             </div>
-            <div className="text-2xl font-extrabold text-red-600 mt-2">
-              {metrics.criticalBlockedCases}
+            <div className="text-2xl font-black text-emerald-600 mt-1.5">
+              {stats.approved}
             </div>
-            <span className="text-[11px] text-slate-400 mt-1 block">
-              Banned FDCs & pediatric contraindications
+            <span className="text-[11px] text-slate-400 mt-0.5 block">
+              Follow standard guidelines
             </span>
           </Card>
 
-          <Card className="p-4 bg-white border border-slate-200/80 shadow-2xs">
+          <Card className="p-4 bg-white border border-slate-200 shadow-2xs">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-slate-500">Stewardship Compliance</span>
-              <ShieldCheck className="w-4 h-4 text-emerald-600" />
+              <span className="text-xs font-semibold text-slate-500">Needs Review</span>
+              <AlertTriangle className="w-4 h-4 text-amber-500" />
             </div>
-            <div className="text-2xl font-extrabold text-emerald-600 mt-2">
-              {metrics.stewardshipComplianceRate}%
+            <div className="text-2xl font-black text-amber-600 mt-1.5">
+              {stats.flagged}
             </div>
-            <span className="text-[11px] text-slate-400 mt-1 block">
-              Within WHO AWaRe Access targets
+            <span className="text-[11px] text-slate-400 mt-0.5 block">
+              Minor warnings or dose adjustments
             </span>
           </Card>
 
-          <Card className="p-4 bg-white border border-slate-200/80 shadow-2xs">
+          <Card className="p-4 bg-white border border-slate-200 shadow-2xs">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-slate-500">Mean Audit Latency</span>
-              <Clock className="w-4 h-4 text-[#0D607B]" />
+              <span className="text-xs font-semibold text-slate-500">High Risk (Blocked)</span>
+              <ShieldAlert className="w-4 h-4 text-rose-500" />
             </div>
-            <div className="text-2xl font-extrabold text-[#0D607B] mt-2">
-              2.8 ms
+            <div className="text-2xl font-black text-rose-600 mt-1.5">
+              {stats.blocked}
             </div>
-            <span className="text-[11px] text-emerald-600 font-medium mt-1 block">
-              Zero LLM inference bottleneck
+            <span className="text-[11px] text-slate-400 mt-0.5 block">
+              Contraindications prevented
             </span>
           </Card>
         </div>
 
-        {/* Filter & Search Bar */}
-        <div className="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-2xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
-          <div className="relative flex-1">
+        {/* Search & Filter Controls */}
+        <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs flex flex-col md:flex-row items-center justify-between gap-3">
+          <div className="relative flex-1 w-full">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <Input
               type="text"
-              placeholder="Search by Case ID, suspected diagnosis, chief complaint, or medication name..."
+              placeholder="Search by ID, patient, diagnosis, or medicine name..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
               className="pl-9 h-9 text-xs border-slate-200 bg-white"
             />
           </div>
 
-          <div className="flex items-center gap-2 self-end md:self-auto w-full md:w-auto">
-            {/* Status Filter */}
-            <div className="w-40">
-              <Select value={statusFilter} onValueChange={(val) => setStatusFilter(val || "ALL")}>
+          <div className="flex items-center gap-2.5 w-full md:w-auto">
+            {/* Friendly Status Filter */}
+            <div className="w-44">
+              <Select
+                value={statusFilter}
+                onValueChange={(val) => {
+                  setStatusFilter(val || "ALL");
+                  setCurrentPage(1);
+                }}
+              >
                 <SelectTrigger className="h-9 text-xs bg-white border-slate-200">
                   <SelectValue placeholder="All Statuses" />
                 </SelectTrigger>
                 <SelectContent align="end">
                   <SelectItem value="ALL">All Statuses</SelectItem>
-                  <SelectItem value="APPROVED">Approved (Low Risk)</SelectItem>
-                  <SelectItem value="FLAGGED">Flagged (Moderate)</SelectItem>
-                  <SelectItem value="BLOCKED">Blocked (High Risk)</SelectItem>
+                  <SelectItem value="APPROVED">Safe & Approved</SelectItem>
+                  <SelectItem value="FLAGGED">Needs Review</SelectItem>
+                  <SelectItem value="BLOCKED">High Risk (Blocked)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -262,154 +324,173 @@ export default function AuditHistoryPage() {
             <div className="w-44">
               <Select
                 value={selectedSort}
-                onValueChange={(val) => setSelectedSort(val as "NEWEST" | "RISK_DESC")}
+                onValueChange={(val) => {
+                  setSelectedSort(val as "NEWEST" | "RISK_DESC");
+                  setCurrentPage(1);
+                }}
               >
                 <SelectTrigger className="h-9 text-xs bg-white border-slate-200">
                   <SelectValue placeholder="Sort Order" />
                 </SelectTrigger>
                 <SelectContent align="end">
-                  <SelectItem value="NEWEST">Newest First</SelectItem>
-                  <SelectItem value="RISK_DESC">Highest Risk First</SelectItem>
+                  <SelectItem value="NEWEST">Most Recent First</SelectItem>
+                  <SelectItem value="RISK_DESC">Highest Concern First</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
         </div>
 
-        {/* Table Container */}
-        <div className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden">
+        {/* Clean, Non-Overflowing Single-Line Table */}
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 border-b border-slate-200/80 text-slate-500 font-semibold uppercase tracking-wider text-[10px]">
+            <table className="w-full text-left text-xs table-fixed">
+              <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider text-[10px]">
                 <tr>
-                  <th className="py-3 px-4">Case ID</th>
-                  <th className="py-3 px-4">Patient Profile</th>
-                  <th className="py-3 px-4">Clinical Diagnosis</th>
-                  <th className="py-3 px-4">Prescribed Antimicrobials</th>
-                  <th className="py-3 px-4 text-center">Risk Score</th>
-                  <th className="py-3 px-4">Audit Status</th>
-                  <th className="py-3 px-4 text-center">Latency</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
+                  <th className="py-3 px-4 w-[160px]">Prescription ID</th>
+                  <th className="py-3 px-4 w-[140px]">Patient</th>
+                  <th className="py-3 px-4 w-[210px]">Diagnosis</th>
+                  <th className="py-3 px-4 w-[220px]">Medicines</th>
+                  <th className="py-3 px-4 w-[140px] text-center">Safety Score</th>
+                  <th className="py-3 px-4 w-[150px]">Review Status</th>
+                  <th className="py-3 px-4 w-[110px] text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {isLoading ? (
                   <tr>
-                    <td colSpan={8} className="py-12 text-center text-xs text-slate-400">
-                      Loading clinical audit logs...
+                    <td colSpan={7} className="py-12 text-center text-xs text-slate-400">
+                      Loading prescriptions...
                     </td>
                   </tr>
                 ) : filteredCases.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="py-12 text-center text-xs text-slate-400">
-                      No prescription audit records matched your filter criteria.
+                    <td colSpan={7} className="py-12 text-center text-xs text-slate-400">
+                      No prescriptions matched your search or filter.
                     </td>
                   </tr>
                 ) : (
-                  filteredCases.map((c) => {
+                  paginatedCases.map((c) => {
                     const status = c.auditResult?.status || "APPROVED";
-                    const score = c.auditResult?.score ?? 14;
-                    const latency = c.auditResult?.latency_ms ?? 3;
-                    const violationsCount = c.auditResult?.flags?.length ?? 0;
+                    const score = c.auditResult?.score ?? 85;
+                    const alertCount = c.auditResult?.flags?.length ?? 0;
+
+                    // Clean, non-overflowing medicine summary
+                    const medCount = c.medicines.length;
+                    const firstMed = c.medicines[0]?.brandName || c.medicines[0]?.genericName || "Unspecified";
+                    const medSummary = medCount === 0
+                      ? "None"
+                      : medCount === 1
+                      ? firstMed
+                      : `${firstMed} +${medCount - 1} more`;
 
                     return (
-                      <tr key={c.id} className="hover:bg-slate-50/70 transition-colors">
-                        {/* Case ID & Date */}
-                        <td className="py-3 px-4 font-mono font-bold text-[#0D607B]">
-                          <div>{c.id}</div>
-                          <span className="text-[10px] text-slate-400 font-sans font-normal">
-                            Outpatient OPD
+                      <tr 
+                        key={c.id} 
+                        className="hover:bg-slate-50/80 transition-colors h-14"
+                      >
+                        {/* 1. Prescription ID & Date */}
+                        <td className="py-2.5 px-4 truncate">
+                          <span className="font-mono font-bold text-[#0D607B] text-xs block truncate">
+                            {c.id}
+                          </span>
+                          <span className="text-[10px] text-slate-400 block truncate">
+                            {formatPrescriptionDate(c.createdAt)}
                           </span>
                         </td>
 
-                        {/* Patient Profile */}
-                        <td className="py-3 px-4">
-                          <div className="font-semibold text-slate-800">
-                            {c.patient.age}y • {c.patient.sex}
-                          </div>
-                          <div className="text-[11px] text-slate-500 line-clamp-1">
-                            {c.patient.allergies || "No known drug allergies"}
+                        {/* 2. Patient Profile */}
+                        <td className="py-2.5 px-4 truncate">
+                          <span className="font-semibold text-slate-800 text-xs block truncate">
+                            {c.patient.age ? `${c.patient.age}y` : "—"} • {c.patient.sex}
+                          </span>
+                          <span className="text-[10px] text-slate-400 block truncate">
+                            {c.patient.pregnancyStatus && c.patient.pregnancyStatus !== "Not applicable"
+                              ? c.patient.pregnancyStatus
+                              : c.patient.egfr
+                              ? `eGFR: ${c.patient.egfr}`
+                              : "Outpatient"}
+                          </span>
+                        </td>
+
+                        {/* 3. Diagnosis / Condition */}
+                        <td className="py-2.5 px-4 truncate" title={c.patient.suspectedDiagnosis || c.patient.symptoms}>
+                          <span className="font-medium text-slate-800 text-xs block truncate">
+                            {c.patient.suspectedDiagnosis || c.patient.symptoms || "General OPD Consult"}
+                          </span>
+                          <span className="text-[10px] text-slate-400 block truncate">
+                            {c.patient.canonical_syndrome || c.patient.symptoms || "Clinical evaluation"}
+                          </span>
+                        </td>
+
+                        {/* 4. Medicines Summary (Strict single line, no wrapping badges) */}
+                        <td className="py-2.5 px-4 truncate">
+                          <div className="flex items-center gap-1.5 truncate">
+                            <span className="text-xs font-medium text-slate-700 truncate" title={c.medicines.map(m => m.brandName || m.genericName).join(", ")}>
+                              {medSummary}
+                            </span>
+                            <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 bg-slate-50 text-slate-500 border-slate-200 shrink-0">
+                              {medCount} {medCount === 1 ? "med" : "meds"}
+                            </Badge>
                           </div>
                         </td>
 
-                        {/* Clinical Diagnosis */}
-                        <td className="py-3 px-4">
-                          <div className="font-medium text-slate-800">
-                            {c.patient.suspectedDiagnosis || "Outpatient Clinical Consult"}
-                          </div>
-                          <div className="text-[10px] text-slate-400 line-clamp-1">
-                            {c.patient.symptoms || "Respiratory symptoms"}
-                          </div>
-                        </td>
-
-                        {/* Prescribed Antimicrobials */}
-                        <td className="py-3 px-4">
-                          <div className="flex flex-wrap gap-1 max-w-xs">
-                            {c.medicines.map((m) => (
-                              <span
-                                key={m.id}
-                                className="inline-flex items-center gap-1 text-[11px] px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-700"
-                              >
-                                <span className="font-semibold">{m.brandName}</span>
-                                <span className="text-[10px] text-slate-400 font-normal">({m.genericName})</span>
-                              </span>
-                            ))}
-                          </div>
-                        </td>
-
-                        {/* Risk Score */}
-                        <td className="py-3 px-4 text-center">
+                        {/* 5. Safety Score */}
+                        <td className="py-2.5 px-4 text-center">
                           <span
-                            className={`inline-flex items-center justify-center font-bold px-2.5 py-0.5 rounded-full text-xs font-mono ${
-                              score >= 60
-                                ? "bg-red-100 text-red-700 border border-red-200"
-                                : score >= 25
-                                ? "bg-amber-100 text-amber-800 border border-amber-200"
-                                : "bg-emerald-100 text-emerald-800 border border-emerald-200"
+                            className={`inline-flex items-center justify-center font-bold px-2.5 py-0.5 rounded-md text-xs font-mono ${
+                              score >= 80
+                                ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                                : score >= 50
+                                ? "bg-amber-50 text-amber-800 border border-amber-200"
+                                : "bg-rose-50 text-rose-800 border border-rose-200"
                             }`}
                           >
                             {score.toFixed(0)} / 100
                           </span>
                         </td>
 
-                        {/* Audit Status */}
-                        <td className="py-3 px-4">
+                        {/* 6. Friendly Review Status */}
+                        <td className="py-2.5 px-4 truncate">
                           {status === "BLOCKED" ? (
-                            <Badge variant="destructive" className="gap-1 text-[11px] px-2 py-0.5 font-semibold">
-                              <ShieldAlert className="w-3 h-3" />
-                              <span>BLOCKED</span>
+                            <Badge variant="destructive" className="gap-1 text-[11px] px-2 py-0.5 font-semibold bg-rose-600 text-white">
+                              <ShieldAlert className="w-3 h-3 shrink-0" />
+                              <span>High Risk</span>
                             </Badge>
                           ) : status === "FLAGGED" ? (
                             <Badge variant="outline" className="gap-1 text-[11px] px-2 py-0.5 bg-amber-50 text-amber-800 border-amber-300 font-semibold">
-                              <AlertTriangle className="w-3 h-3" />
-                              <span>FLAGGED ({violationsCount})</span>
+                              <AlertTriangle className="w-3 h-3 text-amber-600 shrink-0" />
+                              <span>Needs Review {alertCount > 0 ? `(${alertCount})` : ""}</span>
                             </Badge>
                           ) : (
-                            <Badge variant="outline" className="gap-1 text-[11px] px-2 py-0.5 bg-[#E2FAD9] text-[#0d5c36] border-[#169781]/40 font-semibold">
-                              <ShieldCheck className="w-3 h-3" />
-                              <span>APPROVED</span>
+                            <Badge variant="outline" className="gap-1 text-[11px] px-2 py-0.5 bg-[#E2FAD9] text-[#0d5c36] border-[#169781]/30 font-semibold">
+                              <ShieldCheck className="w-3 h-3 text-[#169781] shrink-0" />
+                              <span>Safe</span>
                             </Badge>
                           )}
                         </td>
 
-                        {/* Latency */}
-                        <td className="py-3 px-4 text-center font-mono text-[11px] text-slate-500">
-                          {latency} ms
-                        </td>
-
-                        {/* Action Link */}
-                        <td className="py-3 px-4 text-right">
-                          <Link href={`/prescriptions/${encodeURIComponent(c.id)}/verify`}>
+                        {/* 7. Action Button */}
+                        <td className="py-2.5 px-4 text-right">
+                          <div className="flex items-center justify-end gap-1.5">
                             <Button
                               type="button"
                               size="sm"
-                              variant="outline"
-                              className="gap-1 text-xs h-7 px-2.5 text-[#0D607B] hover:text-[#169781] hover:bg-[#F1F8FC] border-slate-200"
+                              variant="ghost"
+                              onClick={() => setQuickViewCase(c)}
+                              className="h-7 px-2 text-xs text-slate-500 hover:text-[#0D607B] hover:bg-slate-100"
+                              title="Quick Overview"
                             >
-                              <span>Console</span>
-                              <ArrowRight className="w-3 h-3" />
+                              <Eye className="w-3.5 h-3.5" />
+                              <span className="sr-only">Quick Preview</span>
                             </Button>
-                          </Link>
+
+                            <Button asChild size="sm" variant="outline" className="h-7 px-2.5 text-xs text-[#0D607B] border-slate-200 hover:bg-[#F1F8FC]">
+                              <Link href={`/prescriptions/${encodeURIComponent(c.id)}/verify`}>
+                                <span>Details</span>
+                              </Link>
+                            </Button>
+                          </div>
                         </td>
                       </tr>
                     );
@@ -419,17 +500,187 @@ export default function AuditHistoryPage() {
             </table>
           </div>
 
-          {/* Table Footer */}
-          <div className="bg-slate-50/70 p-3 px-4 border-t border-slate-200/80 flex items-center justify-between text-xs text-slate-500">
-            <span>
-              Showing <strong>{filteredCases.length}</strong> of <strong>{cases.length}</strong> audited prescriptions
-            </span>
-            <span className="text-[11px] text-slate-400">
-              Audit trails timestamped and stored in local clinical registry
-            </span>
+          {/* Table Footer with User-Friendly Pagination */}
+          <div className="bg-slate-50/70 p-3 px-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+            <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-start">
+              <span>
+                Showing <strong>{totalItems === 0 ? 0 : startIndex + 1}</strong>–<strong>{endIndex}</strong> of <strong>{totalItems}</strong> prescriptions
+              </span>
+
+              <div className="flex items-center gap-1.5 ml-0 sm:ml-4">
+                <span className="text-[11px] text-slate-400">Per page:</span>
+                <select
+                  value={pageSize}
+                  onChange={(e) => {
+                    setPageSize(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                  className="h-7 text-xs rounded border border-slate-200 bg-white px-2 py-0.5 text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#169781]"
+                >
+                  <option value={10}>10</option>
+                  <option value={20}>20</option>
+                  <option value={50}>50</option>
+                  <option value={100}>100</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Pagination Number Controls */}
+            {totalPages > 1 && (
+              <div className="flex items-center gap-1 self-end sm:self-auto">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={safeCurrentPage <= 1}
+                  className="h-7 px-2 text-xs border-slate-200 text-slate-600 disabled:opacity-40"
+                  aria-label="Previous Page"
+                >
+                  <ChevronLeft className="w-3.5 h-3.5 mr-0.5" />
+                  <span>Prev</span>
+                </Button>
+
+                <div className="flex items-center gap-1 px-1">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1)
+                    .filter((pageNum) => {
+                      if (totalPages <= 5) return true;
+                      return Math.abs(pageNum - safeCurrentPage) <= 1 || pageNum === 1 || pageNum === totalPages;
+                    })
+                    .map((pageNum, idx, visibleArr) => {
+                      const prevPage = visibleArr[idx - 1];
+                      const showEllipsis = prevPage && pageNum - prevPage > 1;
+
+                      return (
+                        <div key={pageNum} className="flex items-center gap-1">
+                          {showEllipsis && <span className="text-slate-400 text-xs px-1">…</span>}
+                          <button
+                            type="button"
+                            onClick={() => setCurrentPage(pageNum)}
+                            className={`h-7 min-w-[28px] px-1.5 rounded text-xs font-semibold transition-colors ${
+                              pageNum === safeCurrentPage
+                                ? "bg-[#0D607B] text-white"
+                                : "text-slate-600 hover:bg-slate-100"
+                            }`}
+                          >
+                            {pageNum}
+                          </button>
+                        </div>
+                      );
+                    })}
+                </div>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={safeCurrentPage >= totalPages}
+                  className="h-7 px-2 text-xs border-slate-200 text-slate-600 disabled:opacity-40"
+                  aria-label="Next Page"
+                >
+                  <span>Next</span>
+                  <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </div>
+
+      {/* Quick View Modal for non-tech users */}
+      <Dialog open={!!quickViewCase} onOpenChange={(open) => !open && setQuickViewCase(null)}>
+        {quickViewCase && (
+          <DialogContent className="sm:max-w-md p-5 space-y-4">
+            <DialogHeader className="text-left border-b border-slate-100 pb-3">
+              <div className="flex items-center justify-between">
+                <DialogTitle className="text-sm font-bold text-[#0D607B]">
+                  Prescription Summary
+                </DialogTitle>
+                <span className="font-mono text-xs font-semibold text-slate-500">
+                  {quickViewCase.id}
+                </span>
+              </div>
+              <DialogDescription className="text-xs text-slate-500">
+                Patient and medication details at a glance
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-3 text-xs">
+              {/* Patient */}
+              <div className="p-3 bg-slate-50 rounded-xl space-y-1 border border-slate-200">
+                <div className="flex items-center gap-1.5 font-semibold text-slate-700">
+                  <User className="w-3.5 h-3.5 text-[#169781]" />
+                  <span>Patient Profile</span>
+                </div>
+                <p className="text-slate-800">
+                  {quickViewCase.patient.age} years old • {quickViewCase.patient.sex}
+                </p>
+                <p className="text-slate-500 text-[11px]">
+                  Diagnosis: <strong>{quickViewCase.patient.suspectedDiagnosis || quickViewCase.patient.symptoms || "General OPD"}</strong>
+                </p>
+              </div>
+
+              {/* Medicines List */}
+              <div className="p-3 bg-slate-50 rounded-xl space-y-2 border border-slate-200">
+                <div className="flex items-center gap-1.5 font-semibold text-slate-700">
+                  <Pill className="w-3.5 h-3.5 text-[#0D607B]" />
+                  <span>Prescribed Medicines ({quickViewCase.medicines.length})</span>
+                </div>
+                <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
+                  {quickViewCase.medicines.map((m, idx) => (
+                    <div key={idx} className="flex items-center justify-between text-xs py-1 border-b border-slate-100 last:border-0">
+                      <div>
+                        <span className="font-semibold text-slate-800">{m.brandName || m.genericName}</span>
+                        <span className="text-[10px] text-slate-400 block">{m.genericName} • {m.dose}</span>
+                      </div>
+                      <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4">
+                        {m.duration || "5d"}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Safety Result */}
+              <div className="p-3 rounded-xl border flex items-center justify-between">
+                <div>
+                  <span className="text-[11px] text-slate-500 block">Guideline Evaluation</span>
+                  <span className="font-bold text-xs text-slate-800">
+                    Safety Score: {quickViewCase.auditResult?.score ?? 85}/100
+                  </span>
+                </div>
+                <div>
+                  {quickViewCase.auditResult?.status === "BLOCKED" ? (
+                    <Badge variant="destructive" className="text-[11px]">High Risk</Badge>
+                  ) : quickViewCase.auditResult?.status === "FLAGGED" ? (
+                    <Badge variant="outline" className="text-[11px] bg-amber-50 text-amber-800 border-amber-300">Needs Review</Badge>
+                  ) : (
+                    <Badge variant="outline" className="text-[11px] bg-emerald-50 text-emerald-800 border-emerald-300">Safe</Badge>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter className="gap-2 pt-2 border-t border-slate-100">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setQuickViewCase(null)}
+                className="text-xs"
+              >
+                Close
+              </Button>
+              <Button asChild size="sm" className="text-xs bg-[#169781] hover:bg-[#117866] text-white">
+                <Link href={`/prescriptions/${encodeURIComponent(quickViewCase.id)}/verify`}>
+                  <span>Open Full Audit & Print</span>
+                </Link>
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        )}
+      </Dialog>
     </AppShell>
   );
 }

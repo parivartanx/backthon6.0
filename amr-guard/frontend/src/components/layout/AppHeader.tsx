@@ -5,7 +5,6 @@ import {
   Menu, 
   HelpCircle, 
   Activity, 
-  Stethoscope, 
   CheckCircle2, 
   FileText, 
   ShieldCheck 
@@ -21,6 +20,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useAuthStore } from "@/store/useAuthStore";
 
 interface AppHeaderProps {
   title?: string;
@@ -29,6 +29,7 @@ interface AppHeaderProps {
 }
 
 export function AppHeader({ title, breadcrumbs, onOpenMobile }: AppHeaderProps) {
+  const user = useAuthStore((s) => s.user);
   const [showHelpModal, setShowHelpModal] = useState(false);
 
   return (
@@ -97,10 +98,18 @@ export function AppHeader({ title, breadcrumbs, onOpenMobile }: AppHeaderProps) 
 
           <div className="h-4 w-[1px] bg-slate-200 hidden sm:block" />
 
-          <div className="flex items-center gap-2 text-xs text-slate-600">
-            <Stethoscope className="w-4 h-4 text-[#169781]" />
-            <span className="hidden md:inline font-medium text-slate-700">Dr. Sharma</span>
-          </div>
+          <Link
+            href="/profile"
+            className="flex items-center gap-2 text-xs text-slate-600 hover:text-[#0D607B] py-1 px-2 rounded-lg hover:bg-slate-50 transition-colors"
+            title="View Clinician Profile & Settings"
+          >
+            <div className="w-6 h-6 rounded-full bg-[#169781] text-white flex items-center justify-center text-[10px] font-bold">
+              {user?.avatarInitials || "AS"}
+            </div>
+            <span className="hidden md:inline font-medium text-slate-700">
+              {user?.name ? user.name.split(",")[0] : "Dr. Sharma"}
+            </span>
+          </Link>
         </div>
       </header>
 

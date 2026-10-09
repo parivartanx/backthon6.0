@@ -22,8 +22,11 @@ import {
   User, 
   AlertTriangle,
   RotateCcw,
-  Printer
+  Printer,
+  Download,
+  Loader2
 } from "lucide-react";
+import { generatePrescriptionReportPdf } from "@/lib/pdfReportGenerator";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -57,6 +60,7 @@ export default function VerifyPrescriptionPage() {
   const [hasLoaded, setHasLoaded] = useState(false);
   const [showIncompleteDialog, setShowIncompleteDialog] = useState(false);
   const [validationWarning, setValidationWarning] = useState<string | null>(null);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
   // Initialize store and sync active case without race condition
   useEffect(() => {
@@ -157,6 +161,34 @@ export default function VerifyPrescriptionPage() {
     }
 
     executeAudit();
+  };
+
+  const handlePrintPdf = async () => {
+    try {
+      setIsGeneratingPdf(true);
+      await generatePrescriptionReportPdf(currentCase, { action: "print" });
+    } catch (err) {
+      console.error("Failed to generate printable PDF:", err);
+      setValidationWarning(
+        err instanceof Error ? err.message : "Failed to generate printable PDF"
+      );
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
+
+  const handleDownloadPdf = async () => {
+    try {
+      setIsGeneratingPdf(true);
+      await generatePrescriptionReportPdf(currentCase, { action: "download" });
+    } catch (err) {
+      console.error("Failed to download PDF report:", err);
+      setValidationWarning(
+        err instanceof Error ? err.message : "Failed to download PDF report"
+      );
+    } finally {
+      setIsGeneratingPdf(false);
+    }
   };
 
   return (
@@ -325,11 +357,29 @@ export default function VerifyPrescriptionPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => window.print()}
-                  className="h-7 text-xs gap-1 text-slate-600"
+                  onClick={handlePrintPdf}
+                  disabled={isGeneratingPdf}
+                  className="h-7 text-xs gap-1.5 text-slate-600 hover:text-[#0D607B] hover:border-[#0D607B]/40"
+                  title="Generate and print formatted clinical audit PDF (excluding sidebar & UI)"
                 >
-                  <Printer className="w-3.5 h-3.5" />
-                  <span>Print Report</span>
+                  {isGeneratingPdf ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-[#0D607B]" />
+                  ) : (
+                    <Printer className="w-3.5 h-3.5" />
+                  )}
+                  <span>{isGeneratingPdf ? "Generating..." : "Print Report"}</span>
+                </Button>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleDownloadPdf}
+                  disabled={isGeneratingPdf}
+                  className="h-7 text-xs gap-1.5 text-slate-600 hover:text-[#0D607B] hover:border-[#0D607B]/40"
+                  title="Download clinical audit report as PDF"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Download PDF</span>
                 </Button>
               </div>
             </div>
