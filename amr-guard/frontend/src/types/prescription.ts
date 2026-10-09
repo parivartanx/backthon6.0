@@ -69,6 +69,12 @@ export interface MedicineEntry {
   is_fdc?: boolean;
   confidence?: number;
   verificationStatus: MedicineVerificationStatus;
+  is_nephrotoxic?: boolean;
+  requires_egfr?: boolean;
+  min_egfr_safe?: number;
+  is_geriatric_contraindicated?: boolean;
+  requires_tdm?: boolean;
+  outpatient_iv_restricted?: boolean;
 }
 
 export interface RuleViolation {
