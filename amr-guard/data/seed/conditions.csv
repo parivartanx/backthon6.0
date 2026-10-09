@@ -8,4 +8,30 @@ id,code,display_name
 7,SYN_WATERY_DIARRHEA,Acute Watery Diarrhea (Non-Cholera)
 8,SYN_PHARYNGITIS_STREP,Streptococcal Pharyngitis (Group A Strep)
 9,SYN_AOM,Acute Otitis Media
-10,SYN_SSTI_UNCOMPLICATED,Uncomplicated Skin and Soft Tissue Infection
+10,SYN_SSTI_UNCOMPLICATED,Uncomplicated Skin and Soft Tissue Infection (Cellulitis / Impetigo)
+11,SYN_CAP_MODERATE,Community-Acquired Pneumonia (Moderate Inpatient Ward)
+12,SYN_CAP_SEVERE,Community-Acquired Pneumonia (Severe ICU)
+13,SYN_HAP,Hospital-Acquired Pneumonia (Non-Ventilated)
+14,SYN_VAP,Ventilator-Associated Pneumonia
+15,SYN_AECB,Acute Exacerbation of Chronic Bronchitis / COPD (Purulent Anthonisen Type 1)
+16,SYN_ACUTE_RHINOSINUSITIS,Acute Bacterial Rhinosinusitis (Persistent >10 Days)
+17,SYN_CSOM,Chronic Suppurative Otitis Media
+18,SYN_DENTAL_ABSCESS,Odontogenic / Periapical Dental Abscess
+19,SYN_RECURRENT_UTI,Recurrent Uncomplicated Cystitis in Females
+20,SYN_PYELONEPHRITIS_UNCOMPLICATED,Acute Uncomplicated Pyelonephritis (Outpatient)
+21,SYN_PYELONEPHRITIS_COMPLICATED,Complicated Pyelonephritis / Urosepsis (Inpatient)
+22,SYN_ASYMPTOMATIC_BACTERIURIA_PREGNANCY,Asymptomatic Bacteriuria in Pregnancy
+23,SYN_ACUTE_PROSTATITIS,Acute Bacterial Prostatitis
+24,SYN_INVASIVE_DIARRHEA,Acute Bacillary Dysentery (Shigellosis / Blood in Stool)
+25,SYN_ENTERIC_FEVER,Enteric Fever / Typhoid (Salmonella enterica)
+26,SYN_INTRA_ABDOMINAL_MILD,Mild-to-Moderate Intra-Abdominal Infection (Secondary Peritonitis)
+27,SYN_INTRA_ABDOMINAL_SEVERE,Severe / Healthcare-Associated Intra-Abdominal Sepsis
+28,SYN_H_PYLORI,Helicobacter pylori Gastritis / Peptic Ulcer Disease
+29,SYN_SSTI_PURULENT,Purulent Skin Infection (Cutaneous Abscess / Carbuncle)
+30,SYN_DIABETIC_FOOT_MILD,Diabetic Foot Infection (Mild Outpatient)
+31,SYN_DIABETIC_FOOT_MODERATE_SEVERE,Diabetic Foot Infection (Moderate-Severe Inpatient)
+32,SYN_SEPTIC_ARTHRITIS,Acute Bacterial Septic Arthritis
+33,SYN_OSTEOMYELITIS_ACUTE,Acute Hematogenous Osteomyelitis
+34,SYN_BACTERIAL_MENINGITIS_COMMUNITY,Community-Acquired Acute Bacterial Meningitis
+35,SYN_FEBRILE_NEUTROPENIA,High-Risk Febrile Neutropenia
+36,SYN_SEPSIS_COMMUNITY,Community-Acquired Sepsis / Septic Shock

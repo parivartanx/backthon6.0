@@ -50,6 +50,22 @@ def test_extract_endpoint():
     assert data["confidence_score"] > 0.5
 
 
+def test_unversioned_extract_route():
+    """Verify unversioned /extract/ and /extract routes respond with HTTP 200 (avoiding 405 Method Not Allowed)."""
+    payload = {
+        "text": "Rx: Amoxicillin 500mg TDS for 5 days. Patient: 32yo male presenting with Mild Community-Acquired Pneumonia."
+    }
+    # Test unversioned with trailing slash
+    res_slash = client.post("/extract/", json=payload)
+    assert res_slash.status_code == 200
+    assert res_slash.json()["patient"]["age_years"] == 32
+
+    # Test unversioned without trailing slash
+    res_no_slash = client.post("/extract", json=payload)
+    assert res_no_slash.status_code == 200
+    assert res_no_slash.json()["patient"]["age_years"] == 32
+
+
 def test_remediate_endpoint():
     """Verify dynamic remediation endpoint (/api/v1/remediate)."""
     payload = {
