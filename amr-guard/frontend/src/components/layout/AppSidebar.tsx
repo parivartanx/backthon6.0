@@ -100,7 +100,7 @@ export function AppSidebar({ onCloseMobile }: AppSidebarProps) {
                 />
               </div>
               <p className="text-[11px] text-slate-400 font-medium truncate">
-                Clinical Stewardship
+                Antibiotic Safety Support
               </p>
             </div>
           </Link>
