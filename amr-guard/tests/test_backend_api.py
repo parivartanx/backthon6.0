@@ -13,8 +13,8 @@ def test_root_endpoint():
     """Verify root GET endpoint responds."""
     response = client.get("/")
     assert response.status_code == 200
-    # Depending on whether frontend build exists, returns either index or stub message
-    assert "message" in response.json() or response.status_code == 200
+    # Depending on whether frontend build exists, returns either HTML or stub JSON message
+    assert response.text != ""
 
 
 def test_health_endpoints():
