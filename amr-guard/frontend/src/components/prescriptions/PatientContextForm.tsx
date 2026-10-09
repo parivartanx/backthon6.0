@@ -97,11 +97,10 @@ export function PatientContextForm({
               onChange={(e) => updateField("caseId", e.target.value)}
               disabled={disabled}
               placeholder="e.g. CASE-2026-0895"
-              className={`h-9 text-xs bg-white ${
-                errors.caseId
+              className={`h-9 text-xs bg-white ${errors.caseId
                   ? "border-red-400 focus-visible:ring-red-200"
                   : "border-slate-300 focus-visible:ring-1 focus-visible:ring-[#169781]"
-              }`}
+                }`}
             />
             {errors.caseId && <p className="mt-1 text-[11px] text-red-600">{errors.caseId}</p>}
           </div>
@@ -122,11 +121,10 @@ export function PatientContextForm({
               }}
               disabled={disabled}
               placeholder="e.g. 34"
-              className={`h-9 text-xs bg-white ${
-                errors.age
+              className={`h-9 text-xs bg-white ${errors.age
                   ? "border-red-400 focus-visible:ring-red-200"
                   : "border-slate-300 focus-visible:ring-1 focus-visible:ring-[#169781]"
-              }`}
+                }`}
             />
             {Number(patient.age) > 0 && Number(patient.age) < 18 && (
               <p className="mt-1 text-[10px] text-amber-600 font-medium">
@@ -284,11 +282,10 @@ export function PatientContextForm({
               onChange={(e) => updateField("allergies", e.target.value)}
               disabled={disabled}
               placeholder="Type allergies or enter 'NKDA' if none known"
-              className={`h-9 text-xs bg-white ${
-                isAllergySensitive
+              className={`h-9 text-xs bg-white ${isAllergySensitive
                   ? "border-amber-400 bg-amber-50/30 text-amber-900 focus-visible:ring-amber-200"
                   : "border-slate-300 focus-visible:ring-1 focus-visible:ring-[#169781]"
-              }`}
+                }`}
             />
             {isAllergySensitive && (
               <Alert className="py-2 px-3 border-amber-300 bg-amber-50/60 text-amber-800">
@@ -311,11 +308,10 @@ export function PatientContextForm({
               onChange={(e) => updateField("symptoms", e.target.value)}
               disabled={disabled}
               placeholder="e.g. High fever x 3 days, purulent productive cough, dysuria"
-              className={`h-9 text-xs bg-white ${
-                errors.symptoms
+              className={`h-9 text-xs bg-white ${errors.symptoms
                   ? "border-red-400 focus-visible:ring-red-200"
                   : "border-slate-300 focus-visible:ring-1 focus-visible:ring-[#169781]"
-              }`}
+                }`}
             />
             {errors.symptoms && <p className="text-[11px] text-red-600">{errors.symptoms}</p>}
           </div>

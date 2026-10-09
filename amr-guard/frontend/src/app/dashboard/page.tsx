@@ -1,4 +1,5 @@
-// [SOLID: SRP] Doctor Dashboard for AMR Sentinel Clinical Intelligence
+// [SOLID: SRP] Clinical Antimicrobial Dashboard
+// Simple, mature, non-technical interface for doctors, clinicians, and hospital staff
 "use client";
 
 import { useEffect } from "react";
@@ -13,24 +14,20 @@ import {
   DashboardChartsSkeleton,
   DashboardTableSkeleton,
 } from "@/components/common/ShimmerSkeleton";
-import { CTAButton } from "@/components/common/CTAButton";
-import { 
-  Plus, 
-  FileCheck2, 
-  AlertCircle, 
-  Zap, 
-  UploadCloud, 
-  FileEdit, 
+import {
+  Plus,
+  FileCheck2,
+  AlertCircle,
   ShieldCheck,
-  ArrowRight,
-  ShieldBan,
+  ShieldAlert,
+  RotateCcw,
+  History,
   Activity,
-  RotateCcw
+  ArrowRight,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function DoctorDashboard() {
@@ -41,87 +38,74 @@ export default function DoctorDashboard() {
   }, [fetchCases]);
 
   return (
-    <AppShell title="AMR Sentinel Clinical Dashboard">
-      <div className="space-y-7 max-w-7xl mx-auto pb-12">
-        {/* Hero Surveillance Banner with Pathogen Vector */}
-        <div className="relative overflow-hidden bg-gradient-to-br from-[#0D607B] via-[#09475c] to-[#063342] text-white p-6 sm:p-8 rounded-3xl shadow-lg border border-[#0D607B]/40">
-          <div className="absolute -right-20 -bottom-20 w-80 h-80 rounded-full bg-[#169781]/20 blur-3xl pointer-events-none" />
-          
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
-            <div className="space-y-3 max-w-2xl text-center md:text-left">
-              <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
-                <Badge variant="outline" className="bg-[#E2FAD9]/10 text-[#E2FAD9] border-[#E2FAD9]/30 text-xs px-2.5 py-0.5 font-semibold gap-1.5 backdrop-blur-xs">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
-                  </span>
-                  <span>Active Surveillance • Real-Time STG Pipeline</span>
-                </Badge>
-                <Badge variant="outline" className="bg-white/10 text-white border-white/20 text-xs px-2.5 py-0.5 font-semibold">
-                  OPD Shift: Active
-                </Badge>
-              </div>
-
-              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white leading-tight">
-                AMR Sentinel Clinical Console
-              </h1>
-              <p className="text-xs sm:text-sm text-slate-200 leading-relaxed max-w-xl">
-                Five-tier antibiotic safety check. Instant checks for contraindications, correct drug choice, and safe treatment duration.
-              </p>
-
-              <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 pt-2">
-                <Button
-                  asChild
-                  className="gap-2 px-5 py-2.5 rounded-xl bg-[#169781] hover:bg-[#117866] text-white text-xs sm:text-sm font-semibold shadow-md transition-all hover:scale-[1.02]"
-                >
-                  <Link href="/prescriptions/new">
-                    <Plus className="w-4 h-4 stroke-[2.5]" />
-                    <span>New Prescription Intake</span>
-                  </Link>
-                </Button>
-                <Button
-                  asChild
+    <AppShell
+      title="Clinical Dashboard"
+      breadcrumbs={[{ label: "Dashboard" }]}
+    >
+      <div className="space-y-6 max-w-7xl w-full mx-auto pb-16 min-w-0">
+        {/* Top Header Card */}
+        <div className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/90 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-start sm:items-center gap-3.5">
+            <div className="w-11 h-11 rounded-xl bg-[#F1F8FC] border border-[#C9E9EB] flex items-center justify-center text-[#169781] shrink-0">
+              <Activity className="w-5 h-5 text-[#169781]" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight">
+                  Clinical Antimicrobial Dashboard
+                </h1>
+                <Badge
                   variant="outline"
-                  className="gap-2 px-4 py-2.5 rounded-xl border-white/30 text-white bg-white/5 hover:bg-white/15 text-xs sm:text-sm font-semibold backdrop-blur-xs"
+                  className="bg-[#E2FAD9] text-[#0d5c36] border-[#169781]/20 text-xs font-semibold"
                 >
-                  <Link href="/prescriptions/new?tab=upload">
-                    <UploadCloud className="w-4 h-4" />
-                    <span>Upload Slip Scan</span>
-                  </Link>
-                </Button>
-                <CTAButton
-                  variant="ghost"
-                  size="sm"
-                  isLoading={isLoading}
-                  loadingText="Syncing Live Data..."
-                  icon={RotateCcw}
-                  onClick={() => fetchCases()}
-                  className="text-xs text-white/80 hover:text-white hover:bg-white/10 border border-white/20 rounded-xl"
-                >
-                  Sync Real API
-                </CTAButton>
+                  Active Monitoring
+                </Badge>
               </div>
+              <p className="text-xs sm:text-sm text-slate-500 mt-1">
+                Overview of outpatient antibiotic prescriptions, guideline safety checks, and stewardship adherence.
+              </p>
             </div>
+          </div>
 
-            {/* Pathogen Radar Vector Illustration */}
-            <div className="shrink-0 relative flex items-center justify-center">
-              <div className="relative w-36 h-36 sm:w-44 sm:h-44 rounded-full bg-white/5 border border-white/10 p-2 flex items-center justify-center shadow-inner group">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="/amr-vector.png"
-                  alt="Pathogen Surveillance Radar"
-                  className="w-full h-full object-contain filter drop-shadow-md transition-transform duration-700 group-hover:rotate-12 group-hover:scale-105"
-                />
-                <div className="absolute -bottom-2 bg-slate-900/90 text-white text-[10px] font-mono px-2.5 py-0.5 rounded-full border border-emerald-400/40 shadow-sm flex items-center gap-1">
-                  <Activity className="w-3 h-3 text-[#169781]" />
-                  <span>WHO AWaRe Radar</span>
-                </div>
-              </div>
-            </div>
+          {/* Quick Actions */}
+          <div className="flex flex-wrap items-center gap-2.5 self-start md:self-auto shrink-0">
+            <Button
+              asChild
+              className="gap-2 px-4 py-2 rounded-xl bg-[#169781] hover:bg-[#117866] text-white text-xs sm:text-sm font-semibold shadow-xs transition-all hover:scale-[1.01]"
+            >
+              <Link href="/prescriptions/new">
+                <Plus className="w-4 h-4 stroke-[2.5]" />
+                <span>New Prescription</span>
+              </Link>
+            </Button>
+
+            <Button
+              asChild
+              variant="outline"
+              className="gap-2 px-3.5 py-2 rounded-xl border-slate-200 text-slate-700 bg-white hover:bg-slate-50 text-xs sm:text-sm font-medium"
+            >
+              <Link href="/history">
+                <History className="w-4 h-4 text-slate-500" />
+                <span>Audit History</span>
+              </Link>
+            </Button>
+
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => fetchCases()}
+              disabled={isLoading}
+              className="h-9 w-9 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100"
+              title="Refresh dashboard data"
+              aria-label="Refresh data"
+            >
+              <RotateCcw className={`w-4 h-4 ${isLoading ? "animate-spin text-[#169781]" : ""}`} />
+            </Button>
           </div>
         </div>
 
-        {/* Clinical Error Banner with Retry */}
+        {/* Clinical Error Banner */}
         {error && (
           <Alert className="bg-amber-50/80 border-amber-200 text-amber-900 py-3 rounded-2xl shadow-2xs">
             <div className="flex items-start justify-between w-full">
@@ -147,73 +131,62 @@ export default function DoctorDashboard() {
           </Alert>
         )}
 
-        {/* 4 Summary Metric Cards: Shimmer Skeleton during Loading or Error fallback */}
-        {error && metrics.prescriptionsProcessed === 0 ? (
-          <Card className="p-8 border-dashed border-amber-300 bg-amber-50/40 text-center space-y-3 rounded-2xl">
-            <AlertCircle className="w-8 h-8 text-amber-600 mx-auto" />
-            <div className="space-y-1">
-              <h3 className="text-sm font-bold text-slate-800">{error.title}</h3>
-              <p className="text-xs text-slate-500 max-w-md mx-auto">{error.userMessage}</p>
-            </div>
-            <Button
-              size="sm"
-              onClick={() => fetchCases()}
-              className="gap-1.5 bg-[#169781] hover:bg-[#117866] text-white text-xs rounded-xl"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-              <span>Retry Connecting to API</span>
-            </Button>
-          </Card>
-        ) : isLoading ? (
+        {/* 4 Summary Metric Cards */}
+        {isLoading ? (
           <DashboardMetricsSkeleton />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <SummaryStatCard
-              title="Prescriptions Processed"
+              title="Total Prescriptions"
               value={metrics.prescriptionsProcessed}
-              subtitle="Live prescriptions evaluated"
+              subtitle="All cases checked"
               icon={FileCheck2}
-              badge="Live Data"
+              badge="Total Checked"
               accentColor="#169781"
             />
             <SummaryStatCard
-              title="Awaiting Verification"
-              value={metrics.awaitingVerification}
-              subtitle="Requires clinician review"
-              icon={AlertCircle}
-              badge="Live Data"
-              accentColor="#D97706"
-            />
-            <SummaryStatCard
-              title="Approved Compliance"
+              title="Approved & Safe"
               value={metrics.auditsReady}
-              subtitle="Evaluated against STG guidelines"
+              subtitle="Guideline compliant"
               icon={ShieldCheck}
-              badge="Live Data"
+              badge="Safe Practice"
               accentColor="#0D607B"
             />
             <SummaryStatCard
-              title="Critical Blocks Overridden"
+              title="Needs Doctor Review"
+              value={metrics.awaitingVerification}
+              subtitle="Dosage or duration flagged"
+              icon={AlertCircle}
+              badge="Requires Review"
+              accentColor="#D97706"
+            />
+            <SummaryStatCard
+              title="High Risk (Blocked)"
               value={metrics.criticalBlockedCases || 0}
-              subtitle="Zero-tolerance tier 1 catches"
-              icon={ShieldBan}
-              badge="Live Data"
+              subtitle="Unsafe antibiotics intercepted"
+              icon={ShieldAlert}
+              badge="Zero-Tolerance"
               accentColor="#EF4444"
             />
           </div>
         )}
 
-        {/* Clinical Antimicrobial Stewardship Analytics Charts: Shimmer Skeleton during Loading */}
+        {/* Charts & Graphs Section (Built using Shadcn UI Chart components) */}
         <div className="space-y-3">
           <div className="flex items-center justify-between px-1">
-            <div className="flex items-center gap-2">
-              <Activity className="w-4 h-4 text-[#169781]" />
+            <div>
               <h2 className="text-sm font-bold text-[#0D607B] uppercase tracking-wide">
-                Antibiotic Usage & Safety Trends
+                Antibiotic Safety &amp; Usage Trends
               </h2>
+              <p className="text-xs text-slate-500">
+                WHO AWaRe group distribution and weekly safety outcomes
+              </p>
             </div>
-            <Badge variant="outline" className="text-[10px] bg-[#E2FAD9] text-[#0d5c36] border-[#169781]/30">
-              ICMR STG Guidelines
+            <Badge
+              variant="outline"
+              className="text-[11px] bg-[#E2FAD9] text-[#0d5c36] border-[#169781]/30 font-medium"
+            >
+              ICMR &amp; WHO Guidelines
             </Badge>
           </div>
 
@@ -224,79 +197,28 @@ export default function DoctorDashboard() {
           )}
         </div>
 
-        {/* Quick Start Action Cards */}
-        <div className="space-y-3">
-          <div className="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-wider px-1">
-            <Zap className="w-3.5 h-3.5 text-[#169781]" />
-            <span>Intake Modes</span>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Card A: Upload */}
-            <Card className="hover:border-[#169781] hover:shadow-xs transition-all py-0">
-              <Link
-                href="/prescriptions/new?tab=upload"
-                className="group p-5 flex items-start gap-4 h-full"
-              >
-                <div className="w-12 h-12 rounded-xl bg-[#F1F8FC] border border-[#C9E9EB] flex items-center justify-center text-[#0D607B] group-hover:bg-[#E2FAD9] group-hover:text-[#0d5c36] transition-colors shrink-0">
-                  <UploadCloud className="w-6 h-6" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-bold text-slate-800 group-hover:text-[#0D607B] transition-colors">
-                      Upload Prescription Slip Scan
-                    </h3>
-                    <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-[#169781] transition-transform group-hover:translate-x-1" />
-                  </div>
-                  <p className="text-xs text-slate-500 mt-1">
-                    Upload scanned outpatient slip or handwritten prescription image to extract medications.
-                  </p>
-                  <div className="mt-2 text-[11px] font-medium text-[#169781]">
-                    JPG, PNG, WebP • Automated entity extraction via Vision OCR
-                  </div>
-                </div>
-              </Link>
-            </Card>
-
-            {/* Card B: Manual */}
-            <Card className="hover:border-[#169781] hover:shadow-xs transition-all py-0">
-              <Link
-                href="/prescriptions/new?tab=manual"
-                className="group p-5 flex items-start gap-4 h-full"
-              >
-                <div className="w-12 h-12 rounded-xl bg-[#F1F8FC] border border-[#C9E9EB] flex items-center justify-center text-[#0D607B] group-hover:bg-[#E2FAD9] group-hover:text-[#0d5c36] transition-colors shrink-0">
-                  <FileEdit className="w-6 h-6" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-bold text-slate-800 group-hover:text-[#0D607B] transition-colors">
-                      Enter Prescription Text Manually
-                    </h3>
-                    <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-[#169781] transition-transform group-hover:translate-x-1" />
-                  </div>
-                  <p className="text-xs text-slate-500 mt-1">
-                    Type or paste medication instructions directly with immediate clinical entity parsing.
-                  </p>
-                  <div className="mt-2 text-[11px] font-medium text-[#0D607B]">
-                    Includes OPD Sample Cases for quick evaluation
-                  </div>
-                </div>
-              </Link>
-            </Card>
-          </div>
-        </div>
-
-        {/* Recent Prescription Activity Table: Shimmer Skeleton during Loading */}
+        {/* Recent Prescriptions Table with Pagination (5, 10, 15, 20 rows per page) */}
         <div className="space-y-3">
           <div className="flex items-center justify-between px-1">
             <div>
               <h2 className="text-sm font-bold text-[#0D607B] uppercase tracking-wide">
-                Recent Prescription Activity
+                Recent Prescriptions
               </h2>
               <p className="text-xs text-slate-500">
-                Outpatient cases evaluated by AMR Sentinel decision support engine
+                Click &quot;View Details&quot; on any prescription to see its full safety audit and recommendations
               </p>
             </div>
+            <Button
+              asChild
+              variant="ghost"
+              size="sm"
+              className="text-xs text-[#0D607B] hover:text-[#169781] hover:bg-[#F1F8FC] gap-1"
+            >
+              <Link href="/history">
+                <span>View Full History</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </Button>
           </div>
 
           {isLoading ? (
