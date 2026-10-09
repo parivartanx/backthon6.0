@@ -148,3 +148,17 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #94A3B8;
 }
+
+/* Eliminate browser-native blue focus outlines on dropdowns & popups */
+[data-slot="select-content"],
+[data-slot="select-content"]:focus,
+[data-slot="select-content"]:focus-visible,
+[data-slot="select-item"],
+[data-slot="select-item"]:focus,
+[data-slot="select-item"]:focus-visible {
+  outline: none !important;
+}
+
+[data-slot="select-content"] {
+  box-shadow: 0 12px 28px -4px rgba(13, 96, 123, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.08) !important;
+}
