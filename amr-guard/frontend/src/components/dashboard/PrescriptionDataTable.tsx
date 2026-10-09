@@ -128,6 +128,23 @@ export function PrescriptionDataTable({ data }: PrescriptionDataTableProps) {
         cell: ({ row }) => {
           const status = row.original.workflowStatus as PrescriptionWorkflowStatus;
           switch (status) {
+            case "Audited": {
+              const res = row.original.auditResult;
+              const band = res?.band || "GREEN";
+              const score = res?.score ?? 0;
+              const bandStyles = {
+                GREEN: "bg-emerald-50 text-emerald-800 border-emerald-300",
+                AMBER: "bg-amber-50 text-amber-800 border-amber-300",
+                RED: "bg-rose-50 text-rose-800 border-rose-300",
+              }[band];
+
+              return (
+                <Badge variant="outline" className={`gap-1 font-semibold text-[10px] ${bandStyles}`}>
+                  <ShieldCheck className="w-3 h-3" />
+                  <span>Audited • {score.toFixed(0)} Risk</span>
+                </Badge>
+              );
+            }
             case "Ready for Audit":
               return (
                 <Badge variant="outline" className="gap-1 bg-[#E2FAD9] text-[#0d5c36] border-[#169781]/20">
@@ -208,6 +225,11 @@ export function PrescriptionDataTable({ data }: PrescriptionDataTableProps) {
       label: "Ready for Audit",
       value: "Ready for Audit",
       count: data.filter((d) => d.workflowStatus === "Ready for Audit").length,
+    },
+    {
+      label: "Audited",
+      value: "Audited",
+      count: data.filter((d) => d.workflowStatus === "Audited").length,
     },
   ];
 

@@ -114,10 +114,10 @@ export function AppHeader({ title, breadcrumbs, onOpenMobile }: AppHeaderProps) 
               </div>
               <div>
                 <DialogTitle className="text-sm font-bold text-[#0D607B]">
-                  AMR-Guard Clinical Protocol
+                  AMR Sentinel Clinical Protocol
                 </DialogTitle>
                 <DialogDescription className="text-[11px] text-slate-500">
-                  Phase 1: Outpatient Prescription Digitization & Verification
+                  Five-Tier Antimicrobial Stewardship & Verification Engine
                 </DialogDescription>
               </div>
             </div>

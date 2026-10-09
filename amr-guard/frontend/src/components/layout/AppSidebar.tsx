@@ -81,20 +81,26 @@ export function AppSidebar({ onCloseMobile }: AppSidebarProps) {
     <>
       <aside className="w-64 bg-white border-r border-slate-200 flex flex-col h-full select-none">
         {/* Brand Header */}
-        <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+        <div className="p-4 border-b border-slate-100 flex items-center justify-between">
           <Link 
             href="/dashboard" 
             onClick={onCloseMobile}
-            className="flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-[#169781] rounded-lg p-1"
+            className="flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-[#169781] rounded-xl p-1.5 transition-colors hover:bg-slate-50"
           >
-            <div className="w-9 h-9 rounded-lg bg-[#0D607B] flex items-center justify-center text-white shadow-xs transition-transform group-hover:scale-105">
-              <ShieldCheck className="w-5 h-5 text-[#E2FAD9]" />
+            <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-[#0D607B] to-[#169781] p-0.5 shadow-xs transition-transform group-hover:scale-105 shrink-0 overflow-hidden flex items-center justify-center">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img 
+                src="/vector2.jpeg" 
+                alt="AMR Sentinel DNA Helix" 
+                className="w-full h-full object-cover rounded-[10px] brightness-105 contrast-110"
+              />
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="font-bold text-lg tracking-tight text-[#0D607B]">AMR-Guard</span>
+                <span className="font-extrabold text-base tracking-tight text-[#0D607B]">AMR Sentinel</span>
+                <span className="inline-block w-2 h-2 rounded-full bg-[#169781] animate-pulse" title="System Active" />
               </div>
-              <p className="text-[11px] font-medium tracking-wide text-slate-500 uppercase">
+              <p className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">
                 Clinical Intelligence
               </p>
             </div>
