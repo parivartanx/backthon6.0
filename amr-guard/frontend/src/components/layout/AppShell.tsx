@@ -4,6 +4,7 @@ import { useState } from "react";
 import { AppSidebar } from "./AppSidebar";
 import { AppHeader } from "./AppHeader";
 import { AppFooter } from "./AppFooter";
+import { FeedbackDialogs } from "@/components/common/FeedbackDialogs";
 import { X } from "lucide-react";
 
 interface AppShellProps {
@@ -55,6 +56,7 @@ export function AppShell({ children, breadcrumbs, title }: AppShellProps) {
           {children}
         </main>
         <AppFooter />
+        <FeedbackDialogs />
       </div>
     </div>
   );
