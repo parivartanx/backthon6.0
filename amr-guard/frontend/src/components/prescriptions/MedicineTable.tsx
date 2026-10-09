@@ -33,6 +33,13 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface MedicineTableProps {
   medicines: MedicineEntry[];
@@ -237,19 +244,23 @@ export function MedicineTable({
                       {/* Route & Frequency Inputs */}
                       <TableCell className="py-2.5 px-2">
                         <div className="space-y-1">
-                          <select
+                          <Select
                             value={editFormData.route || "Oral"}
-                            onChange={(e) =>
-                              setEditFormData({ ...editFormData, route: e.target.value })
+                            onValueChange={(val: string | null) =>
+                              setEditFormData({ ...editFormData, route: val || "Oral" })
                             }
-                            className="w-full px-2 h-7 border border-slate-300 rounded-md text-xs bg-white focus:outline-none focus:ring-1 focus:ring-[#169781]"
                           >
-                            <option value="Oral">Oral</option>
-                            <option value="Intravenous">Intravenous</option>
-                            <option value="Intramuscular">Intramuscular</option>
-                            <option value="Inhalation">Inhalation</option>
-                            <option value="Topical">Topical</option>
-                          </select>
+                            <SelectTrigger className="w-full px-2 h-7 text-xs bg-white border-slate-300">
+                              <SelectValue placeholder="Route" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Oral">Oral</SelectItem>
+                              <SelectItem value="Intravenous">Intravenous</SelectItem>
+                              <SelectItem value="Intramuscular">Intramuscular</SelectItem>
+                              <SelectItem value="Inhalation">Inhalation</SelectItem>
+                              <SelectItem value="Topical">Topical</SelectItem>
+                            </SelectContent>
+                          </Select>
                           <Input
                             type="text"
                             value={editFormData.frequency || ""}

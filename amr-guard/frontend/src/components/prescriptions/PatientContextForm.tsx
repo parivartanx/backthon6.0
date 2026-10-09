@@ -1,10 +1,19 @@
+// [SOLID: SRP] Patient clinical vigilance form utilizing 100% Shadcn UI primitives
 "use client";
 
 import { PatientContext, SexOption, PregnancyStatusOption } from "@/types/prescription";
-import { User, ShieldAlert, FileText, AlertTriangle } from "lucide-react";
+import { User, ShieldAlert, FileText, AlertTriangle, Activity, FlaskConical, Scale } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 
 interface PatientContextFormProps {
   patient: PatientContext;
@@ -36,16 +45,23 @@ export function PatientContextForm({
   return (
     <Card className="bg-white border-slate-200/90 shadow-2xs">
       <CardHeader className="border-b border-slate-100 pb-3">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-[#F1F8FC] border border-[#C9E9EB] flex items-center justify-center text-[#0D607B]">
-            <User className="w-4 h-4" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-[#F1F8FC] border border-[#C9E9EB] flex items-center justify-center text-[#0D607B]">
+              <User className="w-4 h-4 text-[#169781]" />
+            </div>
+            <div>
+              <CardTitle className="text-sm font-bold text-[#0D607B]">
+                Patient Clinical Vigilance Parameters
+              </CardTitle>
+              <CardDescription className="text-[11px] text-slate-500">
+                Core parameters evaluated against ICMR Standard Treatment Guidelines & WHO AWaRe tiers
+              </CardDescription>
+            </div>
           </div>
-          <div>
-            <CardTitle className="text-sm font-bold text-[#0D607B]">Patient Clinical Context</CardTitle>
-            <CardDescription className="text-[11px] text-slate-500">
-              Required parameters for safe antimicrobial interpretation and dosage evaluation
-            </CardDescription>
-          </div>
+          <Badge variant="outline" className="text-[10px] font-semibold bg-[#E2FAD9] text-[#0d5c36] border-[#169781]/20">
+            AMR Sentinel Guard
+          </Badge>
         </div>
       </CardHeader>
 
@@ -94,54 +110,146 @@ export function PatientContextForm({
                   : "border-slate-300 focus-visible:ring-1 focus-visible:ring-[#169781]"
               }`}
             />
+            {Number(patient.age) > 0 && Number(patient.age) < 18 && (
+              <p className="mt-1 text-[10px] text-amber-600 font-medium">
+                Pediatric vigilance: Fluoroquinolones & Tetracyclines prohibited.
+              </p>
+            )}
             {errors.age && <p className="mt-1 text-[11px] text-red-600">{errors.age}</p>}
           </div>
 
-          {/* Sex */}
+          {/* Biological Sex (Shadcn UI Select) */}
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">
               Biological Sex <span className="text-red-500">*</span>
             </label>
-            <select
+            <Select
               value={patient.sex}
-              onChange={(e) => updateField("sex", e.target.value as SexOption)}
+              onValueChange={(val) => updateField("sex", (val as SexOption) || "Male")}
               disabled={disabled}
-              className={`w-full px-3 h-9 text-xs rounded-md border bg-white focus:outline-none focus:ring-1 focus:ring-[#169781] transition-all ${
-                errors.sex
-                  ? "border-red-400 focus:ring-red-200"
-                  : "border-slate-300"
-              }`}
             >
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-              <option value="Other">Other</option>
-              <option value="Prefer not to specify">Prefer not to specify</option>
-            </select>
+              <SelectTrigger className="h-9 text-xs bg-white border-slate-300">
+                <SelectValue placeholder="Select sex" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Male">Male</SelectItem>
+                <SelectItem value="Female">Female</SelectItem>
+                <SelectItem value="Other">Other</SelectItem>
+                <SelectItem value="Prefer not to specify">Prefer not to specify</SelectItem>
+              </SelectContent>
+            </Select>
             {errors.sex && <p className="mt-1 text-[11px] text-red-600">{errors.sex}</p>}
           </div>
 
-          {/* Pregnancy Status */}
+          {/* Pregnancy Status (Shadcn UI Select) */}
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">
               Pregnancy Status
             </label>
-            <select
+            <Select
               value={patient.pregnancyStatus}
-              onChange={(e) =>
-                updateField("pregnancyStatus", e.target.value as PregnancyStatusOption)
+              onValueChange={(val) =>
+                updateField("pregnancyStatus", (val as PregnancyStatusOption) || "Not applicable")
               }
               disabled={disabled || patient.sex === "Male"}
-              className="w-full px-3 h-9 text-xs rounded-md border border-slate-300 bg-white focus:outline-none focus:ring-1 focus:ring-[#169781] transition-all disabled:bg-slate-50 disabled:opacity-60"
             >
-              <option value="Not applicable">Not applicable</option>
-              <option value="Not pregnant">Not pregnant</option>
-              <option value="Pregnant">Pregnant (High vigilance)</option>
-              <option value="Unknown">Unknown</option>
-            </select>
+              <SelectTrigger className="h-9 text-xs bg-white border-slate-300 disabled:opacity-50">
+                <SelectValue placeholder="Pregnancy status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Not applicable">Not applicable</SelectItem>
+                <SelectItem value="Not pregnant">Not pregnant</SelectItem>
+                <SelectItem value="Pregnant">Pregnant (High vigilance)</SelectItem>
+                <SelectItem value="Unknown">Unknown</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
-        {/* Row 2: Allergies & Symptoms */}
+        {/* Row 2: Weight & Renal Function (eGFR) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-3 bg-slate-50/80 rounded-xl border border-slate-100">
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1">
+              <Scale className="w-3.5 h-3.5 text-[#0D607B]" />
+              <span>Weight (kg)</span>
+            </label>
+            <Input
+              type="number"
+              min="1"
+              max="300"
+              value={patient.weight_kg === "" || patient.weight_kg === undefined ? "" : patient.weight_kg}
+              onChange={(e) => {
+                const val = e.target.value;
+                updateField("weight_kg", val === "" ? "" : parseFloat(val) || "");
+              }}
+              disabled={disabled}
+              placeholder="e.g. 68"
+              className="h-8 text-xs bg-white border-slate-300"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1">
+              <Activity className="w-3.5 h-3.5 text-[#169781]" />
+              <span>eGFR (mL/min)</span>
+            </label>
+            <Input
+              type="number"
+              min="0"
+              max="200"
+              value={patient.egfr === "" || patient.egfr === undefined ? "" : patient.egfr}
+              onChange={(e) => {
+                const val = e.target.value;
+                updateField("egfr", val === "" ? "" : parseFloat(val) || "");
+              }}
+              disabled={disabled}
+              placeholder="e.g. 85 (or <30 for renal guard)"
+              className="h-8 text-xs bg-white border-slate-300"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1">
+              <FlaskConical className="w-3.5 h-3.5 text-[#0D607B]" />
+              <span>Culture Report</span>
+            </label>
+            <Select
+              value={patient.has_culture_report ? "yes" : "no"}
+              onValueChange={(val) => updateField("has_culture_report", val === "yes")}
+              disabled={disabled}
+            >
+              <SelectTrigger className="h-8 text-xs bg-white border-slate-300">
+                <SelectValue placeholder="Report available?" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="no">No (Empiric Therapy)</SelectItem>
+                <SelectItem value="yes">Yes (Pathogen Sensitivities Available)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1">
+              <FileText className="w-3.5 h-3.5 text-[#169781]" />
+              <span>Clinical Setting</span>
+            </label>
+            <Select
+              value={patient.is_outpatient === false ? "inpatient" : "outpatient"}
+              onValueChange={(val) => updateField("is_outpatient", val === "outpatient")}
+              disabled={disabled}
+            >
+              <SelectTrigger className="h-8 text-xs bg-white border-slate-300">
+                <SelectValue placeholder="Care setting" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="outpatient">Outpatient (OPD)</SelectItem>
+                <SelectItem value="inpatient">Inpatient (IPD / Ward)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        {/* Row 3: Allergies & Symptoms */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Known Drug Allergies */}
           <div className="space-y-1">
@@ -195,7 +303,7 @@ export function PatientContextForm({
           </div>
         </div>
 
-        {/* Row 3: Medical History & Suspected Diagnosis */}
+        {/* Row 4: Medical History & Suspected Syndrome */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">
@@ -215,16 +323,19 @@ export function PatientContextForm({
             <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center justify-between">
               <span className="flex items-center gap-1">
                 <FileText className="w-3.5 h-3.5 text-[#0D607B]" />
-                <span>Suspected Diagnosis</span>
+                <span>Suspected Diagnosis / Canonical Syndrome</span>
               </span>
-              <span className="text-[10px] text-slate-400 font-normal">Clinician impression</span>
+              <span className="text-[10px] text-slate-400 font-normal">ICMR STG Code / Label</span>
             </label>
             <Input
               type="text"
               value={patient.suspectedDiagnosis}
-              onChange={(e) => updateField("suspectedDiagnosis", e.target.value)}
+              onChange={(e) => {
+                updateField("suspectedDiagnosis", e.target.value);
+                updateField("canonical_syndrome", e.target.value);
+              }}
               disabled={disabled}
-              placeholder="e.g. Community-Acquired Pneumonia (CAP) or Acute Bronchitis"
+              placeholder="e.g. Community-Acquired Pneumonia, Viral URTI, or Acute Cystitis"
               className="h-9 text-xs bg-white border-slate-300 focus-visible:ring-1 focus-visible:ring-[#169781]"
             />
           </div>
