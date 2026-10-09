@@ -19,6 +19,10 @@ import {
   Info
 } from "lucide-react";
 
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+
 function NewPrescriptionContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -116,7 +120,7 @@ function NewPrescriptionContent() {
               const p = CLINICAL_SAMPLE_PRESETS.find((x) => x.id === e.target.value);
               if (p) handleSelectPreset(p);
             }}
-            className="text-xs bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#169781]"
+            className="text-xs bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 font-medium text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#169781]"
           >
             <option value="">Select realistic OPD case...</option>
             {CLINICAL_SAMPLE_PRESETS.map((p) => (
@@ -130,54 +134,49 @@ function NewPrescriptionContent() {
 
       {/* Validation Error Banner */}
       {validationError && (
-        <div className="flex items-center gap-2 p-3.5 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700">
+        <Alert variant="destructive" className="py-3">
           <AlertCircle className="w-4 h-4 shrink-0" />
-          <span>{validationError}</span>
-        </div>
+          <AlertDescription className="text-xs ml-2 font-medium">{validationError}</AlertDescription>
+        </Alert>
       )}
 
       {/* Input Methods Tabs */}
       <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden">
-        <div className="flex items-center border-b border-slate-200 bg-slate-50/50">
-          <button
-            type="button"
-            onClick={() => setDraftSourceType("upload")}
-            className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 text-xs font-semibold border-b-2 transition-all ${
-              draftSourceType === "upload"
-                ? "border-[#169781] text-[#0D607B] bg-white shadow-2xs"
-                : "border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-100/50"
-            }`}
-          >
-            <UploadCloud className="w-4 h-4" />
-            <span>Upload Prescription Image</span>
-          </button>
+        <Tabs
+          value={draftSourceType}
+          onValueChange={(val) => setDraftSourceType(val as "upload" | "manual")}
+          className="w-full"
+        >
+          <TabsList className="w-full grid grid-cols-2 rounded-none border-b border-slate-200 bg-slate-50/50 p-0 h-12">
+            <TabsTrigger
+              value="upload"
+              className="gap-2 text-xs font-semibold data-[state=active]:bg-white data-[state=active]:text-[#0D607B] data-[state=active]:border-b-2 data-[state=active]:border-[#169781] rounded-none h-full"
+            >
+              <UploadCloud className="w-4 h-4" />
+              <span>Upload Prescription Image</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="manual"
+              className="gap-2 text-xs font-semibold data-[state=active]:bg-white data-[state=active]:text-[#0D607B] data-[state=active]:border-b-2 data-[state=active]:border-[#169781] rounded-none h-full"
+            >
+              <FileText className="w-4 h-4" />
+              <span>Enter Prescription Text</span>
+            </TabsTrigger>
+          </TabsList>
 
-          <button
-            type="button"
-            onClick={() => setDraftSourceType("manual")}
-            className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 text-xs font-semibold border-b-2 transition-all ${
-              draftSourceType === "manual"
-                ? "border-[#169781] text-[#0D607B] bg-white shadow-2xs"
-                : "border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-100/50"
-            }`}
-          >
-            <FileText className="w-4 h-4" />
-            <span>Enter Prescription Text</span>
-          </button>
-        </div>
-
-        <div className="p-5 sm:p-6">
-          {draftSourceType === "upload" ? (
-            <PrescriptionUpload disabled={isExtracting} />
-          ) : (
-            <PrescriptionTextInput
-              value={draftText}
-              onChange={setDraftText}
-              onLoadSample={() => handleSelectPreset(CLINICAL_SAMPLE_PRESETS[0])}
-              disabled={isExtracting}
-            />
-          )}
-        </div>
+          <div className="p-5 sm:p-6">
+            {draftSourceType === "upload" ? (
+              <PrescriptionUpload disabled={isExtracting} />
+            ) : (
+              <PrescriptionTextInput
+                value={draftText}
+                onChange={setDraftText}
+                onLoadSample={() => handleSelectPreset(CLINICAL_SAMPLE_PRESETS[0])}
+                disabled={isExtracting}
+              />
+            )}
+          </div>
+        </Tabs>
       </div>
 
       {/* Patient Context Form */}
@@ -204,15 +203,15 @@ function NewPrescriptionContent() {
           </span>
         </div>
 
-        <button
+        <Button
           type="button"
           onClick={handleExtract}
           disabled={isExtracting}
-          className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-[#169781] hover:bg-[#117866] text-white text-xs sm:text-sm font-semibold shadow-xs disabled:opacity-50 disabled:cursor-not-allowed transition-all shrink-0"
+          className="gap-2 px-6 py-2.5 rounded-xl bg-[#169781] hover:bg-[#117866] text-white text-xs sm:text-sm font-semibold shadow-xs"
         >
           <span>Extract Prescription Details</span>
           <ArrowRight className="w-4 h-4" />
-        </button>
+        </Button>
       </div>
     </div>
   );
