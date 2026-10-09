@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, Boolean, Float, Text, ForeignKey, JSON, DateTime
 from sqlalchemy.orm import declarative_base
 from datetime import datetime
+from pgvector.sqlalchemy import Vector
 
 Base = declarative_base()
 
@@ -67,3 +68,12 @@ class Audit(Base):
     score = Column(Float)
     latency_ms = Column(Integer)
     remediation_applied = Column(Boolean)
+
+class KnowledgeChunk(Base):
+    __tablename__ = "knowledge_chunks"
+    id = Column(Integer, primary_key=True, index=True)
+    source_id = Column(String, index=True, nullable=True)
+    chunk_text = Column(Text, nullable=False)
+    embedding = Column(Vector(768), nullable=True)
+    metadata_json = Column(JSON, default=dict)
+
