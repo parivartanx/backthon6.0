@@ -19,6 +19,7 @@ import { fetchStewardshipStats } from "@/network/services/statsService";
 import { extractFromText, extractFromImage } from "@/network/services/extractService";
 import { submitPrescriptionAudit } from "@/network/services/auditService";
 import { parseClinicalError, ClinicalError } from "@/lib/errors";
+import { parseClinicalText, mergeParsedPatientContext } from "@/lib/clinicalTextParser";
 
 export const createDefaultPatient = (): PatientContext => ({
   caseId: `CASE-2026-${Math.floor(1000 + Math.random() * 9000)}`,
@@ -60,6 +61,7 @@ interface PrescriptionState {
   setDraftImage: (file: File | null, previewUrl: string | null) => void;
   updateDraftPatient: (updates: Partial<PatientContext>) => void;
   loadDraftPreset: (preset: ClinicalSamplePreset) => void;
+  syncDraftFromText: () => void;
   resetDraft: () => void;
   extractAndCreateCase: () => Promise<PrescriptionCase>;
 
@@ -100,17 +102,11 @@ export const usePrescriptionStore = create<PrescriptionState>((set, get) => ({
   fetchCases: async () => {
     set({ isLoading: true, error: null });
     try {
-      // 1. Fetch live metrics from real API stats endpoint
-      let liveMetrics: DashboardMetrics;
-      try {
-        liveMetrics = await fetchStewardshipStats();
-      } catch (statsErr) {
-        // Fallback to local store metrics if network is temporarily unreachable
-        liveMetrics = prescriptionStore.getMetrics();
-      }
+      // 1. Fetch live metrics directly from real API stats endpoint
+      const liveMetrics = await fetchStewardshipStats();
 
-      // 2. Fetch prescriptions list
-      const liveCases = await getPrescriptions();
+      // 2. Fetch real clinical cases created/audited by clinician
+      const liveCases = prescriptionStore.getAll();
 
       set({
         cases: liveCases,
@@ -119,7 +115,7 @@ export const usePrescriptionStore = create<PrescriptionState>((set, get) => ({
         error: null,
       });
     } catch (err) {
-      const clinicalErr = parseClinicalError(err, "Loading hospital stewardship dashboard");
+      const clinicalErr = parseClinicalError(err, "Loading hospital statistics");
       set({
         error: clinicalErr,
         isLoading: false,
@@ -141,7 +137,7 @@ export const usePrescriptionStore = create<PrescriptionState>((set, get) => ({
   },
 
   saveCase: async (caseData: PrescriptionCase) => {
-    const saved = await apiSavePrescription(caseData);
+    const saved = prescriptionStore.save(caseData);
     set((state) => {
       const existingIndex = state.cases.findIndex(
         (c) => c.id.toLowerCase() === saved.id.toLowerCase()
@@ -153,7 +149,7 @@ export const usePrescriptionStore = create<PrescriptionState>((set, get) => ({
       return { cases: updatedCases };
     });
 
-    // Refresh live metrics in background
+    // Refresh live metrics from real API in background
     fetchStewardshipStats()
       .then((m) => set({ metrics: m }))
       .catch(() => {});
@@ -162,7 +158,7 @@ export const usePrescriptionStore = create<PrescriptionState>((set, get) => ({
   },
 
   resetDemoData: async () => {
-    apiResetDemo();
+    prescriptionStore.resetDemoData();
     await get().fetchCases();
   },
 
@@ -175,21 +171,41 @@ export const usePrescriptionStore = create<PrescriptionState>((set, get) => ({
   isExtracting: false,
 
   setDraftSourceType: (type) => set({ draftSourceType: type }),
-  setDraftText: (text) => set({ draftText: text }),
+  setDraftText: (text) => {
+    // [PATTERN: Strategy & SOLID: SRP] Dynamically parse clinical text and sync fields
+    const currentPatient = get().draftPatient;
+    const parsed = parseClinicalText(text);
+    const updatedPatient = mergeParsedPatientContext(currentPatient, parsed);
+    set({
+      draftText: text,
+      draftPatient: updatedPatient,
+    });
+  },
   setDraftImage: (file, previewUrl) => set({ draftFile: file, draftPreviewUrl: previewUrl }),
   updateDraftPatient: (updates) =>
     set((state) => ({
       draftPatient: { ...state.draftPatient, ...updates },
     })),
 
-  loadDraftPreset: (preset) =>
+  loadDraftPreset: (preset) => {
+    // Dynamically merge preset patient details with any embedded notes
+    const parsed = parseClinicalText(preset.sourceText);
+    const mergedPatient = mergeParsedPatientContext(preset.data.patient, parsed);
     set({
       draftSourceType: "manual",
       draftText: preset.sourceText,
-      draftPatient: { ...preset.data.patient },
+      draftPatient: mergedPatient,
       draftFile: null,
       draftPreviewUrl: null,
-    }),
+    });
+  },
+
+  syncDraftFromText: () => {
+    const { draftText, draftPatient } = get();
+    const parsed = parseClinicalText(draftText);
+    const updated = mergeParsedPatientContext(draftPatient, parsed);
+    set({ draftPatient: updated });
+  },
 
   resetDraft: () =>
     set({
@@ -218,38 +234,20 @@ export const usePrescriptionStore = create<PrescriptionState>((set, get) => ({
             canRetry: false,
           });
         }
-        // Call Real Multimodal OCR API (/audit/from-image)
-        try {
-          extraction = await extractFromImage(draftFile);
-        } catch (imgErr) {
-          // If server fails or offline, provide graceful fallback
-          const fallback = await prescriptionStore.extractPrescription({
-            sourceType: "upload",
-            file: draftFile,
-          });
-          extraction = fallback;
-        }
+        // Call Real Multimodal OCR API (/audit/from-image) - No mock fallback
+        extraction = await extractFromImage(draftFile);
       } else {
         if (!draftText.trim()) {
           throw new ClinicalError({
             code: "VALIDATION_FAILED",
             title: "Prescription Text Required",
-            userMessage: "Please enter clinical prescription details or load an OPD sample.",
+            userMessage: "Please enter clinical prescription details to extract.",
             hint: "Include medication names, dosage, and duration.",
             canRetry: false,
           });
         }
-        // Call Real NLP Extraction API (/extract/)
-        try {
-          extraction = await extractFromText(draftText);
-        } catch (txtErr) {
-          // If server fails or offline, provide graceful fallback
-          const fallback = await prescriptionStore.extractPrescription({
-            sourceType: "manual",
-            text: draftText,
-          });
-          extraction = fallback;
-        }
+        // Call Real NLP Extraction API (/extract/) - No mock fallback
+        extraction = await extractFromText(draftText);
       }
 
       const newCase: PrescriptionCase = {
@@ -350,14 +348,8 @@ export const usePrescriptionStore = create<PrescriptionState>((set, get) => ({
     set({ isAuditing: true });
 
     try {
-      let result: AuditResult;
-      try {
-        // Real API call to /audit/
-        result = await submitPrescriptionAudit(current);
-      } catch (remoteErr) {
-        // Fallback to deterministic client engine
-        result = await localAuditPrescription(current);
-      }
+      // Real API call to /audit/
+      const result = await submitPrescriptionAudit(current);
 
       const updatedCase: PrescriptionCase = {
         ...current,

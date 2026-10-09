@@ -110,7 +110,7 @@ export default function GuidelinesLibraryPage() {
                 </Badge>
               </div>
               <p className="text-xs text-slate-500 mt-0.5">
-                Deterministic standards powering the AMR Sentinel 5-tier audit engine (WHO AWaRe 2023 • ICMR STG • CDSCO Gazette)
+                Deterministic standards powering the AMR Sentinel 5-tier safety check (WHO AWaRe 2023 • ICMR STG • CDSCO Gazette)
               </p>
             </div>
           </div>

@@ -2,8 +2,6 @@
 import { PrescriptionCase, DashboardMetrics, ExtractionResult } from "@/types/prescription";
 import { CLINICAL_SAMPLE_PRESETS } from "./clinicalSamples";
 
-const STORAGE_KEY = "amr_guard_prescription_cases_v1";
-
 // Initial synthetic cases for Dr. Ananya Sharma's OPD dashboard
 const INITIAL_DEMO_CASES: PrescriptionCase[] = [
   CLINICAL_SAMPLE_PRESETS[0].data,
@@ -85,22 +83,23 @@ const INITIAL_DEMO_CASES: PrescriptionCase[] = [
   },
 ];
 
+const STORAGE_KEY = "amr_guard_clinical_prescriptions_v2";
+
 class PrescriptionStore {
   private isBrowser(): boolean {
     return typeof window !== "undefined";
   }
 
   public getAll(): PrescriptionCase[] {
-    if (!this.isBrowser()) return INITIAL_DEMO_CASES;
+    if (!this.isBrowser()) return [];
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (!stored) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_DEMO_CASES));
-        return INITIAL_DEMO_CASES;
+        return [];
       }
       return JSON.parse(stored);
     } catch {
-      return INITIAL_DEMO_CASES;
+      return [];
     }
   }
 
@@ -139,7 +138,7 @@ class PrescriptionStore {
 
   public resetDemoData(): void {
     if (this.isBrowser()) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_DEMO_CASES));
+      localStorage.removeItem(STORAGE_KEY);
     }
   }
 
