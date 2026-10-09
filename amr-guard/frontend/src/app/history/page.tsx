@@ -191,7 +191,7 @@ export default function AuditHistoryPage() {
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-xl font-bold text-[#0D607B] tracking-tight">
-                  Prescription Audit History
+                  Prescription History
                 </h1>
                 <Badge variant="outline" className="text-[10px] bg-[#E2FAD9] text-[#0d5c36] border-[#169781]/30 font-semibold">
                   All Records
@@ -238,7 +238,7 @@ export default function AuditHistoryPage() {
               {stats.total}
             </div>
             <span className="text-[11px] text-slate-400 mt-0.5 block">
-              Audited in this clinic
+              Prescriptions in this clinic
             </span>
           </Card>
 
