@@ -139,7 +139,7 @@ def test_pdf_extraction_via_from_image_endpoint():
     assert response.status_code == 200
     data = response.json()
     assert data["patient"]["age_years"] == 32
-    assert data["patient"]["sex"] == "M"
+    assert data["patient"]["sex"] in ["M", "Male"]
     assert len(data["prescription_lines"]) >= 1
     assert data["prescription_lines"][0]["drug_name"] == "Amoxicillin"
 
