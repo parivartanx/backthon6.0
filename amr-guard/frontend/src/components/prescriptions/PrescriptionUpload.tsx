@@ -152,16 +152,17 @@ export function PrescriptionUpload({
             <UploadCloud className="w-6 h-6" />
           </div>
           <h3 className="text-sm font-semibold text-slate-800">
-            Upload Prescription Document
+            Upload Prescription Document <span className="text-xs font-normal text-slate-400">(Optional)</span>
           </h3>
           <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
-            Drag and drop your scanned prescription or doctor&apos;s slip, or{" "}
+            Drag and drop your scanned prescription slip if available, or{" "}
             <span className="text-[#169781] font-semibold underline underline-offset-2">
               browse files
             </span>
+            . You can also proceed using form inputs below.
           </p>
           <div className="mt-3 flex items-center justify-center gap-2 text-[11px] text-slate-400">
-            <span>Supports JPEG, PNG, WebP (Max 10MB)</span>
+            <span>Supports JPEG, PNG, WebP (Max 10MB) • Not mandatory</span>
           </div>
         </div>
       ) : (
@@ -242,7 +243,7 @@ export function PrescriptionUpload({
       <div className="flex items-start gap-2 p-3 bg-[#F1F8FC] border border-[#C9E9EB] rounded-lg text-xs text-slate-600">
         <ImageIcon className="w-4 h-4 text-[#0D607B] shrink-0 mt-0.5" />
         <p className="text-[11px] leading-relaxed">
-          <strong className="text-[#0D607B]">Clinical protocol:</strong> Upload a clear prescription image. Review all extracted medicine details, dosages, and patient clinical indicators thoroughly before clinical auditing.
+          <strong className="text-[#0D607B]">Prescription Slip:</strong> Uploading a slip enables automated image OCR. If not available, you can proceed directly by typing notes or completing the patient form.
         </p>
       </div>
 

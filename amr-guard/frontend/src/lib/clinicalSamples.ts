@@ -32,6 +32,7 @@ Prescription:
       sourceText: `Rx - Outpatient Clinic Slip\nPatient: Rahul Verma, 34M\nDiagnosis: Acute Purulent Bronchitis\nSymptoms: Persistent productive cough (yellowish sputum), fever 4 days.\n\n1. Tab. Taxim-O (Cefixime) 200 mg - 1 tab PO BD x 5 days\n2. Tab. Azithral (Azithromycin) 500 mg - 1 tab PO OD x 3 days\n3. Tab. Dolo (Paracetamol) 650 mg - 1 tab PO SOS x 3 days\n4. Tab. Cetzine (Cetirizine) 10 mg - 1 tab PO HS x 5 days`,
       patient: {
         caseId: "CASE-2026-0891",
+        patientName: "Rahul Verma",
         age: 34,
         sex: "Male",
         pregnancyStatus: "Not applicable",
@@ -111,6 +112,7 @@ Prescribed:
       imageFileName: "pediatric_opd_slip_0894.jpg",
       patient: {
         caseId: "CASE-2026-0894",
+        patientName: "Master Aarav Patel",
         age: 6,
         sex: "Male",
         pregnancyStatus: "Not applicable",
@@ -167,6 +169,7 @@ Prescription:
       sourceText: `Rx - Dental OPD\nPatient: Sunita Nair, 42F\nALLERGY: Severe Penicillin allergy (Urticaria)\nDiagnosis: Mandibular Abscess\n- Tab. Flagyl 400mg TID x 5d\n- Tab. Dalacin C 300mg QID x 5d\n- Tab. Zerodol-SP BD x 3d`,
       patient: {
         caseId: "CASE-2026-0898",
+        patientName: "Sunita Nair",
         age: 42,
         sex: "Female",
         pregnancyStatus: "Not pregnant",
