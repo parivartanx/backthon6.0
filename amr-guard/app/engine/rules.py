@@ -302,6 +302,69 @@ def check_unapproved_fdc(line: PrescriptionLine) -> Optional[RuleViolation]:
     return None
 
 
+# [SOLID: SRP] — dedicated check for non-canonical/vague diagnostic indications
+def check_unmapped_syndrome_advisory(
+    canonical_syndrome: Optional[str],
+    line: PrescriptionLine,
+    has_culture_report: bool = False
+) -> Optional[RuleViolation]:
+    """
+    Tier 2.3: Unconfirmed Indication / Vague Symptom Advisory Gate.
+    Prescribing high-potency Watch/Reserve antimicrobials for non-canonical
+    symptoms (e.g. 'fever and cough') without culture confirmation triggers
+    a soft stewardship advisory (P_indication = 30.0).
+    """
+    if has_culture_report:
+        return None
+
+    drug_name = line.canonical_drug
+    aware_tier = get_aware_tier(drug_name, line.aware_tier)
+
+    # Only applies to Watch or Reserve antimicrobials
+    if aware_tier not in ["Watch", "Reserve"]:
+        return None
+
+    # Check if canonical_syndrome is defined and mapped to a specific diagnosis
+    if not canonical_syndrome:
+        is_unmapped = True
+    else:
+        norm_syn = normalize_text(canonical_syndrome)
+        # If it's a valid ICMR code (starts with syn_), or contains known specific clinical disease terms
+        is_canonical = (
+            norm_syn.startswith("syn_")
+            or any(d in norm_syn for d in [
+                "pneumonia", "cap", "hap", "vap", "urinary tract", "uti", "cystitis", "pyelonephritis",
+                "meningitis", "sepsis", "cellulitis", "osteomyelitis", "abscess", "peritonitis",
+                "neutropenia", "endocarditis", "strep pharyngitis", "otitis media", "rhinosinusitis",
+                "enteric fever", "typhoid", "diabetic foot", "septic arthritis"
+            ])
+        )
+        is_unmapped = not is_canonical
+
+    if is_unmapped:
+        syn_display = canonical_syndrome if canonical_syndrome else "Unspecified"
+        return RuleViolation(
+            tier=2,
+            rule_id="TIER2_UNMAPPED_SYNDROME_ADVISORY",
+            rule_name="Unconfirmed Indication / Vague Symptom Advisory",
+            severity="MEDIUM",
+            drug=drug_name,
+            penalty_type="indication",
+            penalty_score=30.0,
+            rationale=(
+                f"WHO '{aware_tier}' antimicrobial '{drug_name}' prescribed for non-canonical "
+                f"symptom presentation ('{syn_display}') without microbiological confirmation."
+            ),
+            remediation=(
+                "Specify a confirmed ICMR diagnostic syndrome (e.g. CAP, acute bacterial rhinosinusitis) "
+                "or obtain culture before initiating broad-spectrum Watch/Reserve therapy."
+            ),
+            citation="ICMR Standard Treatment Guidelines 2022 & WHO AWaRe Policy"
+        )
+
+    return None
+
+
 # ---------------------------------------------------------------------------
 # Tier 3: WHO AWaRe Spectrum & Tier Escalation Rules
 # ---------------------------------------------------------------------------
@@ -381,6 +444,61 @@ def check_reserve_airgap(
                 "sign-off required before dispensing. Empirical outpatient dispensing blocked."
             ),
             citation="WHO Reserve Group Stewardship Protocols & National Policy for Containment of AMR"
+        )
+
+    return None
+
+
+# [SOLID: SRP] — dedicated check for parenteral outpatient administration
+def check_outpatient_iv_safeguard(
+    line: PrescriptionLine,
+    is_outpatient: bool = True,
+    has_culture_report: bool = False
+) -> Optional[RuleViolation]:
+    """
+    Tier 3.3: Outpatient Parenteral Antimicrobial Safeguard.
+    Flags parenteral/intravenous high-potency antimicrobials prescribed in outpatient
+    settings without confirmed microbiology/culture report or documented OPAT supervision.
+    Penalty: P_class = 60.0, Severity = HIGH.
+    """
+    if not is_outpatient or has_culture_report:
+        return None
+
+    drug_name = line.canonical_drug
+    norm_drug = normalize_text(drug_name)
+    route = (line.route or "").lower()
+
+    # Determine if line is IV or restricted outpatient parenteral
+    is_iv = any(r in route for r in ["iv", "intra-venous", "intravenous", "infusion", "inj"])
+    is_restricted = getattr(line, "outpatient_iv_restricted", False)
+
+    # Class-based check if restricted or high-potency parenteral
+    high_potency_parenteral = any(
+        d in norm_drug for d in [
+            "vancomycin", "teicoplanin", "meropenem", "imipenem", "ertapenem", "doripenem",
+            "colistin", "polymyxin b", "amikacin", "gentamicin", "tobramycin", "tigecycline", "ceftazidime"
+        ]
+    )
+
+    if is_restricted or (is_iv and high_potency_parenteral) or (is_restricted and is_iv):
+        return RuleViolation(
+            tier=3,
+            rule_id="TIER3_OUTPATIENT_IV_SAFEGUARD",
+            rule_name="Outpatient Parenteral Antimicrobial Safeguard",
+            severity="HIGH",
+            drug=drug_name,
+            penalty_type="class",
+            penalty_score=60.0,
+            rationale=(
+                f"'{drug_name}' prescribed via intravenous route in an outpatient setting without "
+                "documented Outpatient Parenteral Antimicrobial Therapy (OPAT) monitoring or microbiologic "
+                "confirmation carries high risk of line infections, nephrotoxicity, and unwarranted broad-spectrum exposure."
+            ),
+            remediation=(
+                "Re-evaluate for hospital admission/OPAT protocol or switch to an evidence-based oral "
+                "first-line antimicrobial regimen based on patient clinical stability."
+            ),
+            citation="IDSA Outpatient Parenteral Antimicrobial Therapy (OPAT) Guidelines & ICMR Stewardship Standards"
         )
 
     return None
