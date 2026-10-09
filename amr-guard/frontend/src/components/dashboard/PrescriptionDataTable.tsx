@@ -75,9 +75,10 @@ export function PrescriptionDataTable({ data }: PrescriptionDataTableProps) {
               </div>
               <div>
                 <div className="font-semibold text-slate-800 text-xs">
-                  {item.id}
+                  {item.patient.patientName || item.id}
                 </div>
                 <div className="text-[11px] text-slate-400">
+                  {item.patient.patientName ? `${item.id} • ` : ""}
                   {item.patient.age ? `${item.patient.age}y` : "Age N/A"} • {item.patient.sex}
                 </div>
               </div>
