@@ -18,6 +18,11 @@ PEDIATRIC_FLUOROQUINOLONES: Set[str] = {
     "pefloxacin",
     "lomefloxacin",
     "sparfloxacin",
+    "norflox",
+    "ciproflox",
+    "levoflox",
+    "oflox",
+    "moxiflox",
 }
 
 PEDIATRIC_TETRACYCLINES: Set[str] = {
@@ -62,24 +67,16 @@ VIRAL_SELF_LIMITING_SYNDROMES: Set[str] = {
     "syn_watery_diarrhea",
 }
 
-IRRATIONAL_FDCS: Set[str] = {
-    "ofloxacin + ornidazole",
-    "ofloxacin+ornidazole",
-    "cefixime + azithromycin",
-    "cefixime+azithromycin",
-    "ciprofloxacin + tinidazole",
-    "ciprofloxacin+tinidazole",
-    "norfloxacin + tinidazole",
-    "norfloxacin+tinidazole",
-    "norfloxacin + metronidazole",
-    "norfloxacin+metronidazole",
-    "metronidazole + ofloxacin",
-    "metronidazole+ofloxacin",
-    "cefpodoxime + azithromycin",
-    "cefpodoxime+azithromycin",
-    "amoxicillin + bromhexine",
-    "amoxicillin+bromhexine",
-}
+IRRATIONAL_FDC_PAIRS: list[tuple[str, str]] = [
+    ("ofloxacin", "ornidazole"),
+    ("cefixime", "azithromycin"),
+    ("ciprofloxacin", "tinidazole"),
+    ("norfloxacin", "tinidazole"),
+    ("norfloxacin", "metronidazole"),
+    ("metronidazole", "ofloxacin"),
+    ("cefpodoxime", "azithromycin"),
+    ("amoxicillin", "bromhexine"),
+]
 
 # ---------------------------------------------------------------------------
 # Tier 3: WHO AWaRe Classification Registry
@@ -219,5 +216,8 @@ def get_aware_tier(drug_name: str, fallback_tier: Optional[str] = None) -> str:
 
 def is_irrational_fdc(drug_name: str) -> bool:
     """Check if the formulation matches an irrational fixed-dose combination."""
-    norm = normalize_text(drug_name).replace(" / ", " + ").replace("/", " + ")
-    return any(fdc in norm or norm in fdc for fdc in IRRATIONAL_FDCS)
+    norm = normalize_text(drug_name)
+    for part1, part2 in IRRATIONAL_FDC_PAIRS:
+        if part1 in norm and part2 in norm:
+            return True
+    return False
