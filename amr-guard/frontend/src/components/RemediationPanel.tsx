@@ -143,9 +143,9 @@ export function RemediationPanel({ options, onApply }: RemediationPanelProps) {
                     type="button"
                     size="sm"
                     onClick={() => onApply(opt)}
-                    className="h-7 text-xs gap-1.5 bg-[#169781] hover:bg-[#117866] text-white font-semibold"
+                    className="h-7 text-xs gap-1.5 bg-[#169781] hover:bg-[#117866] text-white font-semibold transition-all shadow-2xs"
                   >
-                    <span>Accept Recommendation</span>
+                    <span>Apply Recommended Substitution</span>
                     <ArrowRight className="w-3 h-3" />
                   </Button>
                 </div>

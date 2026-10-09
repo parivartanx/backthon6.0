@@ -15,6 +15,7 @@ import {
   UploadCloud, 
   FlaskConical, 
   ArrowRight, 
+  ArrowLeft,
   AlertCircle,
   Info
 } from "lucide-react";
@@ -22,6 +23,7 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -83,7 +85,7 @@ function NewPrescriptionContent() {
       return;
     }
     if (draftSourceType === "manual" && !draftText.trim()) {
-      setValidationError("Please enter prescription text or load a clinical sample.");
+      setValidationError("Please enter prescription notes or load a clinical sample.");
       return;
     }
     if (draftSourceType === "upload" && !draftFile && !draftPreviewUrl) {
@@ -95,33 +97,49 @@ function NewPrescriptionContent() {
       const createdCase = await extractAndCreateCase();
       router.push(`/prescriptions/${encodeURIComponent(createdCase.id)}/verify`);
     } catch (err) {
-      setValidationError(err instanceof Error ? err.message : "Extraction failed");
+      setValidationError(err instanceof Error ? err.message : "Clinical parsing failed");
     }
   };
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-12">
-      {/* Stepper: Step 1 active */}
-      <WorkflowStepper currentStep={1} />
+      {/* Professional Clinical Page Header with Back Arrow */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/90 shadow-2xs">
+        <div className="flex items-center gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => router.push("/dashboard")}
+            className="h-9 px-3 rounded-xl border-slate-200 bg-white hover:bg-[#F1F8FC] hover:text-[#0D607B] text-slate-600 gap-1.5 shadow-2xs group transition-all shrink-0 cursor-pointer"
+            title="Return to Surveillance Dashboard"
+          >
+            <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+            <span className="text-xs font-semibold">Dashboard</span>
+          </Button>
 
-      {/* Screen Header */}
-      <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-bold text-[#0D607B] tracking-tight">
-            New Prescription Intake Workspace
-          </h1>
-          <p className="text-xs text-slate-500 mt-1">
-            Digitize handwritten OPD slips or enter medication regimens for clinical data extraction
-          </p>
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-xl font-bold text-[#0D607B] tracking-tight">
+                New Prescription Intake
+              </h1>
+              <Badge variant="outline" className="text-[10px] bg-[#E2FAD9] text-[#0d5c36] border-[#169781]/40 font-semibold">
+                Step 1 of 3
+              </Badge>
+            </div>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Enter medication orders or upload clinical slips for 5-tier antimicrobial stewardship verification
+            </p>
+          </div>
         </div>
 
         {/* Clinical Sample Scenario Selector (Shadcn UI Select) */}
-        <div className="flex items-center gap-2.5 bg-[#F1F8FC] border border-[#C9E9EB] px-3 py-1.5 rounded-xl w-full sm:w-auto">
+        <div className="flex items-center gap-2 bg-[#F1F8FC] border border-[#C9E9EB] px-3 py-1.5 rounded-xl w-full md:w-auto shrink-0">
           <FlaskConical className="w-4 h-4 text-[#169781] shrink-0" />
-          <span className="text-xs font-semibold text-[#0D607B] shrink-0 hidden sm:inline">
-            Load Sample:
+          <span className="text-xs font-semibold text-[#0D607B] shrink-0 hidden lg:inline">
+            Load Scenario:
           </span>
-          <div className="w-full sm:w-80 md:w-96">
+          <div className="w-full sm:w-72 md:w-80">
             <Select
               value={selectedPresetId}
               onValueChange={(val: string | null) => {
@@ -156,6 +174,9 @@ function NewPrescriptionContent() {
         </div>
       </div>
 
+      {/* Modern Stepper: Step 1 active */}
+      <WorkflowStepper currentStep={1} />
+
       {/* Validation Error Banner */}
       {validationError && (
         <Alert variant="destructive" className="py-3">
@@ -177,14 +198,14 @@ function NewPrescriptionContent() {
               className="gap-2 text-xs font-semibold data-[state=active]:bg-white data-[state=active]:text-[#0D607B] data-[state=active]:border-b-2 data-[state=active]:border-[#169781] rounded-none h-full"
             >
               <UploadCloud className="w-4 h-4" />
-              <span>Upload Prescription Image</span>
+              <span>Upload Prescription Slip</span>
             </TabsTrigger>
             <TabsTrigger
               value="manual"
               className="gap-2 text-xs font-semibold data-[state=active]:bg-white data-[state=active]:text-[#0D607B] data-[state=active]:border-b-2 data-[state=active]:border-[#169781] rounded-none h-full"
             >
               <FileText className="w-4 h-4" />
-              <span>Enter Prescription Text</span>
+              <span>Enter Clinical Notes & Orders</span>
             </TabsTrigger>
           </TabsList>
 
@@ -203,7 +224,7 @@ function NewPrescriptionContent() {
         </Tabs>
       </div>
 
-      {/* Patient Context Form */}
+      {/* Patient Clinical Context Form */}
       <PatientContextForm
         patient={draftPatient}
         onChange={(updated) => updateDraftPatient(updated)}
@@ -213,17 +234,17 @@ function NewPrescriptionContent() {
       {/* Extraction Processing State */}
       {isExtracting && (
         <LoadingState
-          message="Extracting clinical prescription parameters..."
-          subMessage="Identifying antimicrobial molecules, strengths, frequencies, routes and durations"
+          message="Parsing prescription entities & clinical regimen..."
+          subMessage="Identifying antimicrobial molecules, dosages, frequencies, and patient risk gates"
         />
       )}
 
-      {/* Bottom Action Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-xl border border-slate-200/90 shadow-2xs">
+      {/* Bottom Action Bar with Clinician-Friendly CTA */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/90 shadow-2xs">
         <div className="flex items-center gap-2 text-xs text-slate-500">
           <Info className="w-4 h-4 text-[#169781] shrink-0" />
           <span>
-            Phase 1 parses prescription entities into a structured, editable clinical table for verification.
+            Step 1 parses clinical regimen into structured entities before running the 5-tier audit engine.
           </span>
         </div>
 
@@ -231,10 +252,10 @@ function NewPrescriptionContent() {
           type="button"
           onClick={handleExtract}
           disabled={isExtracting}
-          className="gap-2 px-6 py-2.5 rounded-xl bg-[#169781] hover:bg-[#117866] text-white text-xs sm:text-sm font-semibold shadow-xs"
+          className="group gap-2 px-6 py-2.5 rounded-xl bg-[#169781] hover:bg-[#117866] text-white text-xs sm:text-sm font-semibold shadow-xs transition-all hover:shadow-sm shrink-0 cursor-pointer"
         >
-          <span>Extract Prescription Details</span>
-          <ArrowRight className="w-4 h-4" />
+          <span>Parse &amp; Verify Prescription Entities</span>
+          <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
         </Button>
       </div>
     </div>

@@ -1,3 +1,4 @@
+// [SOLID: SRP] Modern Animated Clinical Navigation Sidebar for AMR Sentinel
 "use client";
 
 import Link from "next/link";
@@ -9,10 +10,10 @@ import {
   History, 
   BookOpenText, 
   RotateCcw, 
-  ClipboardList, 
   Stethoscope, 
   AlertTriangle, 
-  Info 
+  Activity,
+  Cpu
 } from "lucide-react";
 import { usePrescriptionStore } from "@/store/usePrescriptionStore";
 import { useState } from "react";
@@ -37,7 +38,6 @@ export function AppSidebar({ onCloseMobile }: AppSidebarProps) {
   const { resetDemoData } = usePrescriptionStore();
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [resetting, setResetting] = useState(false);
-  const [phase2InfoModal, setPhase2InfoModal] = useState<string | null>(null);
 
   const navItems = [
     {
@@ -51,6 +51,7 @@ export function AppSidebar({ onCloseMobile }: AppSidebarProps) {
       href: "/prescriptions/new",
       icon: FilePlus2,
       active: pathname.startsWith("/prescriptions/new"),
+      badge: "Intake",
     },
     {
       label: "Audit History",
@@ -58,7 +59,6 @@ export function AppSidebar({ onCloseMobile }: AppSidebarProps) {
       icon: History,
       active: pathname.startsWith("/history"),
       badge: "Log",
-      placeholder: false,
     },
     {
       label: "Guideline Library",
@@ -66,7 +66,6 @@ export function AppSidebar({ onCloseMobile }: AppSidebarProps) {
       icon: BookOpenText,
       active: pathname.startsWith("/guidelines"),
       badge: "ICMR/WHO",
-      placeholder: false,
     },
   ];
 
@@ -79,25 +78,27 @@ export function AppSidebar({ onCloseMobile }: AppSidebarProps) {
 
   return (
     <>
-      <aside className="w-64 bg-white border-r border-slate-200 flex flex-col h-full select-none">
-        {/* Brand Header */}
+      <aside className="w-64 bg-white border-r border-slate-200/90 flex flex-col h-full select-none shadow-2xs">
+        {/* Brand Header with Emblem */}
         <div className="p-4 border-b border-slate-100 flex items-center justify-between">
           <Link 
             href="/dashboard" 
             onClick={onCloseMobile}
-            className="flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-[#169781] rounded-xl p-1.5 transition-colors hover:bg-slate-50"
+            className="flex items-center gap-3 group focus:outline-none rounded-xl p-1.5 transition-all duration-200 hover:bg-slate-50"
           >
-            <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-[#0D607B] to-[#169781] p-0.5 shadow-xs transition-transform group-hover:scale-105 shrink-0 overflow-hidden flex items-center justify-center">
+            <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-[#0D607B] to-[#169781] p-0.5 shadow-xs transition-transform duration-300 group-hover:scale-105 group-hover:rotate-1 shrink-0 overflow-hidden flex items-center justify-center">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img 
                 src="/vector2.jpeg" 
-                alt="AMR Sentinel DNA Helix" 
-                className="w-full h-full object-cover rounded-[10px] brightness-105 contrast-110"
+                alt="AMR Sentinel Emblem" 
+                className="w-full h-full object-cover rounded-[10px] brightness-105 contrast-110" 
               />
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="font-extrabold text-base tracking-tight text-[#0D607B]">AMR Sentinel</span>
+                <span className="font-extrabold text-base tracking-tight text-[#0D607B] group-hover:text-[#169781] transition-colors">
+                  AMR Sentinel
+                </span>
                 <span className="inline-block w-2 h-2 rounded-full bg-[#169781] animate-pulse" title="System Active" />
               </div>
               <p className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">
@@ -107,60 +108,40 @@ export function AppSidebar({ onCloseMobile }: AppSidebarProps) {
           </Link>
         </div>
 
-        {/* Navigation Links */}
-        <nav className="flex-1 px-3 py-4 space-y-1.5 overflow-y-auto" aria-label="Main Navigation">
-          <div className="px-3 pb-2 text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
+        {/* Navigation Links with Micro-Animations */}
+        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto" aria-label="Main Navigation">
+          <div className="px-3 pb-2 text-[11px] font-bold tracking-wider text-slate-400 uppercase">
             Workflows
           </div>
           {navItems.map((item) => {
             const Icon = item.icon;
-            if (item.placeholder) {
-              return (
-                <button
-                  key={item.label}
-                  type="button"
-                  onClick={() => setPhase2InfoModal(item.label)}
-                  className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-colors text-left"
-                >
-                  <div className="flex items-center gap-3">
-                    <Icon className="w-4 h-4 text-slate-400" />
-                    <span>{item.label}</span>
-                  </div>
-                  {item.badge && (
-                    <Badge variant="secondary" className="text-[10px] font-medium px-2 py-0.2 bg-slate-100 text-slate-500 border-none">
-                      {item.badge}
-                    </Badge>
-                  )}
-                </button>
-              );
-            }
 
             return (
               <Link
                 key={item.label}
                 href={item.href}
                 onClick={onCloseMobile}
-                className={`flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                className={`group flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ease-out ${
                   item.active
-                    ? "bg-[#F1F8FC] text-[#0D607B] font-semibold shadow-2xs border-l-4 border-[#169781]"
-                    : "text-slate-600 hover:text-[#0D607B] hover:bg-slate-50"
+                    ? "bg-[#F1F8FC] text-[#0D607B] font-semibold shadow-2xs border-l-4 border-[#169781] translate-x-1"
+                    : "text-slate-600 hover:text-[#0D607B] hover:bg-slate-50 hover:translate-x-1"
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <Icon
-                    className={`w-4 h-4 ${
-                      item.active ? "text-[#169781]" : "text-slate-400"
-                    }`}
-                  />
+                  <div className={`p-1 rounded-lg transition-colors ${
+                    item.active ? "bg-white text-[#169781] shadow-2xs" : "text-slate-400 group-hover:text-[#169781]"
+                  }`}>
+                    <Icon className="w-4 h-4 transition-transform group-hover:scale-110" />
+                  </div>
                   <span>{item.label}</span>
                 </div>
                 {item.badge && (
                   <Badge
                     variant="secondary"
-                    className={`text-[10px] font-medium px-2 py-0.2 border-none ${
+                    className={`text-[10px] font-medium px-2 py-0.2 border-none transition-colors ${
                       item.active
                         ? "bg-[#E2FAD9] text-[#0d5c36]"
-                        : "bg-slate-100 text-slate-500"
+                        : "bg-slate-100 text-slate-500 group-hover:bg-slate-200"
                     }`}
                   >
                     {item.badge}
@@ -170,44 +151,62 @@ export function AppSidebar({ onCloseMobile }: AppSidebarProps) {
             );
           })}
 
-          {/* Phase 1 Scope Card */}
-          <div className="mt-6 mx-1 p-3.5 rounded-xl bg-[#F1F8FC] border border-[#C9E9EB] text-xs text-slate-600 space-y-1.5">
-            <div className="flex items-center gap-1.5 font-semibold text-[#0D607B]">
-              <ClipboardList className="w-3.5 h-3.5 text-[#169781]" />
-              <span>Phase 1 Scope</span>
+          {/* Modern Active Engine Radar Card (Replaces static Phase 1 Scope) */}
+          <div className="mt-6 mx-1 p-3.5 rounded-2xl bg-gradient-to-br from-[#F1F8FC] to-white border border-[#C9E9EB] text-xs shadow-2xs space-y-2 relative overflow-hidden group">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 font-bold text-xs text-[#0D607B]">
+                <ShieldCheck className="w-4 h-4 text-[#169781]" />
+                <span>5-Tier Guard Engine</span>
+              </div>
+              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
             </div>
+
             <p className="text-[11px] leading-relaxed text-slate-500">
-              Prescription digitization, OCR preparation & clinical data verification.
+              Deterministic rule enforcement across <strong>WHO AWaRe 2023</strong>, <strong>ICMR STGs</strong> & <strong>CDSCO Bans</strong>.
             </p>
+
+            <div className="pt-1.5 border-t border-[#C9E9EB]/60 flex items-center justify-between text-[10px] text-slate-400">
+              <span className="flex items-center gap-1 text-[#169781] font-semibold">
+                <Activity className="w-3 h-3 animate-pulse" />
+                <span>Zero-LLM Core</span>
+              </span>
+              <span className="font-mono bg-white px-1.5 py-0.5 rounded border border-slate-200">
+                &lt;5ms Latency
+              </span>
+            </div>
           </div>
         </nav>
 
         {/* User & Demo Controls */}
-        <div className="p-3 border-t border-slate-100 space-y-2">
+        <div className="p-3 border-t border-slate-100 space-y-2.5">
           <Button
             type="button"
             variant="ghost"
             onClick={() => setShowResetConfirm(true)}
-            className="w-full flex items-center justify-center gap-2 h-8 text-xs text-slate-500 hover:text-[#0D607B] hover:bg-slate-100"
+            className="w-full flex items-center justify-center gap-2 h-8 text-xs text-slate-500 hover:text-[#0D607B] hover:bg-slate-100 rounded-lg transition-colors"
             title="Reset local sample cases"
           >
             <RotateCcw className="w-3.5 h-3.5 text-slate-400" />
             <span>Reset Demo Data</span>
           </Button>
 
-          <div className="flex items-center gap-3 p-2.5 rounded-xl bg-slate-50 border border-slate-200/70">
-            <Avatar className="w-9 h-9 ring-2 ring-[#E2FAD9]">
-              <AvatarFallback className="bg-[#169781] text-white font-bold text-xs">
-                AS
-              </AvatarFallback>
-            </Avatar>
+          {/* Doctor Profile Pill with Online Indicator */}
+          <div className="flex items-center gap-3 p-2.5 rounded-xl bg-slate-50/80 hover:bg-slate-50 border border-slate-200/70 transition-all">
+            <div className="relative">
+              <Avatar className="w-9 h-9 ring-2 ring-[#E2FAD9]">
+                <AvatarFallback className="bg-[#169781] text-white font-bold text-xs">
+                  AS
+                </AvatarFallback>
+              </Avatar>
+              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white" title="Online" />
+            </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-slate-800 truncate">
+              <p className="text-xs font-bold text-slate-800 truncate">
                 Dr. Ananya Sharma
               </p>
               <p className="text-[11px] text-slate-500 flex items-center gap-1">
                 <Stethoscope className="w-3 h-3 text-[#169781]" />
-                <span>OPD Clinician</span>
+                <span className="truncate">OPD Room 4 • Duty</span>
               </p>
             </div>
           </div>
@@ -238,47 +237,18 @@ export function AppSidebar({ onCloseMobile }: AppSidebarProps) {
               variant="outline"
               size="sm"
               onClick={() => setShowResetConfirm(false)}
-              className="text-xs font-medium text-slate-600"
+              className="text-xs h-8"
             >
               Cancel
             </Button>
             <Button
               type="button"
               size="sm"
-              onClick={handleExecuteReset}
               disabled={resetting}
-              className="text-xs font-semibold text-white bg-[#0D607B] hover:bg-[#09475c]"
+              onClick={handleExecuteReset}
+              className="text-xs h-8 bg-amber-600 hover:bg-amber-700 text-white"
             >
-              {resetting ? "Resetting..." : "Reset Data"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Phase 2 Feature Notice Modal */}
-      <Dialog open={!!phase2InfoModal} onOpenChange={(open) => !open && setPhase2InfoModal(null)}>
-        <DialogContent className="sm:max-w-md p-5 space-y-4">
-          <DialogHeader className="text-left space-y-2">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-[#F1F8FC] border border-[#C9E9EB] flex items-center justify-center text-[#0D607B]">
-                <Info className="w-4 h-4 text-[#169781]" />
-              </div>
-              <DialogTitle className="text-sm font-bold text-[#0D607B]">
-                {phase2InfoModal} — Phase 2 Architecture
-              </DialogTitle>
-            </div>
-            <DialogDescription className="text-xs text-slate-600 leading-relaxed pt-1">
-              <strong>{phase2InfoModal}</strong> is part of the clinical decision-support pipeline in Phase 2. Verified prescriptions from Phase 1 will flow directly into the ICMR guideline engine and hospital EMR integration.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="pt-2 border-t border-slate-100">
-            <Button
-              type="button"
-              size="sm"
-              onClick={() => setPhase2InfoModal(null)}
-              className="text-xs font-semibold text-white bg-[#169781] hover:bg-[#117866]"
-            >
-              Understood
+              {resetting ? "Resetting..." : "Confirm Reset"}
             </Button>
           </DialogFooter>
         </DialogContent>

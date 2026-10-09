@@ -51,11 +51,11 @@ export function PrescriptionTextInput({
             size="sm"
             onClick={onLoadSample}
             disabled={disabled}
-            className="gap-1.5 text-xs h-7 px-2.5 text-[#0D607B] hover:text-[#169781] bg-[#F1F8FC] border-[#C9E9EB] hover:bg-[#E2FAD9]/50"
+            className="gap-1.5 text-xs h-7 px-2.5 text-[#0D607B] hover:text-[#169781] bg-[#F1F8FC] border-[#C9E9EB] hover:bg-[#E2FAD9]/50 transition-colors"
             title="Load realistic sample clinical prescription"
           >
             <FileText className="w-3.5 h-3.5 text-[#169781]" />
-            <span>Fill Sample OPD Text</span>
+            <span>Load Clinical OPD Sample</span>
           </Button>
 
           {safeValue.length > 0 && !showClearConfirm && (

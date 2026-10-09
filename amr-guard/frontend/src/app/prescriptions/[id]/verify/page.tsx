@@ -172,49 +172,52 @@ export default function VerifyPrescriptionPage() {
         {/* Stepper: Step 2 active or Step 3 if Audited */}
         <WorkflowStepper currentStep={isAudited ? 3 : 2} />
 
-        {/* Screen Header */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2.5">
-              <h1 className="text-xl font-bold text-[#0D607B] tracking-tight">
-                {isAudited ? "AMR Sentinel Clinical Audit Console" : "Verify Prescription Details"}
-              </h1>
-              {isAudited ? (
-                <Badge variant="outline" className={`gap-1 font-semibold text-[11px] ${
-                  currentCase.auditResult?.status === "APPROVED"
-                    ? "bg-emerald-50 text-emerald-800 border-emerald-300"
-                    : currentCase.auditResult?.status === "BLOCKED"
-                    ? "bg-rose-50 text-rose-800 border-rose-300"
-                    : "bg-amber-50 text-amber-800 border-amber-300"
-                }`}>
-                  <ShieldCheck className="w-3.5 h-3.5" />
-                  <span>Audit Complete: {currentCase.auditResult?.status}</span>
-                </Badge>
-              ) : isAlreadyAudited ? (
-                <Badge variant="outline" className="gap-1 bg-[#E2FAD9] text-[#0d5c36] border-[#169781]/20 font-semibold text-[11px]">
-                  <ShieldCheck className="w-3.5 h-3.5 text-[#169781]" />
-                  <span>Ready for Audit</span>
-                </Badge>
-              ) : (
-                <Badge variant="outline" className="gap-1 bg-amber-50 text-amber-800 border-amber-300/60 font-semibold text-[11px]">
-                  <AlertCircle className="w-3.5 h-3.5 text-amber-600" />
-                  <span>Awaiting Verification</span>
-                </Badge>
-              )}
-            </div>
-            <p className="text-xs text-slate-500 mt-1">
-              Case ID: <strong className="text-slate-800">{currentCase.id}</strong> • Cross-reference extracted medication entities with original clinical slip
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2 flex-wrap">
-            <Button asChild variant="outline" size="sm" className="gap-1.5 text-xs text-slate-600">
+        {/* Professional Clinical Page Header with Back Arrow */}
+        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/90 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="h-9 px-3 rounded-xl border-slate-200 bg-white hover:bg-[#F1F8FC] hover:text-[#0D607B] text-slate-600 gap-1.5 shadow-2xs group transition-all shrink-0 cursor-pointer"
+              title="Return to Intake Workspace"
+            >
               <Link href="/prescriptions/new">
-                <ArrowLeft className="w-3.5 h-3.5" />
-                <span>New Intake</span>
+                <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+                <span className="text-xs font-semibold">Back to Intake</span>
               </Link>
             </Button>
 
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h1 className="text-xl font-bold text-[#0D607B] tracking-tight">
+                  {isAudited ? "AMR Sentinel Clinical Audit Console" : "Medication Review & Verification"}
+                </h1>
+                {isAudited ? (
+                  <Badge variant="outline" className={`gap-1 font-semibold text-[10px] ${
+                    currentCase.auditResult?.status === "APPROVED"
+                      ? "bg-emerald-50 text-emerald-800 border-emerald-300"
+                      : currentCase.auditResult?.status === "BLOCKED"
+                      ? "bg-rose-50 text-rose-800 border-rose-300"
+                      : "bg-amber-50 text-amber-800 border-amber-300"
+                  }`}>
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    <span>Audit Complete: {currentCase.auditResult?.status}</span>
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="gap-1 bg-[#F1F8FC] text-[#0D607B] border-[#C9E9EB] font-semibold text-[10px]">
+                    <AlertCircle className="w-3.5 h-3.5 text-[#169781]" />
+                    <span>Step 2 of 3: Entity Review</span>
+                  </Badge>
+                )}
+              </div>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Case ID: <strong className="text-slate-800 font-mono">{currentCase.id}</strong> • Cross-reference extracted medication entities with original clinical slip
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 flex-wrap self-start md:self-auto shrink-0">
             {isAudited ? (
               <Button
                 type="button"
@@ -222,10 +225,10 @@ export default function VerifyPrescriptionPage() {
                 disabled={isAuditing}
                 variant="outline"
                 size="sm"
-                className="gap-1.5 text-xs text-[#0D607B] border-[#C9E9EB] hover:bg-[#F1F8FC]"
+                className="gap-1.5 text-xs text-[#0D607B] border-[#C9E9EB] hover:bg-[#F1F8FC] h-9 px-3 rounded-xl"
               >
                 <RotateCcw className={`w-3.5 h-3.5 ${isAuditing ? "animate-spin" : ""}`} />
-                <span>Re-Audit Rules</span>
+                <span>Re-Audit 5-Tier Rules</span>
               </Button>
             ) : (
               <Button
@@ -233,10 +236,10 @@ export default function VerifyPrescriptionPage() {
                 onClick={handleStartAudit}
                 disabled={isAuditing}
                 size="sm"
-                className="gap-1.5 text-xs font-semibold text-white bg-[#169781] hover:bg-[#117866] shadow-xs"
+                className="group gap-2 text-xs font-semibold text-white bg-[#169781] hover:bg-[#117866] shadow-xs px-4 h-9 rounded-xl transition-all hover:shadow-sm cursor-pointer"
               >
                 <ShieldCheck className="w-4 h-4 stroke-[2.5]" />
-                <span>{isAuditing ? "Auditing 5-Tiers..." : "Run AMR Sentinel Audit"}</span>
+                <span>{isAuditing ? "Auditing 5-Tiers..." : "Run 5-Tier Antimicrobial Audit"}</span>
               </Button>
             )}
           </div>
