@@ -19,5 +19,11 @@ run: build-frontend
 seed:
 	python scripts/seed_db.py
 
+ingest-okf:
+	python scripts/ingest_okf.py --dir data/seed --type drugs
+
+ingest-knowledge:
+	python scripts/ingest_knowledge.py
+
 test:
 	pytest
