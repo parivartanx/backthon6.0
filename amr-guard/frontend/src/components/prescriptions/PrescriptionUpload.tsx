@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, useRef, DragEvent, ChangeEvent } from "react";
-import { 
-  UploadCloud, 
-  Image as ImageIcon, 
-  X, 
-  FileCheck, 
-  AlertCircle, 
+import {
+  UploadCloud,
+  Image as ImageIcon,
+  X,
+  FileCheck,
+  AlertCircle,
   Maximize2,
   ZoomIn
 } from "lucide-react";
@@ -134,11 +134,10 @@ export function PrescriptionUpload({
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           onClick={() => !disabled && fileInputRef.current?.click()}
-          className={`border-2 border-dashed rounded-xl p-6 sm:p-8 text-center cursor-pointer transition-all duration-200 ${
-            isDragging
+          className={`border-2 border-dashed rounded-xl p-6 sm:p-8 text-center cursor-pointer transition-all duration-200 ${isDragging
               ? "border-[#169781] bg-[#E2FAD9]/30 ring-4 ring-[#E2FAD9]"
               : "border-slate-300 hover:border-[#169781] hover:bg-slate-50/60 bg-white"
-          } ${disabled ? "opacity-60 cursor-not-allowed" : ""}`}
+            } ${disabled ? "opacity-60 cursor-not-allowed" : ""}`}
         >
           <input
             type="file"
@@ -219,7 +218,7 @@ export function PrescriptionUpload({
           </div>
 
           {/* Image Preview Box */}
-          <div 
+          <div
             onClick={() => setIsZoomOpen(true)}
             className="relative rounded-lg overflow-hidden border border-slate-200 bg-slate-50 max-h-64 flex items-center justify-center group cursor-pointer"
           >
