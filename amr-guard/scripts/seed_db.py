@@ -14,9 +14,23 @@ def seed_database():
     try:
         with engine.connect() as conn:
             conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
+            # Ensure new columns exist on drugs table
+            new_cols = [
+                ("is_nephrotoxic", "BOOLEAN DEFAULT FALSE"),
+                ("requires_egfr", "BOOLEAN DEFAULT FALSE"),
+                ("min_egfr_safe", "FLOAT DEFAULT 30.0"),
+                ("is_geriatric_contraindicated", "BOOLEAN DEFAULT FALSE"),
+                ("requires_tdm", "BOOLEAN DEFAULT FALSE"),
+                ("outpatient_iv_restricted", "BOOLEAN DEFAULT FALSE"),
+            ]
+            for col_name, col_type in new_cols:
+                try:
+                    conn.execute(text(f"ALTER TABLE drugs ADD COLUMN IF NOT EXISTS {col_name} {col_type};"))
+                except Exception as col_err:
+                    print(f"Notice: column {col_name}: {col_err}")
             conn.commit()
     except Exception as e:
-        print(f"Notice: vector extension check: {e}")
+        print(f"Notice: table migration check: {e}")
 
     Base.metadata.create_all(bind=engine)
     print("Tables verified.")
