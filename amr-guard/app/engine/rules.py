@@ -413,6 +413,133 @@ def check_drug_allergy_contraindications(
     return None
 
 
+# [PATTERN: Specification] — Tier 1 & Tier 2 Comorbidity Black-Box Warning Gate
+def check_comorbidity_contraindications(
+    patient: PatientContext,
+    line: PrescriptionLine
+) -> Optional[RuleViolation]:
+    """
+    Tier 1 / Tier 2 Comorbidity Black-Box Warning Gate.
+    Verifies documented patient medical history / comorbidities against prescribed antimicrobials:
+    - Tier 1 Hard Stop (BLOCKED, 100.0):
+      * Myasthenia Gravis + Fluoroquinolones (Black Box: fatal neuromuscular respiratory depression)
+      * Myasthenia Gravis + Aminoglycosides (neuromuscular blockade)
+      * G6PD Deficiency + Nitrofurantoin or Sulfonamides (acute hemolytic anemia crisis)
+    - Tier 2 Serious Warning (HIGH, 60.0):
+      * Long QT Syndrome / Arrhythmia + Fluoroquinolones or Macrolides (Torsades de Pointes)
+      * Epilepsy / Seizure Disorder + Carbapenems (lowers seizure threshold)
+    """
+    history_text = f"{patient.medical_history or ''} {patient.diagnosis_text or ''}".lower()
+    if not history_text.strip():
+        return None
+
+    drug_name = line.canonical_drug
+    norm_drug = normalize_text(drug_name)
+
+    # 1. Myasthenia Gravis (Tier 1 Fatal Contraindication)
+    is_myasthenia = "myasthenia" in history_text
+    if is_myasthenia:
+        if is_fluoroquinolone(norm_drug) or is_aminoglycoside(norm_drug):
+            offending_class = "Fluoroquinolones" if is_fluoroquinolone(norm_drug) else "Aminoglycosides"
+            return RuleViolation(
+                tier=1,
+                rule_id="TIER1_COMORBIDITY_FATAL_CONTRAINDICATION",
+                rule_name="Myasthenia Gravis Neuromuscular Blockade Contraindication",
+                severity="BLOCKED",
+                drug=drug_name,
+                penalty_type="contraindication",
+                penalty_score=100.0,
+                rationale=(
+                    f"Patient has documented Myasthenia Gravis. {drug_name} ({offending_class}) "
+                    "carries an FDA Black Box Warning for exacerbating neuromuscular weakness, "
+                    "which can precipitate life-threatening acute respiratory muscle paralysis."
+                ),
+                remediation=(
+                    f"Immediately discontinue {drug_name}. Switch to an alternative class without neuromuscular "
+                    "blocking activity (e.g. Beta-lactams or Macrolides with close monitoring)."
+                ),
+                citation="FDA Black Box Warning & Myasthenia Gravis Foundation Clinical Prescribing Safety Guidelines"
+            )
+
+    # 2. G6PD Deficiency (Tier 1 Fatal Contraindication)
+    is_g6pd = ("g6pd" in history_text) or ("glucose-6-phosphate" in history_text)
+    if is_g6pd:
+        is_nitro = "nitrofurantoin" in norm_drug
+        is_sulfa = is_sulfa_drug(norm_drug)
+        if is_nitro or is_sulfa:
+            offending_class = "Nitrofurantoin" if is_nitro else "Sulfonamides"
+            return RuleViolation(
+                tier=1,
+                rule_id="TIER1_COMORBIDITY_FATAL_CONTRAINDICATION",
+                rule_name="G6PD Deficiency Acute Hemolysis Contraindication",
+                severity="BLOCKED",
+                drug=drug_name,
+                penalty_type="contraindication",
+                penalty_score=100.0,
+                rationale=(
+                    f"Patient has documented G6PD Deficiency. {drug_name} ({offending_class}) "
+                    "triggers severe acute oxidative stress in red blood cells, causing life-threatening "
+                    "acute intravascular hemolytic anemia and renal tubular hemoglobinuria."
+                ),
+                remediation=(
+                    f"Immediately discontinue {drug_name}. Prescribe non-oxidative antimicrobials "
+                    "(e.g., Amoxicillin, Cefalexin, or Fosfomycin for UTI)."
+                ),
+                citation="WHO Model Formulary & Clinical Pharmacogenetics Implementation Consortium (CPIC) Guidelines"
+            )
+
+    # 3. Long QT Syndrome / Cardiac Arrhythmia (Tier 2 High Warning)
+    is_qt = any(kw in history_text for kw in ["long qt", "prolonged qt", "torsades", "arrhythmia"])
+    if is_qt:
+        if is_fluoroquinolone(norm_drug) or is_macrolide_drug(norm_drug):
+            offending_class = "Fluoroquinolones" if is_fluoroquinolone(norm_drug) else "Macrolides"
+            return RuleViolation(
+                tier=2,
+                rule_id="TIER2_COMORBIDITY_SERIOUS_WARNING",
+                rule_name="Cardiac Arrhythmia / Long QT Prolongation Warning",
+                severity="HIGH",
+                drug=drug_name,
+                penalty_type="contraindication",
+                penalty_score=60.0,
+                rationale=(
+                    f"Patient has documented cardiac conduction disorder / Long QT history. "
+                    f"{drug_name} ({offending_class}) causes dose-dependent QT interval prolongation "
+                    "and increases the risk of polymorphic ventricular tachycardia (Torsades de Pointes)."
+                ),
+                remediation=(
+                    f"Monitor baseline and serial ECG QTc intervals, or switch to an antimicrobial without "
+                    "QT-prolonging potential (e.g., Beta-lactams)."
+                ),
+                citation="CredibleMeds QT Drugs List & American Heart Association Prescribing Safety Standards"
+            )
+
+    # 4. Epilepsy / Seizure Disorder (Tier 2 High Warning)
+    is_seizure = any(kw in history_text for kw in ["epilepsy", "seizure", "convulsion"])
+    if is_seizure:
+        if "imipenem" in norm_drug or is_carbapenem_drug(norm_drug):
+            return RuleViolation(
+                tier=2,
+                rule_id="TIER2_COMORBIDITY_SERIOUS_WARNING",
+                rule_name="Seizure Disorder Carbapenem Threshold Warning",
+                severity="HIGH",
+                drug=drug_name,
+                penalty_type="contraindication",
+                penalty_score=60.0,
+                rationale=(
+                    f"Patient has documented seizure disorder / epilepsy. {drug_name} crosses the "
+                    "blood-brain barrier and binds GABA receptors, significantly lowering seizure threshold."
+                ),
+                remediation=(
+                    f"Avoid high-dose carbapenems (particularly Imipenem-Cilastatin). If a carbapenem is essential, "
+                    "Meropenem exhibits significantly lower neurotoxicity."
+                ),
+                citation="FDA Package Insert Warnings & Infectious Diseases Society of America (IDSA)"
+            )
+
+    return None
+
+
+
 
 # ---------------------------------------------------------------------------
 # Tier 2: Indication & Diagnosis Legitimacy Rules

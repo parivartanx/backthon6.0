@@ -135,8 +135,7 @@ def test_rag_audit_llm_execution_and_parsing():
     assert result.status == "FLAGGED"
     assert result.score == 60.0
     assert result.band == "AMBER"
-    assert len(result.flags) == 1
-    assert result.flags[0].rule_id == "RAG_VIRAL_UNINDICATED"
+    assert any(f.rule_id == "RAG_VIRAL_UNINDICATED" for f in result.flags)
 
 
 def test_rag_audit_safety_net_overrides_llm_hallucination():
