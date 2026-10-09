@@ -66,7 +66,7 @@ export default function DoctorDashboard() {
                 AMR Sentinel Clinical Console
               </h1>
               <p className="text-xs sm:text-sm text-slate-200 leading-relaxed max-w-xl">
-                Five-Tier Antimicrobial Stewardship Engine. Real-time contraindication interception, WHO AWaRe tier enforcement, and evidence-based remediation in &lt;5ms.
+                Five-tier antibiotic safety check. Instant checks for contraindications, correct drug choice, and safe treatment duration.
               </p>
 
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 pt-2">
@@ -147,8 +147,24 @@ export default function DoctorDashboard() {
           </Alert>
         )}
 
-        {/* 4 Summary Metric Cards: Shimmer Skeleton during Loading */}
-        {isLoading ? (
+        {/* 4 Summary Metric Cards: Shimmer Skeleton during Loading or Error fallback */}
+        {error && metrics.prescriptionsProcessed === 0 ? (
+          <Card className="p-8 border-dashed border-amber-300 bg-amber-50/40 text-center space-y-3 rounded-2xl">
+            <AlertCircle className="w-8 h-8 text-amber-600 mx-auto" />
+            <div className="space-y-1">
+              <h3 className="text-sm font-bold text-slate-800">{error.title}</h3>
+              <p className="text-xs text-slate-500 max-w-md mx-auto">{error.userMessage}</p>
+            </div>
+            <Button
+              size="sm"
+              onClick={() => fetchCases()}
+              className="gap-1.5 bg-[#169781] hover:bg-[#117866] text-white text-xs rounded-xl"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Retry Connecting to API</span>
+            </Button>
+          </Card>
+        ) : isLoading ? (
           <DashboardMetricsSkeleton />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -157,6 +173,7 @@ export default function DoctorDashboard() {
               value={metrics.prescriptionsProcessed}
               subtitle="Live audits across care"
               icon={FileCheck2}
+              badge="Live Data"
               accentColor="#169781"
             />
             <SummaryStatCard
@@ -164,6 +181,7 @@ export default function DoctorDashboard() {
               value={metrics.awaitingVerification}
               subtitle="Requires clinician review"
               icon={AlertCircle}
+              badge="Live Data"
               accentColor="#D97706"
             />
             <SummaryStatCard
@@ -171,13 +189,15 @@ export default function DoctorDashboard() {
               value={metrics.auditsReady}
               subtitle="Evaluated against STG guidelines"
               icon={ShieldCheck}
+              badge="Live Data"
               accentColor="#0D607B"
             />
             <SummaryStatCard
               title="Critical Blocks Overridden"
-              value={metrics.criticalBlockedCases || 18}
+              value={metrics.criticalBlockedCases || 0}
               subtitle="Zero-tolerance tier 1 catches"
               icon={ShieldBan}
+              badge="Live Data"
               accentColor="#EF4444"
             />
           </div>
@@ -189,7 +209,7 @@ export default function DoctorDashboard() {
             <div className="flex items-center gap-2">
               <Activity className="w-4 h-4 text-[#169781]" />
               <h2 className="text-sm font-bold text-[#0D607B] uppercase tracking-wide">
-                Stewardship Intelligence & Surveillance Trends
+                Antibiotic Usage & Safety Trends
               </h2>
             </div>
             <Badge variant="outline" className="text-[10px] bg-[#E2FAD9] text-[#0d5c36] border-[#169781]/30">

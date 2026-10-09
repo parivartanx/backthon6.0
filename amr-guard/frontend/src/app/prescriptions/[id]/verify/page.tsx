@@ -287,7 +287,7 @@ export default function VerifyPrescriptionPage() {
               <div className="flex items-center gap-2">
                 <User className="w-4 h-4 text-[#0D607B]" />
                 <CardTitle className="text-xs font-bold text-[#0D607B] uppercase tracking-wider">
-                  Patient Context & Clinical Vigilance Parameters
+                  Patient Details & Clinical Information
                 </CardTitle>
               </div>
               {currentCase.patient.canonical_syndrome && (

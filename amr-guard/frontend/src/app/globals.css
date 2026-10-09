@@ -194,6 +194,8 @@ body {
   );
   animation: shimmer-wave 1.6s infinite ease-in-out;
   content: "";
+}
+
 /* Print Styles: Hide sidebars, navigation headers, footers and action buttons */
 @media print {
   aside,
