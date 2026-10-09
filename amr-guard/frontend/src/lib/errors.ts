@@ -176,7 +176,7 @@ export function parseClinicalError(
         code: "SERVER_ERROR",
         title: "Clinical Engine Notice",
         userMessage:
-          "The antimicrobial stewardship engine encountered a temporary computation issue while auditing this prescription.",
+          "The clinical safety engine encountered a temporary issue while auditing this prescription.",
         hint: "Your draft has been preserved. Please retry in a few moments.",
         status: 500,
         canRetry: true,
