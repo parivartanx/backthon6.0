@@ -69,8 +69,23 @@ export function PatientContextForm({
       </CardHeader>
 
       <CardContent className="pt-4 space-y-4">
-        {/* Row 1: Identification, Age, Sex, Pregnancy */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Row 1: Identification, Demographics, Age, Sex, Pregnancy */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
+          {/* Patient Name */}
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">
+              Patient Name
+            </label>
+            <Input
+              type="text"
+              value={patient.patientName || ""}
+              onChange={(e) => updateField("patientName", e.target.value)}
+              disabled={disabled}
+              placeholder="e.g. Rahul Verma"
+              className="h-9 text-xs bg-white border-slate-300 focus-visible:ring-1 focus-visible:ring-[#169781]"
+            />
+          </div>
+
           {/* Case ID */}
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">

@@ -70,7 +70,7 @@ export function PrescriptionTextInput({
           className="text-xs font-semibold text-slate-700 flex items-center gap-1.5"
         >
           <span>Prescription Notes & Clinical Orders</span>
-          <span className="text-red-500">*</span>
+          <span className="text-[11px] text-slate-400 font-normal">(Optional)</span>
         </label>
         <div className="flex items-center gap-2">
           <Button
