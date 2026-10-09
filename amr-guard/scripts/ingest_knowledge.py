@@ -1,6 +1,5 @@
 import os
 import sys
-# from google import genai # Commented out to prevent accidental large API usage in stub
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
