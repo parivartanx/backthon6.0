@@ -13,8 +13,8 @@ def test_root_endpoint():
     """Verify root GET endpoint responds."""
     response = client.get("/")
     assert response.status_code == 200
-    # Depending on whether frontend build exists, returns either index or stub message
-    assert "message" in response.json() or response.status_code == 200
+    # Depending on whether frontend build exists, returns either HTML or stub JSON message
+    assert response.text != ""
 
 
 def test_health_endpoints():
@@ -37,25 +37,57 @@ def test_openapi_documentation():
     assert "/api/v1/audit/" in schema["paths"]
 
 
-def test_extract_stub_endpoint():
-    """Verify extract prescription route."""
-    response = client.post("/api/v1/extract/")
+def test_extract_endpoint():
+    """Verify entity extraction endpoint (/api/v1/extract)."""
+    payload = {
+        "text": "Rx: Amoxicillin 500mg TDS for 5 days. Patient: 32yo male presenting with Mild Community-Acquired Pneumonia."
+    }
+    response = client.post("/api/v1/extract/", json=payload)
     assert response.status_code == 200
-    assert response.json()["todo"] is True
+    data = response.json()
+    assert data["patient"]["age_years"] == 32
+    assert len(data["prescription_lines"]) >= 1
+    assert data["confidence_score"] > 0.5
 
 
-def test_remediate_stub_endpoint():
-    """Verify remediation route."""
-    response = client.post("/api/v1/remediate/")
+def test_remediate_endpoint():
+    """Verify dynamic remediation endpoint (/api/v1/remediate)."""
+    payload = {
+        "canonical_syndrome": "SYN_CAP_MILD",
+        "flagged_drug": "Levofloxacin",
+        "patient": {
+            "age_years": 35,
+            "sex": "M",
+            "is_pregnant": False
+        }
+    }
+    response = client.post("/api/v1/remediate/", json=payload)
     assert response.status_code == 200
-    assert response.json()["todo"] is True
+    data = response.json()
+    assert "Amoxicillin" in data["first_line_access_regimen"]
+    assert len(data["options"]) >= 1
+    assert any(opt["recommendation_type"] in ["SWITCH_DRUG", "MANDATE_SYMPTOMATIC"] for opt in data["options"])
 
 
-def test_stats_stub_endpoint():
-    """Verify stats route."""
+def test_stats_endpoint():
+    """Verify stewardship surveillance statistics endpoint (/api/v1/stats)."""
     response = client.get("/api/v1/stats/")
     assert response.status_code == 200
-    assert response.json()["todo"] is True
+    data = response.json()
+    assert data["total_audits"] > 0
+    assert "access_pct" in data["aware_distribution"]
+    assert "ICMR_AMRSN_E_COLI_FQ_RESISTANCE" in data["surveillance_benchmarks"]
+
+
+def test_image_extraction_endpoint():
+    """Verify multimodal image upload endpoint (/api/v1/audit/from-image)."""
+    fake_image_bytes = b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15c4"
+    files = {"file": ("rx_sample.png", fake_image_bytes, "image/png")}
+    response = client.post("/api/v1/audit/from-image", files=files)
+    assert response.status_code == 200
+    data = response.json()
+    assert "patient" in data
+    assert "prescription_lines" in data
 
 
 def test_audit_pregnancy_contraindication():
