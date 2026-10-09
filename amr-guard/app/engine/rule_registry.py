@@ -10,6 +10,7 @@ from app.engine.rules import (
     check_pediatric_contraindications,
     check_pregnancy_contraindications,
     check_nitrofurantoin_renal_age,
+    check_nephrotoxic_renal_safety,
     check_viral_self_limiting_indication,
     check_unapproved_fdc,
     check_watch_escalation,
@@ -40,6 +41,20 @@ RULE_METADATA = [
         "name": "Nitrofurantoin Geriatric / Renal Gate",
         "description": "Blocks Nitrofurantoin in age >= 65 or low eGFR < 30 mL/min.",
         "citation": "Beers Criteria & ICMR Geriatric Guidelines"
+    },
+    {
+        "id": "TIER1_NEPHROTOXIC_MISSING_EGFR",
+        "tier": 1,
+        "name": "Mandatory Baseline Renal Function Hold",
+        "description": "Blocks narrow-therapeutic-index nephrotoxic drugs when eGFR is missing in elderly or for high-risk antimicrobials.",
+        "citation": "KDIGO Guidelines & FDA Black Box / TDM Standards"
+    },
+    {
+        "id": "TIER1_NEPHROTOXIC_RENAL_IMPAIRMENT",
+        "tier": 1,
+        "name": "Severe Renal Impairment Contraindication",
+        "description": "Blocks full-dose nephrotoxic agents when eGFR < 30 mL/min.",
+        "citation": "KDIGO AKI Guidelines & Clinical Pharmacokinetics"
     },
     {
         "id": "TIER2_VIRAL_INDICATION_GATE",
@@ -130,6 +145,10 @@ def evaluate_all_rules(
         v_renal = check_nitrofurantoin_renal_age(patient, line)
         if v_renal:
             violations.append(v_renal)
+
+        v_nephro = check_nephrotoxic_renal_safety(patient, line)
+        if v_nephro:
+            violations.append(v_nephro)
 
         # Tier 2: Indication & Diagnosis Legitimacy
         v_viral = check_viral_self_limiting_indication(active_syndrome, line)

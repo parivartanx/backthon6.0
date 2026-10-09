@@ -122,6 +122,12 @@ class NormalizedDrug(BaseModel):
     is_antibiotic: bool = True
     is_fdc: bool = False
     confidence: float = 1.0
+    is_nephrotoxic: bool = False
+    requires_egfr: bool = False
+    min_egfr_safe: float = 30.0
+    is_geriatric_contraindicated: bool = False
+    requires_tdm: bool = False
+    outpatient_iv_restricted: bool = False
 
 
 class DrugNormalizerAgent:
@@ -152,7 +158,65 @@ class DrugNormalizerAgent:
 
     def normalize(self, raw_input: str) -> NormalizedDrug:
         """
-        Main pipeline: Cleans and resolves a drug string into a NormalizedDrug.
+        Main pipeline: Cleans, resolves, and populates clinical safety attributes.
+        """
+        base = self._resolve_base(raw_input)
+        return self._populate_safety_attributes(base)
+
+    def _populate_safety_attributes(self, drug: NormalizedDrug) -> NormalizedDrug:
+        """
+        Enrich normalized drug with explicit clinical safety attributes
+        from database formulary or dynamic class-based inference.
+        """
+        norm_name = normalize_text(drug.generic_name)
+        # 1. Query Database formulary
+        try:
+            from app.db.session import SessionLocal
+            from app.db.models import Drug
+            db = SessionLocal()
+            try:
+                db_drug = db.query(Drug).filter(Drug.generic_name.ilike(drug.generic_name)).first()
+                if db_drug:
+                    drug.is_nephrotoxic = bool(db_drug.is_nephrotoxic)
+                    drug.requires_egfr = bool(db_drug.requires_egfr)
+                    drug.min_egfr_safe = float(db_drug.min_egfr_safe or 30.0)
+                    drug.is_geriatric_contraindicated = bool(db_drug.is_geriatric_contraindicated)
+                    drug.requires_tdm = bool(db_drug.requires_tdm)
+                    drug.outpatient_iv_restricted = bool(db_drug.outpatient_iv_restricted)
+                    if db_drug.aware_class:
+                        drug.aware_tier = db_drug.aware_class
+                    return drug
+            finally:
+                db.close()
+        except Exception:
+            pass
+
+        # 2. Dynamic class-based inference for uncataloged or novel drugs
+        if any(k in norm_name for k in ["vancomycin", "teicoplanin", "amikacin", "gentamicin", "tobramycin", "plazomicin"]):
+            drug.is_nephrotoxic = True
+            drug.requires_egfr = True
+            drug.requires_tdm = True
+            drug.outpatient_iv_restricted = True
+            if drug.aware_tier == "Access":
+                drug.aware_tier = "Watch"
+        elif any(k in norm_name for k in ["colistin", "polymyxin b"]):
+            drug.is_nephrotoxic = True
+            drug.requires_egfr = True
+            drug.outpatient_iv_restricted = True
+            drug.aware_tier = "Reserve"
+        elif "nitrofurantoin" in norm_name:
+            drug.requires_egfr = True
+            drug.is_geriatric_contraindicated = True
+        elif any(k in norm_name for k in ["meropenem", "imipenem", "ertapenem", "doripenem", "daptomycin", "tigecycline"]):
+            drug.outpatient_iv_restricted = True
+            if any(k in norm_name for k in ["meropenem", "daptomycin", "tigecycline"]):
+                drug.aware_tier = "Reserve"
+
+        return drug
+
+    def _resolve_base(self, raw_input: str) -> NormalizedDrug:
+        """
+        Cleans and resolves a drug string into a preliminary NormalizedDrug.
         """
         raw_clean = normalize_text(raw_input)
         if not raw_clean:

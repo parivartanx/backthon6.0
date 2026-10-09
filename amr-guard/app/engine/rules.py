@@ -155,6 +155,70 @@ def check_nitrofurantoin_renal_age(
     return None
 
 
+def check_nephrotoxic_renal_safety(
+    patient: PatientContext,
+    line: PrescriptionLine
+) -> Optional[RuleViolation]:
+    """
+    Tier 1.3: Mandatory Nephrotoxic Drug & Renal Function Safety Gate.
+    Blocks high-risk narrow-therapeutic-index nephrotoxic antimicrobials (Vancomycin,
+    Teicoplanin, Aminoglycosides, Colistin, Amphotericin B) if:
+    1. Baseline eGFR is missing in elderly patients (age >= 65) or for drugs requiring baseline renal tracking.
+    2. Documented eGFR < 30 mL/min without adjusted renal dosing protocol.
+    """
+    drug_name = line.canonical_drug
+    norm_drug = normalize_text(drug_name)
+
+    is_nephrotoxic = getattr(line, "is_nephrotoxic", False) or getattr(line, "requires_egfr", False)
+    if not is_nephrotoxic:
+        if any(d in norm_drug for d in ["vancomycin", "teicoplanin", "amikacin", "gentamicin", "tobramycin", "colistin", "polymyxin b"]):
+            is_nephrotoxic = True
+
+    if is_nephrotoxic:
+        # Check missing eGFR (mandatory for elderly or high-risk NTI drugs)
+        if patient.egfr is None:
+            if patient.age_years >= 65 or getattr(line, "requires_egfr", False) or any(d in norm_drug for d in ["vancomycin", "teicoplanin", "colistin"]):
+                return RuleViolation(
+                    tier=1,
+                    rule_id="TIER1_NEPHROTOXIC_MISSING_EGFR",
+                    rule_name="Mandatory Baseline Renal Function Hold",
+                    severity="BLOCKED",
+                    drug=drug_name,
+                    penalty_type="contraindication",
+                    penalty_score=100.0,
+                    rationale=(
+                        f"Administering nephrotoxic agent '{drug_name}' to patient (Age {patient.age_years}) "
+                        "without baseline Glomerular Filtration Rate (eGFR) or Serum Creatinine creates acute risk of kidney injury, accumulation toxicity, and ototoxicity."
+                    ),
+                    remediation=(
+                        f"Place prescription on safety hold. Order an urgent Serum Creatinine / eGFR panel and establish Therapeutic Drug Monitoring (TDM) before initiating {drug_name}."
+                    ),
+                    citation="KDIGO Acute Kidney Injury Guidelines & FDA Black Box / TDM Safety Guidance"
+                )
+
+        # Check documented severe renal impairment
+        if patient.egfr is not None and patient.egfr < 30.0:
+            return RuleViolation(
+                tier=1,
+                rule_id="TIER1_NEPHROTOXIC_RENAL_IMPAIRMENT",
+                rule_name="Severe Renal Impairment Contraindication",
+                severity="BLOCKED",
+                drug=drug_name,
+                penalty_type="contraindication",
+                penalty_score=100.0,
+                rationale=(
+                    f"Patient eGFR is {patient.egfr} mL/min (< 30 mL/min). Administering full-dose '{drug_name}' "
+                    "carries severe risk of acute tubular necrosis, irreversible nephrotoxic failure, and ototoxicity."
+                ),
+                remediation=(
+                    f"Dose adjustment or alternative non-nephrotoxic agent required. Consult clinical pharmacokinetics for renal dose recalculation."
+                ),
+                citation="KDIGO Guidelines & Clinical Pharmacokinetics Prescribing Standards"
+            )
+
+    return None
+
+
 # ---------------------------------------------------------------------------
 # Tier 2: Indication & Diagnosis Legitimacy Rules
 # ---------------------------------------------------------------------------
