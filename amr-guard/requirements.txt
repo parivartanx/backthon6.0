@@ -11,3 +11,5 @@ google-genai
 PyYAML
 pytest
 httpx
+pgvector
+rank_bm25

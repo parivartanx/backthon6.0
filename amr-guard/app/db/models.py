@@ -1,8 +1,17 @@
 from sqlalchemy import Column, Integer, String, Boolean, Float, Text, ForeignKey, JSON, DateTime
 from sqlalchemy.orm import declarative_base
 from datetime import datetime
+from pgvector.sqlalchemy import Vector
 
 Base = declarative_base()
+
+class KnowledgeChunk(Base):
+    __tablename__ = "knowledge_chunks"
+    id = Column(Integer, primary_key=True, index=True)
+    source_id = Column(String, index=True)
+    chunk_text = Column(Text)
+    embedding = Column(Vector(768)) # Default Gemini embedding dimension
+    metadata_json = Column(JSON)
 
 class Drug(Base):
     __tablename__ = "drugs"
