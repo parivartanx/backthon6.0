@@ -1,2 +1,2 @@
-"use client";
-export function PatientContextForm() { return <div>PatientContextForm stub</div>; }
+// [SOLID: OCP & DRY] Re-export actual PatientContextForm implementation
+export * from "./prescriptions/PatientContextForm";
