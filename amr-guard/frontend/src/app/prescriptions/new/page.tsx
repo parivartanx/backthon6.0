@@ -1,3 +1,4 @@
+// [SOLID: SRP] Redesigned New Prescription Intake Workspace for AMR Sentinel
 "use client";
 
 import { useEffect, useState, Suspense } from "react";
@@ -5,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { AppShell } from "@/components/layout/AppShell";
 import { WorkflowStepper } from "@/components/common/WorkflowStepper";
 import { PrescriptionUpload } from "@/components/prescriptions/PrescriptionUpload";
-import { PrescriptionTextInput } from "@/components/prescriptions/PrescriptionTextInput";
+import { ManualPrescriptionForm } from "@/components/prescriptions/ManualPrescriptionForm";
 import { PatientContextForm } from "@/components/prescriptions/PatientContextForm";
 import { LoadingState } from "@/components/common/LoadingState";
 import { usePrescriptionStore } from "@/store/usePrescriptionStore";
@@ -16,12 +17,23 @@ import {
   FlaskConical, 
   ArrowRight, 
   AlertCircle,
-  Info
+  Info,
+  Sparkles,
+  ShieldCheck,
+  Stethoscope
 } from "lucide-react";
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 function NewPrescriptionContent() {
   const router = useRouter();
@@ -76,7 +88,7 @@ function NewPrescriptionContent() {
       return;
     }
     if (draftSourceType === "manual" && !draftText.trim()) {
-      setValidationError("Please enter prescription text or load a clinical sample.");
+      setValidationError("Please enter prescription medication orders or load an OPD sample.");
       return;
     }
     if (draftSourceType === "upload" && !draftFile && !draftPreviewUrl) {
@@ -93,93 +105,121 @@ function NewPrescriptionContent() {
   };
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto pb-12">
+    <div className="space-y-6 max-w-5xl mx-auto pb-12 animate-in fade-in duration-300">
       {/* Stepper: Step 1 active */}
       <WorkflowStepper currentStep={1} />
 
-      {/* Screen Header */}
-      <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-bold text-[#0D607B] tracking-tight">
-            New Prescription Intake Workspace
-          </h1>
-          <p className="text-xs text-slate-500 mt-1">
-            Digitize handwritten OPD slips or enter medication regimens for clinical data extraction
-          </p>
+      {/* Hero Header Card with Vector2 Bio-Helix Badge */}
+      <div className="bg-white p-5 sm:p-6 rounded-3xl border border-slate-200/90 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-5 relative overflow-hidden">
+        {/* Subtle decorative gradient background */}
+        <div className="absolute top-0 right-0 w-72 h-32 bg-gradient-to-l from-[#E2FAD9]/40 to-transparent pointer-events-none" />
+
+        <div className="flex items-start gap-4">
+          <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-[#0D607B] to-[#169781] p-0.5 shadow-xs shrink-0 overflow-hidden flex items-center justify-center">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/vector2.jpeg"
+              alt="AMR Sentinel Bio-Helix"
+              className="w-full h-full object-cover rounded-[14px] brightness-105 contrast-110"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <h1 className="text-xl sm:text-2xl font-extrabold text-[#0D607B] tracking-tight">
+                New Prescription Intake Workspace
+              </h1>
+              <Badge variant="outline" className="hidden sm:inline-flex bg-[#E2FAD9] text-[#0d5c36] border-[#169781]/30 text-[10px] font-semibold gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#169781] animate-pulse" />
+                <span>Intake Gate</span>
+              </Badge>
+            </div>
+            <p className="text-xs sm:text-sm text-slate-500 max-w-xl">
+              Build a medication regimen with the interactive Rx builder or upload an outpatient slip for automated extraction.
+            </p>
+          </div>
         </div>
 
-        {/* Clinical Sample Scenario Selector */}
-        <div className="flex items-center gap-2 bg-[#F1F8FC] border border-[#C9E9EB] p-1.5 rounded-xl self-start md:self-auto">
+        {/* Clinical Sample Scenario Selector (Shadcn UI Select) */}
+        <div className="flex items-center gap-2 bg-[#F1F8FC] border border-[#C9E9EB] p-1.5 rounded-2xl self-start md:self-auto shrink-0 shadow-2xs">
           <FlaskConical className="w-4 h-4 text-[#169781] ml-2 shrink-0" />
           <span className="text-xs font-semibold text-[#0D607B] hidden sm:inline">
-            Load Clinical Sample:
+            Load Sample Case:
           </span>
-          <select
-            value={selectedPresetId}
-            onChange={(e) => {
-              const p = CLINICAL_SAMPLE_PRESETS.find((x) => x.id === e.target.value);
-              if (p) handleSelectPreset(p);
-            }}
-            className="text-xs bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 font-medium text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#169781]"
-          >
-            <option value="">Select realistic OPD case...</option>
-            {CLINICAL_SAMPLE_PRESETS.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.title}
-              </option>
-            ))}
-          </select>
+          <div className="w-56 sm:w-64">
+            <Select
+              value={selectedPresetId}
+              onValueChange={(val: string | null) => {
+                if (val) {
+                  const p = CLINICAL_SAMPLE_PRESETS.find((x) => x.id === val);
+                  if (p) handleSelectPreset(p);
+                }
+              }}
+            >
+              <SelectTrigger className="h-8 text-xs bg-white border-slate-200">
+                <SelectValue placeholder="Select realistic OPD case..." />
+              </SelectTrigger>
+              <SelectContent>
+                {CLINICAL_SAMPLE_PRESETS.map((p) => (
+                  <SelectItem key={p.id} value={p.id} className="text-xs">
+                    {p.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </div>
 
       {/* Validation Error Banner */}
       {validationError && (
-        <Alert variant="destructive" className="py-3">
+        <Alert variant="destructive" className="py-3 shadow-2xs animate-in slide-in-from-top-2">
           <AlertCircle className="w-4 h-4 shrink-0" />
           <AlertDescription className="text-xs ml-2 font-medium">{validationError}</AlertDescription>
         </Alert>
       )}
 
-      {/* Input Methods Tabs */}
-      <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden">
+      {/* Input Methods Tabs Container */}
+      <div className="bg-white rounded-3xl border border-slate-200/90 shadow-2xs overflow-hidden">
         <Tabs
           value={draftSourceType}
           onValueChange={(val) => setDraftSourceType(val as "upload" | "manual")}
           className="w-full"
         >
-          <TabsList className="w-full grid grid-cols-2 rounded-none border-b border-slate-200 bg-slate-50/50 p-0 h-12">
-            <TabsTrigger
-              value="upload"
-              className="gap-2 text-xs font-semibold data-[state=active]:bg-white data-[state=active]:text-[#0D607B] data-[state=active]:border-b-2 data-[state=active]:border-[#169781] rounded-none h-full"
-            >
-              <UploadCloud className="w-4 h-4" />
-              <span>Upload Prescription Image</span>
-            </TabsTrigger>
+          <TabsList className="w-full grid grid-cols-2 rounded-none border-b border-slate-200 bg-slate-50/70 p-0 h-13">
             <TabsTrigger
               value="manual"
-              className="gap-2 text-xs font-semibold data-[state=active]:bg-white data-[state=active]:text-[#0D607B] data-[state=active]:border-b-2 data-[state=active]:border-[#169781] rounded-none h-full"
+              className="gap-2 text-xs sm:text-sm font-bold data-[state=active]:bg-white data-[state=active]:text-[#0D607B] data-[state=active]:border-b-2 data-[state=active]:border-[#169781] rounded-none h-full transition-all"
             >
-              <FileText className="w-4 h-4" />
-              <span>Enter Prescription Text</span>
+              <FileText className="w-4 h-4 text-[#169781]" />
+              <span>Structured Rx & Manual Input</span>
+            </TabsTrigger>
+
+            <TabsTrigger
+              value="upload"
+              className="gap-2 text-xs sm:text-sm font-bold data-[state=active]:bg-white data-[state=active]:text-[#0D607B] data-[state=active]:border-b-2 data-[state=active]:border-[#169781] rounded-none h-full transition-all"
+            >
+              <UploadCloud className="w-4 h-4 text-[#0D607B]" />
+              <span>Upload Prescription Scan</span>
             </TabsTrigger>
           </TabsList>
 
           <div className="p-5 sm:p-6">
-            {draftSourceType === "upload" ? (
-              <PrescriptionUpload disabled={isExtracting} />
-            ) : (
-              <PrescriptionTextInput
-                value={draftText}
-                onChange={setDraftText}
+            {draftSourceType === "manual" ? (
+              <ManualPrescriptionForm
+                draftText={draftText}
+                onTextChange={setDraftText}
                 onLoadSample={() => handleSelectPreset(CLINICAL_SAMPLE_PRESETS[0])}
                 disabled={isExtracting}
               />
+            ) : (
+              <PrescriptionUpload disabled={isExtracting} />
             )}
           </div>
         </Tabs>
       </div>
 
-      {/* Patient Context Form */}
+      {/* Patient Clinical Vigilance Form */}
       <PatientContextForm
         patient={draftPatient}
         onChange={(updated) => updateDraftPatient(updated)}
@@ -189,17 +229,17 @@ function NewPrescriptionContent() {
       {/* Extraction Processing State */}
       {isExtracting && (
         <LoadingState
-          message="Extracting clinical prescription parameters..."
-          subMessage="Identifying antimicrobial molecules, strengths, frequencies, routes and durations"
+          message="Extracting & normalizing clinical prescription entities..."
+          subMessage="Classifying WHO AWaRe tiers, checking renal/age limits, and formatting for Five-Tier audit"
         />
       )}
 
       {/* Bottom Action Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-xl border border-slate-200/90 shadow-2xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs">
         <div className="flex items-center gap-2 text-xs text-slate-500">
           <Info className="w-4 h-4 text-[#169781] shrink-0" />
           <span>
-            Phase 1 parses prescription entities into a structured, editable clinical table for verification.
+            Next: Review extracted entities on Step 2 before initiating the deterministic Five-Tier audit.
           </span>
         </div>
 
@@ -207,10 +247,17 @@ function NewPrescriptionContent() {
           type="button"
           onClick={handleExtract}
           disabled={isExtracting}
-          className="gap-2 px-6 py-2.5 rounded-xl bg-[#169781] hover:bg-[#117866] text-white text-xs sm:text-sm font-semibold shadow-xs"
+          className="gap-2 px-6 h-10 rounded-xl bg-[#169781] hover:bg-[#117866] text-white text-xs sm:text-sm font-bold shadow-md transition-all hover:scale-[1.01] shrink-0"
         >
-          <span>Extract Prescription Details</span>
-          <ArrowRight className="w-4 h-4" />
+          {isExtracting ? (
+            <span>Processing Intake...</span>
+          ) : (
+            <>
+              <Sparkles className="w-4 h-4 stroke-[2.5]" />
+              <span>Extract & Validate Prescription</span>
+              <ArrowRight className="w-4 h-4" />
+            </>
+          )}
         </Button>
       </div>
     </div>
@@ -226,7 +273,11 @@ export default function NewPrescriptionPage() {
         { label: "New Prescription" },
       ]}
     >
-      <Suspense fallback={<div className="p-8 text-center text-xs text-slate-400">Loading workspace...</div>}>
+      <Suspense fallback={
+        <div className="max-w-md mx-auto my-16">
+          <LoadingState message="Loading intake workspace..." />
+        </div>
+      }>
         <NewPrescriptionContent />
       </Suspense>
     </AppShell>
