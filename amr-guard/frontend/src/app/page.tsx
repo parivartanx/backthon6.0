@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { fetchApi } from "@/lib/api";
 
 export default function AuditScreen() {
   const [status, setStatus] = useState<string>("Loading...");
 
   useEffect(() => {
-    fetch("/api/v1/health")
-      .then((res) => res.json())
+    fetchApi("/health")
       .then((data) => setStatus(JSON.stringify(data)))
       .catch((err) => setStatus(err.toString()));
   }, []);
