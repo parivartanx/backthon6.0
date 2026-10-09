@@ -1,8 +1,8 @@
-// [SOLID: SRP] Patient clinical vigilance form utilizing 100% Shadcn UI primitives
+// [SOLID: SRP] Patient clinical safety form utilizing 100% Shadcn UI primitives
 "use client";
 
 import { PatientContext, SexOption, PregnancyStatusOption } from "@/types/prescription";
-import { User, ShieldAlert, FileText, AlertTriangle, Activity, FlaskConical, Scale } from "lucide-react";
+import { User, ShieldAlert, FileText, Activity, FlaskConical, Scale, AlertTriangle } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -52,16 +52,19 @@ export function PatientContextForm({
             </div>
             <div>
               <CardTitle className="text-sm font-bold text-[#0D607B]">
-                Patient Clinical Vigilance Parameters
+                Patient Details & Clinical Information
               </CardTitle>
               <CardDescription className="text-[11px] text-slate-500">
                 Core parameters evaluated against ICMR Standard Treatment Guidelines & WHO AWaRe tiers
               </CardDescription>
             </div>
           </div>
-          <Badge variant="outline" className="text-[10px] font-semibold bg-[#E2FAD9] text-[#0d5c36] border-[#169781]/20">
-            AMR Sentinel Guard
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="text-[10px] font-semibold bg-[#E2FAD9] text-[#0d5c36] border-[#169781]/20 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#169781] animate-pulse" />
+              <span>Dynamic Field Sync</span>
+            </Badge>
+          </div>
         </div>
       </CardHeader>
 
@@ -112,7 +115,7 @@ export function PatientContextForm({
             />
             {Number(patient.age) > 0 && Number(patient.age) < 18 && (
               <p className="mt-1 text-[10px] text-amber-600 font-medium">
-                Pediatric vigilance: Fluoroquinolones & Tetracyclines prohibited.
+                Pediatric safety rule: Fluoroquinolones & Tetracyclines prohibited under 18.
               </p>
             )}
             {errors.age && <p className="mt-1 text-[11px] text-red-600">{errors.age}</p>}
@@ -159,7 +162,7 @@ export function PatientContextForm({
               <SelectContent>
                 <SelectItem value="Not applicable">Not applicable</SelectItem>
                 <SelectItem value="Not pregnant">Not pregnant</SelectItem>
-                <SelectItem value="Pregnant">Pregnant (High vigilance)</SelectItem>
+                <SelectItem value="Pregnant">Pregnant (High Risk)</SelectItem>
                 <SelectItem value="Unknown">Unknown</SelectItem>
               </SelectContent>
             </Select>

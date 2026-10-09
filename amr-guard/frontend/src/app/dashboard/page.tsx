@@ -171,7 +171,7 @@ export default function DoctorDashboard() {
             <SummaryStatCard
               title="Prescriptions Processed"
               value={metrics.prescriptionsProcessed}
-              subtitle="Live audits across care"
+              subtitle="Live prescriptions evaluated"
               icon={FileCheck2}
               badge="Live Data"
               accentColor="#169781"
@@ -291,7 +291,7 @@ export default function DoctorDashboard() {
           <div className="flex items-center justify-between px-1">
             <div>
               <h2 className="text-sm font-bold text-[#0D607B] uppercase tracking-wide">
-                Recent Prescription Activity & Audits
+                Recent Prescription Activity
               </h2>
               <p className="text-xs text-slate-500">
                 Outpatient cases evaluated by AMR Sentinel decision support engine
