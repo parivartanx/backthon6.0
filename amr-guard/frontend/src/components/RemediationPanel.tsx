@@ -1,4 +1,4 @@
-// [SOLID: SRP & Clean Architecture] Stage 6: Remediation & Prescription Review Panel
+// [SOLID: SRP & Clean Architecture] Clinical Remediation & Guideline Alternative Selection Panel
 "use client";
 
 import React, { useState } from "react";
@@ -34,9 +34,8 @@ import {
   AlertTriangle,
   ShieldCheck,
   ShieldAlert,
-  ArrowRightLeft,
   Sparkles,
-  Info
+  ArrowLeftRight
 } from "lucide-react";
 
 interface RemediationPanelProps {
@@ -75,10 +74,10 @@ export function RemediationPanel({
 
   // Common clinical justification presets
   const clinicalPresets = [
-    "Microbiology culture sensitivity isolated susceptible pathogen.",
-    "Documented severe anaphylaxis/allergy to first-line penicillin/cephalosporin.",
-    "Infectious disease specialist consultation approved broad-spectrum therapy.",
-    "Treatment failure on prior first-line Access regimen; escalation indicated.",
+    "Culture sensitivity isolated susceptible pathogen.",
+    "Documented allergy/anaphylaxis to first-line penicillin.",
+    "Infectious disease specialist consultation approved broad therapy.",
+    "Prior treatment failure on first-line Access regimen.",
   ];
 
   const handleOpenRetainDialog = (opt: RemediationOption) => {
@@ -106,101 +105,97 @@ export function RemediationPanel({
 
   if (!options || options.length === 0) {
     return (
-      <div className="p-6 bg-emerald-50/50 rounded-2xl border border-emerald-200 text-center space-y-2">
-        <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 mx-auto">
-          <CheckCircle2 className="w-5 h-5" />
+      <div className="p-6 bg-emerald-50/60 rounded-2xl border border-emerald-200 text-center space-y-2.5">
+        <div className="w-11 h-11 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 mx-auto">
+          <CheckCircle2 className="w-6 h-6" />
         </div>
-        <h4 className="text-xs font-bold text-emerald-900">Stage 6: Clinical Review Complete</h4>
-        <p className="text-[11px] text-emerald-700 max-w-sm mx-auto">
-          Prescription strictly complies with first-line ICMR guidelines and recommended course durations. No substitutions or modifications required.
+        <h4 className="text-sm font-bold text-emerald-900">Clinical Review Complete</h4>
+        <p className="text-xs text-emerald-700 max-w-md mx-auto leading-relaxed">
+          This prescription strictly complies with ICMR and WHO Access guidelines. Recommended first-line treatment and course duration are fully verified.
         </p>
       </div>
     );
   }
 
+  // Doctor-friendly categorization
   const typeConfig: Record<
     string,
     { label: string; icon: typeof RefreshCw; badgeClass: string }
   > = {
     SWITCH_DRUG: {
-      label: "De-escalate / Switch Agent",
+      label: "Recommended Alternative (First-Line)",
       icon: RefreshCw,
-      badgeClass: "bg-blue-100 text-blue-900 border-blue-200",
+      badgeClass: "bg-blue-50 text-blue-800 border-blue-200",
     },
     DISCONTINUE: {
-      label: "Discontinue Antimicrobial",
+      label: "Discontinue Antibiotic (Supportive Care)",
       icon: Ban,
-      badgeClass: "bg-red-100 text-red-900 border-red-200",
+      badgeClass: "bg-rose-50 text-rose-800 border-rose-200",
     },
     REDUCE_DURATION: {
-      label: "Reduce Course Duration",
+      label: "Optimize Course Duration",
       icon: Clock,
-      badgeClass: "bg-amber-100 text-amber-900 border-amber-200",
+      badgeClass: "bg-amber-50 text-amber-800 border-amber-200",
     },
     MANDATE_SYMPTOMATIC: {
       label: "Supportive Symptomatic Care",
       icon: Stethoscope,
-      badgeClass: "bg-teal-100 text-teal-900 border-teal-200",
+      badgeClass: "bg-teal-50 text-teal-800 border-teal-200",
     },
     MICROBIOLOGY_REQUIRED: {
-      label: "Microbiology ID Mandated",
+      label: "Culture & Sensitivity Test Needed",
       icon: FlaskConical,
-      badgeClass: "bg-purple-100 text-purple-900 border-purple-200",
+      badgeClass: "bg-purple-50 text-purple-800 border-purple-200",
     },
     CONTRAINDICATION_BLOCK: {
-      label: "Emergency Halt / Block",
+      label: "Safety Halt: Guideline Contraindication",
       icon: Ban,
-      badgeClass: "bg-rose-100 text-rose-900 border-rose-300",
+      badgeClass: "bg-rose-50 text-rose-800 border-rose-300",
     },
   };
 
   return (
     <div className="space-y-4">
       {/* Panel Header */}
-      <div className="flex items-center justify-between flex-wrap gap-2">
+      <div className="flex items-center justify-between flex-wrap gap-2 pb-1">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-bold text-[#169781] tracking-wider uppercase bg-[#E2FAD9] px-2 py-0.5 rounded">
-              Stage 6
-            </span>
-            <h3 className="text-sm font-bold text-[#0D607B]">
-              Remediation & Prescription Review
+            <h3 className="text-sm sm:text-base font-bold text-[#0D607B]">
+              Guideline Alternatives &amp; Clinical Remediation
             </h3>
+            <Badge variant="outline" className="text-[10px] font-semibold bg-[#E2FAD9] text-[#0d5c36] border-[#169781]/30">
+              {options.length} {options.length === 1 ? "Option" : "Options"}
+            </Badge>
           </div>
-          <p className="text-[11px] text-slate-500 mt-0.5">
-            Compare original prescription against verified guideline alternatives and choose doctor action
+          <p className="text-xs text-slate-500 mt-0.5">
+            Compare flagged medication with verified ICMR / WHO first-line alternatives and select your clinical action.
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          {onExploreMore && (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={onExploreMore}
-              disabled={isLoadingMore}
-              className="h-6 text-[10px] px-2.5 text-[#0D607B] border-[#C9E9EB] hover:bg-[#F1F8FC]"
-            >
-              <Sparkles className={`w-3 h-3 mr-1 ${isLoadingMore ? "animate-spin" : ""}`} />
-              <span>{isLoadingMore ? "Consulting Engine..." : "Explore Alternatives"}</span>
-            </Button>
-          )}
-          <Badge variant="outline" className="text-[10px] font-semibold bg-[#E2FAD9] text-[#0d5c36] border-[#169781]/30">
-            {options.length} {options.length === 1 ? "Intervention" : "Interventions"}
-          </Badge>
-        </div>
+        {onExploreMore && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={onExploreMore}
+            disabled={isLoadingMore}
+            className="h-8 text-xs px-3 text-[#0D607B] border-[#C9E9EB] hover:bg-[#F1F8FC]"
+          >
+            <Sparkles className={`w-3.5 h-3.5 mr-1.5 ${isLoadingMore ? "animate-spin text-[#169781]" : "text-[#169781]"}`} />
+            <span>{isLoadingMore ? "Consulting Engine..." : "Explore More Alternatives"}</span>
+          </Button>
+        )}
       </div>
 
       {/* Active Clinical Override Banner (if retained with rationale) */}
       {clinicalOverride && (
-        <div className="p-3.5 bg-amber-50/90 border border-amber-300 rounded-xl space-y-1">
+        <div className="p-3.5 bg-amber-50/90 border border-amber-300 rounded-xl space-y-1.5">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-amber-900 flex items-center gap-1.5">
-              <FileText className="w-3.5 h-3.5 text-amber-700" />
+              <FileText className="w-4 h-4 text-amber-700" />
               Prescription Retained with Documented Clinical Rationale
             </span>
-            <Badge variant="outline" className="text-[10px] bg-amber-100 text-amber-800 border-amber-300">
+            <Badge variant="outline" className="text-[10px] bg-amber-100 text-amber-800 border-amber-300 font-semibold">
               Doctor Override Active
             </Badge>
           </div>
@@ -215,7 +210,7 @@ export function RemediationPanel({
         </div>
       )}
 
-      {/* First-line Protocol Reference */}
+      {/* Official First-line Protocol Reference */}
       {firstLineRegimen && (
         <div className="p-3 bg-[#F1F8FC] border border-[#C9E9EB] rounded-xl flex items-start gap-2.5 text-xs">
           <BookOpen className="w-4 h-4 text-[#169781] shrink-0 mt-0.5" />
@@ -227,12 +222,12 @@ export function RemediationPanel({
       )}
 
       {stewardshipGuidance && (
-        <p className="text-[11px] text-slate-600 bg-slate-50 p-2.5 rounded-lg border border-slate-200/80 leading-relaxed italic">
+        <p className="text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-200/80 leading-relaxed italic">
           &quot;{stewardshipGuidance}&quot;
         </p>
       )}
 
-      {/* Remediation Cards List */}
+      {/* Remediation Options List */}
       <div className="space-y-4">
         {options.map((opt, idx) => {
           const cfg = typeConfig[opt.recommendation_type] || {
@@ -258,74 +253,78 @@ export function RemediationPanel({
           return (
             <div
               key={idx}
-              className="p-4 rounded-xl border border-slate-200 bg-white hover:border-[#169781]/40 shadow-xs space-y-3.5 transition-all"
+              className="p-4 sm:p-5 rounded-2xl border border-slate-200 bg-white hover:border-[#169781]/40 shadow-2xs space-y-4 transition-all"
             >
               {/* Card Header: Type Badge + Guideline Reference */}
-              <div className="flex items-center justify-between flex-wrap gap-2 pb-1 border-b border-slate-100">
-                <Badge variant="outline" className={`gap-1.5 text-[10px] px-2.5 py-0.5 font-bold ${cfg.badgeClass}`}>
+              <div className="flex items-center justify-between flex-wrap gap-2 pb-2 border-b border-slate-100">
+                <Badge variant="outline" className={`gap-1.5 text-[11px] px-2.5 py-1 font-bold ${cfg.badgeClass}`}>
                   <Icon className="w-3.5 h-3.5" />
                   <span>{cfg.label}</span>
                 </Badge>
                 
-                <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-mono">
-                  <BookOpen className="w-3 h-3 text-slate-400" />
-                  <span>{opt.source_citation || "ICMR STG / WHO AWaRe 2023"}</span>
+                <div className="flex items-center gap-1.5 text-[10px] text-slate-500 font-medium">
+                  <BookOpen className="w-3.5 h-3.5 text-slate-400" />
+                  <span>{opt.source_citation || "ICMR STG / WHO AWaRe Guidelines"}</span>
                 </div>
               </div>
 
-              {/* SIDE-BY-SIDE REGIMEN COMPARISON (Original vs Proposed Alternative) */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
-                {/* Left: Original Prescribed */}
-                <div className="p-3 rounded-lg bg-rose-50/40 border border-rose-200/70 space-y-1.5">
+              {/* Side-by-Side Comparison: Current Flagged vs Proposed Alternative */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                {/* Left: Original Prescribed (Flagged) */}
+                <div className="p-3.5 rounded-xl bg-rose-50/50 border border-rose-200/80 space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-rose-800 uppercase tracking-wider flex items-center gap-1">
-                      <ShieldAlert className="w-3 h-3 text-rose-600" />
-                      Original Prescription
+                    <span className="text-[10px] font-bold text-rose-800 uppercase tracking-wider flex items-center gap-1.5">
+                      <ShieldAlert className="w-3.5 h-3.5 text-rose-600" />
+                      Current Prescribed
                     </span>
-                    <Badge variant="outline" className="text-[9px] bg-rose-100 text-rose-800 border-rose-200">
+                    <Badge variant="outline" className="text-[9px] bg-rose-100 text-rose-800 border-rose-200 font-semibold">
                       {originalMedicine?.aware_tier ? `${originalMedicine.aware_tier} Tier` : "Flagged"}
                     </Badge>
                   </div>
-                  <div className="text-xs font-bold text-slate-900">
-                    {originalMedicine ? `${originalMedicine.genericName || originalMedicine.brandName} ${originalMedicine.dose || ""}` : (matchingFlag?.drug || "Prescribed Molecule")}
-                  </div>
-                  <div className="text-[11px] text-slate-600">
-                    Duration: <span className="font-semibold text-slate-800">{originalMedicine?.duration || "10-14 days"}</span>
+                  <div>
+                    <div className="text-sm font-bold text-slate-900">
+                      {originalMedicine ? `${originalMedicine.genericName || originalMedicine.brandName} ${originalMedicine.dose || ""}` : (matchingFlag?.drug || "Prescribed Molecule")}
+                    </div>
+                    <div className="text-xs text-slate-600 mt-0.5">
+                      Course: <span className="font-semibold text-slate-800">{originalMedicine?.duration || "10 days"}</span>
+                    </div>
                   </div>
                   {matchingFlag && (
-                    <div className="text-[10px] text-rose-700 bg-white/80 p-1.5 rounded border border-rose-100 leading-tight">
-                      <strong>Flag:</strong> {matchingFlag.rule_name}
+                    <div className="text-[11px] text-rose-800 bg-white/90 p-2 rounded-lg border border-rose-100 leading-snug">
+                      <strong>Flagged:</strong> {matchingFlag.rule_name}
                     </div>
                   )}
                 </div>
 
                 {/* Right: Proposed Guideline Alternative */}
-                <div className="p-3 rounded-lg bg-emerald-50/40 border border-emerald-200/70 space-y-1.5">
+                <div className="p-3.5 rounded-xl bg-emerald-50/50 border border-emerald-200/80 space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-emerald-800 uppercase tracking-wider flex items-center gap-1">
-                      <ShieldCheck className="w-3 h-3 text-emerald-600" />
-                      Proposed Alternative
+                    <span className="text-[10px] font-bold text-emerald-800 uppercase tracking-wider flex items-center gap-1.5">
+                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                      Recommended First-Line
                     </span>
-                    <Badge variant="outline" className="text-[9px] bg-emerald-100 text-emerald-800 border-emerald-200">
-                      Access (First-Line)
+                    <Badge variant="outline" className="text-[9px] bg-emerald-100 text-emerald-800 border-emerald-200 font-semibold">
+                      Access (Safe Choice)
                     </Badge>
                   </div>
-                  <div className="text-xs font-bold text-emerald-950">
-                    {opt.suggested_drug || (firstLineRegimen || "Standard Access Regimen")}
+                  <div>
+                    <div className="text-sm font-bold text-emerald-950">
+                      {opt.suggested_drug || (firstLineRegimen || "Standard First-Line Regimen")}
+                    </div>
+                    <div className="text-xs text-slate-600 mt-0.5">
+                      Target Course: <span className="font-semibold text-emerald-900">{opt.suggested_duration_days ? `${opt.suggested_duration_days} days` : "3 – 5 days"}</span>
+                    </div>
                   </div>
-                  <div className="text-[11px] text-slate-600">
-                    Target Duration: <span className="font-semibold text-emerald-900">{opt.suggested_duration_days ? `${opt.suggested_duration_days} days` : "3 – 5 days"}</span>
-                  </div>
-                  <div className="text-[10px] text-emerald-800 bg-white/80 p-1.5 rounded border border-emerald-100 leading-tight">
-                    <strong>Benefit:</strong> Minimizes resistance, avoids organ toxicity & aligns with ICMR
+                  <div className="text-[11px] text-emerald-800 bg-white/90 p-2 rounded-lg border border-emerald-100 leading-snug">
+                    <strong>Clinical Benefit:</strong> First-line ICMR recommendation; targeted efficacy with low resistance risk.
                   </div>
                 </div>
               </div>
 
-              {/* Explanation of Why Change is Needed */}
-              <div className="p-3 bg-slate-50/70 rounded-lg border border-slate-200/80 space-y-1">
+              {/* Clinical Explanation in Plain Language */}
+              <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-200/80 space-y-1">
                 <span className="text-[10px] font-bold text-[#0D607B] uppercase tracking-wider block">
-                  Clinical Rationale for Intervention:
+                  Why this change is advised:
                 </span>
                 <p className="text-xs text-slate-700 leading-relaxed font-medium">
                   {opt.guidance}
@@ -337,24 +336,24 @@ export function RemediationPanel({
                 )}
               </div>
 
-              {/* DOCTOR ACTIONS TOOLBAR */}
+              {/* Doctor Actions Toolbar */}
               <div className="pt-2 border-t border-slate-100 flex items-center justify-between flex-wrap gap-2">
-                <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
-                  Doctor Actions:
+                <span className="text-xs font-semibold text-slate-500">
+                  Select Action:
                 </span>
 
                 <div className="flex items-center gap-2 flex-wrap">
-                  {/* Action 3: Retain with Documented Rationale */}
+                  {/* Action 1: Retain with Documented Rationale */}
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
                     onClick={() => handleOpenRetainDialog(opt)}
-                    className="h-7 text-xs gap-1.5 text-amber-800 border-amber-300 hover:bg-amber-50"
-                    title="Document clinical justification to retain current prescription"
+                    className="h-8 text-xs gap-1.5 text-amber-800 border-amber-300 hover:bg-amber-50"
+                    title="Keep prescribed medicine and document clinical justification"
                   >
                     <FileText className="w-3.5 h-3.5 text-amber-600" />
-                    <span>Retain with Rationale</span>
+                    <span>Keep Current (Add Reason)</span>
                   </Button>
 
                   {/* Action 2: Modify Regimen */}
@@ -364,23 +363,23 @@ export function RemediationPanel({
                       variant="outline"
                       size="sm"
                       onClick={() => onModify(opt)}
-                      className="h-7 text-xs gap-1.5 text-slate-700 hover:text-[#0D607B] hover:border-[#0D607B]/40"
+                      className="h-8 text-xs gap-1.5 text-slate-700 hover:text-[#0D607B] hover:border-[#0D607B]/40"
                     >
                       <Edit3 className="w-3.5 h-3.5" />
-                      <span>Modify Regimen</span>
+                      <span>Adjust Dose / Days</span>
                     </Button>
                   )}
 
-                  {/* Action 1: Accept Recommendation */}
+                  {/* Action 3: Accept Recommendation (Primary CTA) */}
                   {onApply && (
                     <Button
                       type="button"
                       size="sm"
                       onClick={() => onApply(opt)}
-                      className="h-7 text-xs gap-1.5 bg-[#169781] hover:bg-[#117866] text-white font-semibold shadow-xs"
+                      className="h-8 text-xs gap-1.5 bg-[#169781] hover:bg-[#117866] text-white font-semibold shadow-xs"
                     >
                       <CheckCircle2 className="w-3.5 h-3.5" />
-                      <span>Accept Recommendation</span>
+                      <span>Accept Recommended Alternative</span>
                       <ArrowRight className="w-3 h-3 ml-0.5" />
                     </Button>
                   )}
@@ -400,7 +399,7 @@ export function RemediationPanel({
               Retain Prescription with Clinical Justification
             </DialogTitle>
             <DialogDescription className="text-xs text-slate-500">
-              Guideline safety alerts flagged this antimicrobial. If you choose to retain it based on diagnostic findings, patient sensitivities, or specialist consensus, document your justification for the audit trail.
+              Guideline safety alerts flagged this antimicrobial. If you choose to retain it based on microbiology sensitivity, patient history, or specialist consensus, document your justification for the audit trail.
             </DialogDescription>
           </DialogHeader>
 
@@ -446,7 +445,7 @@ export function RemediationPanel({
                   setDoctorRationale(e.target.value);
                   setRationaleError(null);
                 }}
-                placeholder="E.g., Isolated Klebsiella pneumoniae on urine culture resistant to first-line agents. Patient initiated on targeted therapy per antibiogram."
+                placeholder="E.g., Culture sensitivity demonstrated resistance to first-line agents. Targeted therapy initiated."
                 className="text-xs"
               />
               {rationaleError && (
@@ -471,7 +470,7 @@ export function RemediationPanel({
               onClick={handleConfirmRetain}
               className="text-xs bg-amber-600 hover:bg-amber-700 text-white font-semibold"
             >
-              Confirm & Retain with Rationale
+              Confirm &amp; Retain with Rationale
             </Button>
           </DialogFooter>
         </DialogContent>

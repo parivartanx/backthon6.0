@@ -35,6 +35,13 @@ export function PatientContextForm({
     });
   };
 
+  const updateFields = (updates: Partial<PatientContext>) => {
+    onChange({
+      ...patient,
+      ...updates,
+    });
+  };
+
   const isAllergySensitive =
     patient.allergies &&
     patient.allergies.trim().length > 0 &&
@@ -93,7 +100,7 @@ export function PatientContextForm({
             </label>
             <Input
               type="text"
-              value={patient.caseId}
+              value={patient.caseId || ""}
               onChange={(e) => updateField("caseId", e.target.value)}
               disabled={disabled}
               placeholder="e.g. CASE-2026-0895"
@@ -114,10 +121,14 @@ export function PatientContextForm({
               type="number"
               min="0"
               max="125"
-              value={patient.age === "" ? "" : patient.age}
+              value={patient.age === "" || patient.age === undefined ? "" : patient.age}
               onChange={(e) => {
                 const val = e.target.value;
-                updateField("age", val === "" ? "" : Math.max(0, parseInt(val, 10) || 0));
+                const parsedAge = val === "" ? "" : Math.max(0, parseInt(val, 10) || 0);
+                updateFields({
+                  age: parsedAge,
+                  age_years: typeof parsedAge === "number" ? parsedAge : undefined,
+                });
               }}
               disabled={disabled}
               placeholder="e.g. 34"
@@ -140,8 +151,15 @@ export function PatientContextForm({
               Biological Sex <span className="text-red-500">*</span>
             </label>
             <Select
-              value={patient.sex}
-              onValueChange={(val) => updateField("sex", (val as SexOption) || "Male")}
+              value={patient.sex || "Male"}
+              onValueChange={(val) => {
+                const sexVal = (val as SexOption) || "Male";
+                if (sexVal === "Male") {
+                  updateFields({ sex: sexVal, pregnancyStatus: "Not applicable", is_pregnant: false });
+                } else {
+                  updateField("sex", sexVal);
+                }
+              }}
               disabled={disabled}
             >
               <SelectTrigger className="h-9 text-xs bg-white border-slate-300">
@@ -163,10 +181,14 @@ export function PatientContextForm({
               Pregnancy Status
             </label>
             <Select
-              value={patient.pregnancyStatus}
-              onValueChange={(val) =>
-                updateField("pregnancyStatus", (val as PregnancyStatusOption) || "Not applicable")
-              }
+              value={patient.pregnancyStatus || "Not applicable"}
+              onValueChange={(val) => {
+                const pregVal = (val as PregnancyStatusOption) || "Not applicable";
+                updateFields({
+                  pregnancyStatus: pregVal,
+                  is_pregnant: pregVal === "Pregnant",
+                });
+              }}
               disabled={disabled || patient.sex === "Male"}
             >
               <SelectTrigger className="h-9 text-xs bg-white border-slate-300 disabled:opacity-50">
@@ -278,7 +300,7 @@ export function PatientContextForm({
             </div>
             <Input
               type="text"
-              value={patient.allergies}
+              value={patient.allergies || ""}
               onChange={(e) => updateField("allergies", e.target.value)}
               disabled={disabled}
               placeholder="Type allergies or enter 'NKDA' if none known"
@@ -304,7 +326,7 @@ export function PatientContextForm({
             </label>
             <Input
               type="text"
-              value={patient.symptoms}
+              value={patient.symptoms || ""}
               onChange={(e) => updateField("symptoms", e.target.value)}
               disabled={disabled}
               placeholder="e.g. High fever x 3 days, purulent productive cough, dysuria"
@@ -325,7 +347,7 @@ export function PatientContextForm({
             </label>
             <Input
               type="text"
-              value={patient.medicalHistory}
+              value={patient.medicalHistory || ""}
               onChange={(e) => updateField("medicalHistory", e.target.value)}
               disabled={disabled}
               placeholder="e.g. Type 2 Diabetes, chronic renal impairment, mild asthma"
@@ -343,10 +365,13 @@ export function PatientContextForm({
             </label>
             <Input
               type="text"
-              value={patient.suspectedDiagnosis}
+              value={patient.suspectedDiagnosis || ""}
               onChange={(e) => {
-                updateField("suspectedDiagnosis", e.target.value);
-                updateField("canonical_syndrome", e.target.value);
+                const val = e.target.value;
+                updateFields({
+                  suspectedDiagnosis: val,
+                  canonical_syndrome: val,
+                });
               }}
               disabled={disabled}
               placeholder="e.g. Community-Acquired Pneumonia, Viral URTI, or Acute Cystitis"

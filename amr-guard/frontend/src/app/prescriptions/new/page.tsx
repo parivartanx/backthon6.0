@@ -80,15 +80,21 @@ function NewPrescriptionContent() {
       });
       return;
     }
-    if (!draftPatient.symptoms.trim()) {
-      const msg = "Presenting symptoms or diagnosis syndrome are required.";
+    const clinicalIndication =
+      draftPatient.symptoms.trim() || draftPatient.suspectedDiagnosis?.trim();
+    if (!clinicalIndication) {
+      const msg = "Presenting symptoms or suspected diagnosis are required.";
       setValidationError(msg);
       showError({
         title: "Clinical Indication Required",
         message: msg,
-        hint: "Provide clinical diagnosis to verify antibiotic indication under ICMR STG guidelines.",
+        hint: "Provide clinical symptoms or suspected diagnosis to verify antibiotic indication under ICMR STG guidelines.",
       });
       return;
+    }
+    // If symptoms was empty but diagnosis was provided, backfill symptoms
+    if (!draftPatient.symptoms.trim() && draftPatient.suspectedDiagnosis?.trim()) {
+      updateDraftPatient({ symptoms: draftPatient.suspectedDiagnosis.trim() });
     }
     try {
       // Execute Real Extraction or Direct Case Creation from Inputs

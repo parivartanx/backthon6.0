@@ -70,10 +70,10 @@ export function AppSidebar({ onCloseMobile }: AppSidebarProps) {
     },
     {
       label: "Clinical Remediation",
-      href: `/prescriptions/${encodeURIComponent(targetCaseId)}/remediate`,
+      href: "/remediation",
       icon: ShieldAlert,
       badge: blockedCount > 0 ? `${blockedCount}` : undefined,
-      active: pathname.includes("/remediate"),
+      active: pathname.startsWith("/remediation") || pathname.includes("/remediate"),
     },
     {
       label: "Prescription History",
