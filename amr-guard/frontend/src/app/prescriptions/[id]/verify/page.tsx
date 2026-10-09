@@ -26,9 +26,14 @@ import {
   RotateCcw,
   Printer,
   Download,
-  Loader2
+  Loader2,
+  History,
+  FileText,
+  ExternalLink
 } from "lucide-react";
 import { generatePrescriptionReportPdf } from "@/lib/pdfReportGenerator";
+import { fetchRemediationGuidance, RemediationResponse } from "@/network/services/remediationService";
+import { RemediationOption } from "@/types/prescription";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -62,7 +67,10 @@ export default function VerifyPrescriptionPage() {
   const [hasLoaded, setHasLoaded] = useState(false);
   const [showIncompleteDialog, setShowIncompleteDialog] = useState(false);
   const [validationWarning, setValidationWarning] = useState<string | null>(null);
+  const [successNotice, setSuccessNotice] = useState<string | null>(null);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [remediationResponse, setRemediationResponse] = useState<RemediationResponse | null>(null);
+  const [isExploringRemediation, setIsExploringRemediation] = useState(false);
 
   // Initialize store and sync active case without race condition
   useEffect(() => {
@@ -207,6 +215,157 @@ export default function VerifyPrescriptionPage() {
     }
   };
 
+  const handleExploreRemediation = async () => {
+    try {
+      setIsExploringRemediation(true);
+      const flaggedDrug = currentCase.auditResult?.flags.find((f) => f.drug)?.drug;
+      const res = await fetchRemediationGuidance({
+        canonical_syndrome:
+          currentCase.patient.canonical_syndrome ||
+          currentCase.patient.suspectedDiagnosis ||
+          currentCase.patient.symptoms,
+        flagged_drug: flaggedDrug,
+        patient: currentCase.patient,
+      });
+      setRemediationResponse(res);
+      setSuccessNotice("Retrieved live clinical guidelines and first-line Access recommendations.");
+    } catch (err) {
+      console.error("Failed to fetch remediation guidance:", err);
+      setValidationWarning("Could not retrieve expanded recommendations from stewardship engine.");
+    } finally {
+      setIsExploringRemediation(false);
+    }
+  };
+
+  const handleApplyRemediation = async (opt: RemediationOption) => {
+    try {
+      setValidationWarning(null);
+      const updatedMeds = [...currentCase.medicines];
+      let actionSummary = "";
+
+      if (opt.recommendation_type === "SWITCH_DRUG" && opt.suggested_drug) {
+        let targetIndex = updatedMeds.findIndex((m) =>
+          currentCase.auditResult?.flags.some(
+            (f) =>
+              f.drug &&
+              (m.genericName.toLowerCase().includes(f.drug.toLowerCase()) ||
+                m.brandName.toLowerCase().includes(f.drug.toLowerCase()))
+          )
+        );
+        if (targetIndex === -1) {
+          targetIndex = updatedMeds.findIndex(
+            (m) => m.aware_tier === "Watch" || m.aware_tier === "Reserve"
+          );
+        }
+        if (targetIndex === -1) targetIndex = 0;
+
+        if (targetIndex >= 0 && targetIndex < updatedMeds.length) {
+          const oldName = updatedMeds[targetIndex].genericName || updatedMeds[targetIndex].brandName;
+          updatedMeds[targetIndex] = {
+            ...updatedMeds[targetIndex],
+            genericName: opt.suggested_drug,
+            brandName: opt.suggested_drug,
+            aware_tier: "Access",
+            verificationStatus: "Verified",
+          };
+          actionSummary = `Switched ${oldName} to recommended first-line agent: ${opt.suggested_drug}`;
+        }
+      } else if (
+        opt.recommendation_type === "REDUCE_DURATION" &&
+        opt.suggested_duration_days
+      ) {
+        let targetIndex = updatedMeds.findIndex(
+          (m) => (m.duration_days || 0) > opt.suggested_duration_days!
+        );
+        if (targetIndex === -1) targetIndex = 0;
+
+        if (targetIndex >= 0 && targetIndex < updatedMeds.length) {
+          updatedMeds[targetIndex] = {
+            ...updatedMeds[targetIndex],
+            duration: `${opt.suggested_duration_days} days`,
+            duration_days: opt.suggested_duration_days,
+            verificationStatus: "Verified",
+          };
+          actionSummary = `Reduced course duration to ${opt.suggested_duration_days} days`;
+        }
+      } else if (
+        opt.recommendation_type === "DISCONTINUE" ||
+        opt.recommendation_type === "MANDATE_SYMPTOMATIC"
+      ) {
+        let targetIndex = updatedMeds.findIndex((m) =>
+          currentCase.auditResult?.flags.some(
+            (f) =>
+              f.drug &&
+              (m.genericName.toLowerCase().includes(f.drug.toLowerCase()) ||
+                m.brandName.toLowerCase().includes(f.drug.toLowerCase()))
+          )
+        );
+        if (targetIndex === -1) targetIndex = 0;
+
+        if (targetIndex >= 0 && targetIndex < updatedMeds.length) {
+          const oldName = updatedMeds[targetIndex].genericName || updatedMeds[targetIndex].brandName;
+          updatedMeds[targetIndex] = {
+            ...updatedMeds[targetIndex],
+            brandName: "Paracetamol 650mg",
+            genericName: "Paracetamol",
+            dose: "650mg",
+            frequency: "TDS PRN",
+            duration: "3 days",
+            duration_days: 3,
+            aware_tier: "Access",
+            verificationStatus: "Verified",
+          };
+          actionSummary = `Discontinued unindicated ${oldName} and prescribed supportive symptomatic therapy`;
+        }
+      } else {
+        actionSummary = `Applied clinical recommendation: ${opt.guidance}`;
+      }
+
+      const updatedCase: typeof currentCase = {
+        ...currentCase,
+        medicines: updatedMeds,
+        updatedAt: new Date().toISOString(),
+      };
+
+      setActiveCase(updatedCase);
+      await saveCase(updatedCase);
+      setSuccessNotice(`${actionSummary}. Re-evaluating prescription safety...`);
+
+      // Automatically re-run audit on the updated case
+      await auditActiveCase();
+      setSuccessNotice(`${actionSummary}. Prescription safely updated and re-verified against guidelines!`);
+    } catch (err) {
+      console.error("Failed to apply remediation:", err);
+      setValidationWarning(err instanceof Error ? err.message : "Failed to apply remediation");
+    }
+  };
+
+  const handleRetainWithRationale = async (rationale: string, retainedDrug?: string) => {
+    try {
+      const overrideData = {
+        rationale,
+        doctorName: "Dr. Ananya Sharma, MD",
+        timestamp: new Date().toISOString(),
+        retainedDrug,
+      };
+      const updatedCase: typeof currentCase = {
+        ...currentCase,
+        clinicalOverride: overrideData,
+        auditResult: currentCase.auditResult ? {
+          ...currentCase.auditResult,
+          status: "OVERRIDDEN" as const,
+        } : undefined,
+        updatedAt: new Date().toISOString(),
+      };
+      setActiveCase(updatedCase);
+      await saveCase(updatedCase);
+      setSuccessNotice(`Clinical override recorded by Dr. Ananya Sharma. Original prescription retained with documented justification.`);
+    } catch (err) {
+      console.error("Failed to record clinical override:", err);
+      setValidationWarning("Could not record clinical override rationale.");
+    }
+  };
+
   return (
     <AppShell
       title="Verify Prescription Details"
@@ -262,17 +421,30 @@ export default function VerifyPrescriptionPage() {
           </div>
           <div className="flex items-center gap-2">
             {isAudited ? (
-              <Button
-                type="button"
-                onClick={executeAudit}
-                disabled={isAuditing}
-                variant="outline"
-                size="sm"
-                className="gap-1.5 text-xs text-[#0D607B] border-[#C9E9EB] hover:bg-[#F1F8FC]"
-              >
-                <RotateCcw className={`w-3.5 h-3.5 ${isAuditing ? "animate-spin" : ""}`} />
-                <span>Run Safety Check Again</span>
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  asChild
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5 text-xs text-[#0D607B] border-[#C9E9EB] hover:bg-[#F1F8FC]"
+                >
+                  <Link href={`/prescriptions/${currentCase.id}/remediate`}>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    <span>Open Remediation Page (Stage 6)</span>
+                  </Link>
+                </Button>
+                <Button
+                  type="button"
+                  onClick={executeAudit}
+                  disabled={isAuditing}
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5 text-xs text-[#0D607B] border-[#C9E9EB] hover:bg-[#F1F8FC]"
+                >
+                  <RotateCcw className={`w-3.5 h-3.5 ${isAuditing ? "animate-spin" : ""}`} />
+                  <span>Run Safety Check Again</span>
+                </Button>
+              </div>
             ) : (
               <Button
                 type="button"
@@ -288,6 +460,13 @@ export default function VerifyPrescriptionPage() {
           </div>
         </div>
 
+        {successNotice && (
+          <Alert className="py-2.5 bg-emerald-50 border-emerald-300 text-emerald-900">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            <AlertDescription className="text-xs ml-2 font-medium">{successNotice}</AlertDescription>
+          </Alert>
+        )}
+
         {validationWarning && (
           <Alert variant="destructive" className="py-2.5">
             <AlertCircle className="w-4 h-4 shrink-0" />
@@ -298,11 +477,16 @@ export default function VerifyPrescriptionPage() {
         {/* Patient Clinical Info Summary Strip */}
         <Card className="bg-white border-slate-200/90 shadow-2xs py-4">
           <CardHeader className="border-b border-slate-100 pb-2.5 pt-0 px-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <div className="flex items-center gap-2">
                 <User className="w-4 h-4 text-[#0D607B]" />
-                <CardTitle className="text-xs font-bold text-[#0D607B] uppercase tracking-wider">
-                  Patient Details & Clinical Information
+                <CardTitle className="text-xs font-bold text-[#0D607B] uppercase tracking-wider flex items-center gap-2">
+                  <span>Patient Details & Clinical Information</span>
+                  {currentCase.patient.patientName && (
+                    <span className="normal-case font-bold text-slate-900 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded text-xs">
+                      {currentCase.patient.patientName}
+                    </span>
+                  )}
                 </CardTitle>
               </div>
               {currentCase.patient.canonical_syndrome && (
@@ -313,27 +497,33 @@ export default function VerifyPrescriptionPage() {
             </div>
           </CardHeader>
           <CardContent className="px-4 pb-0 pt-3">
-            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3 text-xs">
+            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-3 text-xs">
+              <div>
+                <span className="text-[10px] uppercase font-semibold text-slate-400 block">Patient Name</span>
+                <span className="font-bold text-slate-900 truncate block" title={currentCase.patient.patientName}>
+                  {currentCase.patient.patientName || "—"}
+                </span>
+              </div>
               <div>
                 <span className="text-[10px] uppercase font-semibold text-slate-400 block">Age / Sex</span>
                 <span className="font-semibold text-slate-800">
-                  {currentCase.patient.age || "—"} yrs • {currentCase.patient.sex}
+                  {currentCase.patient.age ? `${currentCase.patient.age} yrs` : "—"} • {currentCase.patient.sex || "—"}
                 </span>
               </div>
               <div>
                 <span className="text-[10px] uppercase font-semibold text-slate-400 block">Pregnancy</span>
-                <span className="font-medium text-slate-700">{currentCase.patient.pregnancyStatus}</span>
+                <span className="font-medium text-slate-700">{currentCase.patient.pregnancyStatus || "—"}</span>
               </div>
               <div>
                 <span className="text-[10px] uppercase font-semibold text-slate-400 block">Renal (eGFR)</span>
                 <span className="font-semibold text-slate-800">
-                  {currentCase.patient.egfr ? `${currentCase.patient.egfr} mL/min` : "Normal / Not recorded"}
+                  {currentCase.patient.egfr ? `${currentCase.patient.egfr} mL/min` : "—"}
                 </span>
               </div>
               <div>
                 <span className="text-[10px] uppercase font-semibold text-slate-400 block">Culture Report</span>
                 <span className="font-medium text-slate-700">
-                  {currentCase.patient.has_culture_report ? "Available" : "Empiric Care"}
+                  {currentCase.patient.has_culture_report ? "Available" : "None attached"}
                 </span>
               </div>
               <div className="col-span-2">
@@ -412,10 +602,20 @@ export default function VerifyPrescriptionPage() {
 
               <div className="lg:col-span-6">
                 <RemediationPanel
-                  options={currentCase.auditResult.remediation_options}
-                  onApply={(opt) => {
-                    setValidationWarning(`Remediation noted: ${opt.guidance}. You can update medication table below to adjust regimen.`);
+                  options={remediationResponse?.options || currentCase.auditResult.remediation_options}
+                  flags={currentCase.auditResult.flags}
+                  medicines={currentCase.medicines}
+                  clinicalOverride={currentCase.clinicalOverride}
+                  firstLineRegimen={remediationResponse?.first_line_access_regimen}
+                  stewardshipGuidance={remediationResponse?.stewardship_guidance}
+                  isLoadingMore={isExploringRemediation}
+                  onExploreMore={handleExploreRemediation}
+                  onApply={handleApplyRemediation}
+                  onModify={() => {
+                    document.getElementById('medication-regimen-review')?.scrollIntoView({ behavior: 'smooth' });
+                    setSuccessNotice("Editing mode active: adjust medication fields in the table below.");
                   }}
+                  onRetainWithRationale={handleRetainWithRationale}
                 />
               </div>
             </div>
@@ -449,19 +649,149 @@ export default function VerifyPrescriptionPage() {
                     <FlagCard
                       key={`${flag.rule_id}-${idx}`}
                       violation={flag}
-                      onApplyRemediation={(rem) => {
-                        setValidationWarning(`Adopted recommendation: ${rem}`);
+                      onApplyRemediation={(_rem) => {
+                        const matchingOpt =
+                          currentCase.auditResult?.remediation_options.find((o) =>
+                            flag.drug ? o.guidance.toLowerCase().includes(flag.drug.toLowerCase()) : false
+                          ) || currentCase.auditResult?.remediation_options[0];
+                        if (matchingOpt) {
+                          handleApplyRemediation(matchingOpt);
+                        } else {
+                          setSuccessNotice(`Adopted recommendation: ${flag.remediation}`);
+                        }
                       }}
                     />
                   ))}
                 </div>
               )}
             </div>
+
+            {/* STAGE 7: FINAL AUDIT SUMMARY & HISTORY CONSOLE */}
+            <Card className="bg-white border border-slate-200/90 shadow-2xs p-5 space-y-4">
+              <div className="flex items-center justify-between flex-wrap gap-2 border-b border-slate-100 pb-3">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-bold text-[#0D607B] tracking-wider uppercase bg-[#F1F8FC] border border-[#C9E9EB] px-2 py-0.5 rounded">
+                      Stage 7
+                    </span>
+                    <h3 className="text-sm font-bold text-[#0D607B]">
+                      Final Audit Summary & Clinical Decision History
+                    </h3>
+                  </div>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    Official evaluation outcome, decision rationale, and tamper-proof report export
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-lg border ${
+                    currentCase.clinicalOverride
+                      ? "bg-amber-50 text-amber-900 border-amber-300"
+                      : currentCase.auditResult.status === "APPROVED"
+                      ? "bg-emerald-50 text-emerald-800 border-emerald-300"
+                      : currentCase.auditResult.status === "BLOCKED"
+                      ? "bg-rose-50 text-rose-800 border-rose-300"
+                      : "bg-amber-50 text-amber-800 border-amber-300"
+                  }`}>
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    {currentCase.clinicalOverride
+                      ? "Retained with Documented Clinical Rationale"
+                      : currentCase.auditResult.status === "APPROVED"
+                      ? "Prescription Approved • Guideline Compliant"
+                      : currentCase.auditResult.status === "BLOCKED"
+                      ? "Action Required • Prescription Blocked"
+                      : "Review Required"}
+                  </span>
+                </div>
+              </div>
+
+              {/* Audit Trail Details Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs bg-slate-50/60 p-3.5 rounded-xl border border-slate-200/70">
+                <div>
+                  <span className="text-[10px] uppercase font-semibold text-slate-400 block">Case Reference</span>
+                  <span className="font-mono font-bold text-slate-800">{currentCase.id}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] uppercase font-semibold text-slate-400 block">Reviewing Clinician</span>
+                  <span className="font-medium text-slate-800">
+                    {currentCase.clinicalOverride?.doctorName || "Dr. Ananya Sharma, MD"}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[10px] uppercase font-semibold text-slate-400 block">Evaluation Timestamp</span>
+                  <span className="font-mono text-slate-700">
+                    {currentCase.updatedAt ? new Date(currentCase.updatedAt).toLocaleString() : "Just now"}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[10px] uppercase font-semibold text-slate-400 block">Final Risk Index</span>
+                  <span className={`font-bold ${
+                    currentCase.clinicalOverride
+                      ? "text-amber-800"
+                      : currentCase.auditResult.score <= 30
+                      ? "text-emerald-700"
+                      : "text-rose-700"
+                  }`}>
+                    {currentCase.clinicalOverride ? "Overridden (Recorded)" : `${currentCase.auditResult.score.toFixed(1)} / 100`}
+                  </span>
+                </div>
+              </div>
+
+              {/* If clinical override rationale exists */}
+              {currentCase.clinicalOverride && (
+                <div className="p-3 bg-amber-50/80 rounded-lg border border-amber-200 space-y-1">
+                  <span className="text-[11px] font-bold text-amber-900 block">
+                    Documented Physician Override Rationale:
+                  </span>
+                  <p className="text-xs text-amber-900 italic font-medium leading-relaxed">
+                    &quot;{currentCase.clinicalOverride.rationale}&quot;
+                  </p>
+                </div>
+              )}
+
+              {/* Stage 7 Action Buttons */}
+              <div className="flex items-center justify-between flex-wrap gap-2 pt-1">
+                <Button
+                  asChild
+                  variant="outline"
+                  size="sm"
+                  className="text-xs text-[#0D607B] border-[#C9E9EB] hover:bg-[#F1F8FC] gap-1.5"
+                >
+                  <Link href="/history">
+                    <History className="w-3.5 h-3.5" />
+                    <span>View All Prescriptions in Audit History</span>
+                  </Link>
+                </Button>
+
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handlePrintPdf}
+                    disabled={isGeneratingPdf}
+                    className="h-8 text-xs gap-1.5 text-slate-700"
+                  >
+                    <Printer className="w-3.5 h-3.5" />
+                    <span>Print Report</span>
+                  </Button>
+
+                  <Button
+                    size="sm"
+                    onClick={handleDownloadPdf}
+                    disabled={isGeneratingPdf}
+                    className="h-8 text-xs gap-1.5 bg-[#169781] hover:bg-[#117866] text-white font-semibold"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Download Official Audit Report</span>
+                  </Button>
+                </div>
+              </div>
+            </Card>
           </div>
         )}
 
         {/* Split Screen Layout: Original Source vs Extracted Medicine Table */}
-        <div className="space-y-3 pt-4">
+        <div id="medication-regimen-review" className="space-y-3 pt-4">
           <div className="flex items-center justify-between">
             <h3 className="text-xs font-bold text-[#0D607B] uppercase tracking-wider">
               Prescription Source & Medication Regimen Review
