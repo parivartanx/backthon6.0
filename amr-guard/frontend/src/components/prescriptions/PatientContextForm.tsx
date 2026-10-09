@@ -105,8 +105,8 @@ export function PatientContextForm({
               disabled={disabled}
               placeholder="e.g. CASE-2026-0895"
               className={`h-9 text-xs bg-white ${errors.caseId
-                  ? "border-red-400 focus-visible:ring-red-200"
-                  : "border-slate-300 focus-visible:ring-1 focus-visible:ring-[#169781]"
+                ? "border-red-400 focus-visible:ring-red-200"
+                : "border-slate-300 focus-visible:ring-1 focus-visible:ring-[#169781]"
                 }`}
             />
             {errors.caseId && <p className="mt-1 text-[11px] text-red-600">{errors.caseId}</p>}
@@ -133,8 +133,8 @@ export function PatientContextForm({
               disabled={disabled}
               placeholder="e.g. 34"
               className={`h-9 text-xs bg-white ${errors.age
-                  ? "border-red-400 focus-visible:ring-red-200"
-                  : "border-slate-300 focus-visible:ring-1 focus-visible:ring-[#169781]"
+                ? "border-red-400 focus-visible:ring-red-200"
+                : "border-slate-300 focus-visible:ring-1 focus-visible:ring-[#169781]"
                 }`}
             />
             {Number(patient.age) > 0 && Number(patient.age) < 18 && (
@@ -305,8 +305,8 @@ export function PatientContextForm({
               disabled={disabled}
               placeholder="Type allergies or enter 'NKDA' if none known"
               className={`h-9 text-xs bg-white ${isAllergySensitive
-                  ? "border-amber-400 bg-amber-50/30 text-amber-900 focus-visible:ring-amber-200"
-                  : "border-slate-300 focus-visible:ring-1 focus-visible:ring-[#169781]"
+                ? "border-amber-400 bg-amber-50/30 text-amber-900 focus-visible:ring-amber-200"
+                : "border-slate-300 focus-visible:ring-1 focus-visible:ring-[#169781]"
                 }`}
             />
             {isAllergySensitive && (
@@ -331,8 +331,8 @@ export function PatientContextForm({
               disabled={disabled}
               placeholder="e.g. High fever x 3 days, purulent productive cough, dysuria"
               className={`h-9 text-xs bg-white ${errors.symptoms
-                  ? "border-red-400 focus-visible:ring-red-200"
-                  : "border-slate-300 focus-visible:ring-1 focus-visible:ring-[#169781]"
+                ? "border-red-400 focus-visible:ring-red-200"
+                : "border-slate-300 focus-visible:ring-1 focus-visible:ring-[#169781]"
                 }`}
             />
             {errors.symptoms && <p className="text-[11px] text-red-600">{errors.symptoms}</p>}
