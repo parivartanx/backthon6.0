@@ -19,7 +19,7 @@ export function SummaryStatCard({
   value,
   subtitle,
   icon: Icon,
-  badge = "Synthetic Demo",
+  badge = "Live Data",
   accentColor = "#169781",
 }: SummaryStatCardProps) {
   return (

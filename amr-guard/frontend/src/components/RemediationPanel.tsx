@@ -28,7 +28,7 @@ export function RemediationPanel({ options, onApply }: RemediationPanelProps) {
         <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 mx-auto">
           <CheckCircle2 className="w-5 h-5" />
         </div>
-        <h4 className="text-xs font-bold text-emerald-900">Full Stewardship Compliance</h4>
+        <h4 className="text-xs font-bold text-emerald-900">Full Guideline Compliance</h4>
         <p className="text-[11px] text-emerald-700 max-w-sm mx-auto">
           Zero interventions required. Prescription strictly complies with first-line ICMR guidelines and recommended course durations.
         </p>
@@ -77,10 +77,10 @@ export function RemediationPanel({ options, onApply }: RemediationPanelProps) {
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-xs font-bold text-[#0D607B] uppercase tracking-wider">
-            Clinical Stewardship Remediation Options
+            Clinical Safety Recommendations
           </h3>
           <p className="text-[11px] text-slate-500">
-            Actionable interventions prioritized by AMR resistance reduction efficacy
+            Actionable recommendations to improve prescription safety and guidelines adherence
           </p>
         </div>
         <Badge variant="outline" className="text-[10px] font-semibold bg-[#E2FAD9] text-[#0d5c36] border-[#169781]/30">

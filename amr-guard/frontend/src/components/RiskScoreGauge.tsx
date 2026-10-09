@@ -35,7 +35,7 @@ export function RiskScoreGauge({
       gradientStart: "#10B981",
       gradientEnd: "#169781",
       badgeBg: "bg-emerald-50 text-emerald-800 border-emerald-300",
-      label: "Low Risk • Stewardship Compliant",
+      label: "Low Risk • Guideline Compliant",
       icon: ShieldCheck,
       description: "Adheres to first-line Access antimicrobials and recommended clinical durations.",
     },
