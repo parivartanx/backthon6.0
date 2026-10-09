@@ -41,23 +41,23 @@ export function AuditConfirmationModal({
             </Badge>
           </div>
           <DialogTitle className="text-lg font-bold text-[#0D607B] pt-1">
-            Prescription Ready for Clinical Audit
+            Prescription Ready for Safety Check
           </DialogTitle>
           <DialogDescription className="text-xs text-slate-500 max-w-sm mx-auto">
             Case <strong className="text-slate-800">{caseId}</strong> with{" "}
-            <strong className="text-slate-800">{medicineCount} verified medication(s)</strong> has been locked and saved for Phase 2 AMR Clinical Decision Support.
+            <strong className="text-slate-800">{medicineCount} verified medication(s)</strong> has been locked and saved for prescription safety review.
           </DialogDescription>
         </DialogHeader>
 
         <div className="p-3.5 bg-[#F1F8FC] border border-[#C9E9EB] rounded-xl text-left text-xs text-slate-600 space-y-1.5">
           <div className="font-semibold text-[#0D607B] flex items-center justify-between">
-            <span>Phase 2 Handoff Status:</span>
+            <span>Prescription Status:</span>
             <Badge variant="outline" className="text-[10px] bg-white border-[#C9E9EB] text-[#0D607B]">
-              Pipeline Ready
+              Ready for Review
             </Badge>
           </div>
           <p className="text-[11px] text-slate-500 leading-relaxed">
-            Data contract validated: dosage, contraindications, and active molecules will be evaluated against ICMR / WHO antibiotic stewardship rules.
+            Data validated: dosage, contraindications, and active molecules will be evaluated against ICMR and WHO antibiotic safety rules.
           </p>
         </div>
 

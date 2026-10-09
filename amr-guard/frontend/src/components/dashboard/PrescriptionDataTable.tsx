@@ -36,6 +36,8 @@ import {
   ArrowRight,
   User,
   Filter,
+  FileText,
+  Plus,
 } from "lucide-react";
 
 interface PrescriptionDataTableProps {
@@ -76,6 +78,32 @@ export function PrescriptionDataTable({ data }: PrescriptionDataTableProps) {
   const [pageSize, setPageSize] = useState<number>(5);
   const [currentPage, setCurrentPage] = useState<number>(1);
 
+  if (data.length === 0) {
+    return (
+      <div className="bg-white rounded-2xl border border-slate-200/80 p-8 sm:p-12 text-center space-y-4">
+        <div className="w-14 h-14 rounded-2xl bg-[#F1F8FC] border border-[#C9E9EB] flex items-center justify-center text-[#0D607B] mx-auto shadow-2xs">
+          <FileText className="w-7 h-7 text-[#169781]" />
+        </div>
+        <div className="space-y-1 max-w-sm mx-auto">
+          <h3 className="text-sm font-bold text-slate-800">No Prescriptions Checked Yet Today</h3>
+          <p className="text-xs text-slate-500 leading-relaxed">
+            Prescriptions you create and evaluate with the clinical safety engine will appear here in real-time.
+          </p>
+        </div>
+        <Button
+          asChild
+          size="sm"
+          className="gap-2 px-5 py-2 rounded-xl bg-[#169781] hover:bg-[#117866] text-white text-xs font-semibold shadow-xs"
+        >
+          <Link href="/prescriptions/new">
+            <Plus className="w-3.5 h-3.5" />
+            <span>New Prescription Intake</span>
+          </Link>
+        </Button>
+      </div>
+    );
+  }
+
   // Filtered dataset
   const filteredData = useMemo(() => {
     return data.filter((item) => {
@@ -85,12 +113,15 @@ export function PrescriptionDataTable({ data }: PrescriptionDataTableProps) {
         if (statusFilter === "APPROVED" && auditStatus !== "APPROVED") return false;
         if (statusFilter === "FLAGGED" && auditStatus !== "FLAGGED") return false;
         if (statusFilter === "BLOCKED" && auditStatus !== "BLOCKED") return false;
+        if (statusFilter === "Needs Verification" && item.workflowStatus !== "Needs Verification") return false;
+        if (statusFilter === "Ready for Audit" && item.workflowStatus !== "Ready for Audit") return false;
       }
 
-      // Search query filter
+      // Search query filter (matches ID, patient name, diagnosis, symptoms, or medication brand/generic)
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
         const idMatch = item.id.toLowerCase().includes(q);
+        const nameMatch = item.patient.patientName?.toLowerCase().includes(q);
         const diagMatch =
           item.patient.suspectedDiagnosis?.toLowerCase().includes(q) ||
           item.patient.symptoms?.toLowerCase().includes(q);
@@ -99,7 +130,7 @@ export function PrescriptionDataTable({ data }: PrescriptionDataTableProps) {
             m.brandName?.toLowerCase().includes(q) ||
             m.genericName?.toLowerCase().includes(q)
         );
-        if (!idMatch && !diagMatch && !medMatch) return false;
+        if (!idMatch && !nameMatch && !diagMatch && !medMatch) return false;
       }
 
       return true;
@@ -141,7 +172,7 @@ export function PrescriptionDataTable({ data }: PrescriptionDataTableProps) {
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
           <Input
             type="text"
-            placeholder="Search by Patient ID, diagnosis, or medicine..."
+            placeholder="Search by Patient name/ID, diagnosis, or medicine..."
             value={searchQuery}
             onChange={(e) => handleSearchChange(e.target.value)}
             className="pl-9 h-9 text-xs bg-slate-50/60 border-slate-200 focus-visible:bg-white focus-visible:ring-1 focus-visible:ring-[#169781]"
@@ -156,10 +187,11 @@ export function PrescriptionDataTable({ data }: PrescriptionDataTableProps) {
           </div>
 
           {[
-            { label: "All", value: "ALL" },
+            { label: "All Cases", value: "ALL" },
             { label: "Safe & Approved", value: "APPROVED" },
             { label: "Needs Review", value: "FLAGGED" },
             { label: "High Risk", value: "BLOCKED" },
+            { label: "Needs Verification", value: "Needs Verification" },
           ].map((tab) => (
             <Button
               key={tab.value}
@@ -225,9 +257,10 @@ export function PrescriptionDataTable({ data }: PrescriptionDataTableProps) {
                         </div>
                         <div className="min-w-0 truncate">
                           <div className="font-bold text-slate-900 text-xs truncate">
-                            {item.id}
+                            {item.patient.patientName || item.id}
                           </div>
                           <div className="text-[11px] text-slate-400 truncate">
+                            {item.patient.patientName ? `${item.id} • ` : ""}
                             {item.patient.age ? `${item.patient.age}y` : "Age N/A"} •{" "}
                             {item.patient.sex || "Patient"} • {formatDateSummary(item.createdAt)}
                           </div>
@@ -294,6 +327,13 @@ export function PrescriptionDataTable({ data }: PrescriptionDataTableProps) {
                         >
                           <AlertTriangle className="w-3 h-3 text-amber-600 shrink-0" />
                           <span>Review</span>
+                        </Badge>
+                      ) : item.workflowStatus === "Needs Verification" ? (
+                        <Badge
+                          variant="outline"
+                          className="bg-amber-50 text-amber-800 border-amber-300 gap-1 text-[10px] font-semibold py-0.5 px-2"
+                        >
+                          <span>Needs Verification</span>
                         </Badge>
                       ) : (
                         <Badge

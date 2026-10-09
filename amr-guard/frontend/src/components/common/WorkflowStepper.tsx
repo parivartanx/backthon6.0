@@ -17,7 +17,7 @@ interface WorkflowStepperProps {
 const STEPS: Step[] = [
   { number: 1, label: "Prescription Intake" },
   { number: 2, label: "Medication Review" },
-  { number: 3, label: "Safety Audit" },
+  { number: 3, label: "Prescription Safety Check" },
 ];
 
 export function WorkflowStepper({ currentStep }: WorkflowStepperProps) {

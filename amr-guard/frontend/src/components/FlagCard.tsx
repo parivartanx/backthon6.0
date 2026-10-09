@@ -140,7 +140,7 @@ export function FlagCard({ violation, onApplyRemediation }: FlagCardProps) {
             {violation.remediation && (
               <div className="p-3 bg-white rounded-lg border border-[#169781]/20 space-y-1">
                 <span className="text-[10px] font-bold text-[#169781] uppercase tracking-wider block">
-                  Actionable Stewardship Remediation:
+                  Recommended Safety Action:
                 </span>
                 <p className="text-xs text-slate-700 leading-relaxed font-medium">
                   {violation.remediation}

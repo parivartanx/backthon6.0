@@ -11,7 +11,7 @@ import {
 } from "@/types/prescription";
 import { prescriptionStore } from "./prescriptionStore";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://nine-peaches-wash.loca.lt/api/v1";
 
 /**
  * Standard fetch helper with error handling
@@ -21,11 +21,12 @@ export async function fetchApi<T>(endpoint: string, options: RequestInit = {}): 
     ...options,
     headers: {
       "Content-Type": "application/json",
+      "bypass-tunnel-reminder": "true",
       ...options.headers,
     },
   });
   if (!res.ok) {
-    throw new Error(`API error: ${res.statusText}`);
+    throw new Error(`API error: ${res.statusText} (${res.status})`);
   }
   return res.json();
 }

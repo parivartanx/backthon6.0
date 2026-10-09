@@ -11,6 +11,7 @@ import {
   Stethoscope,
   AlertTriangle,
   ChevronRight,
+  ShieldAlert,
 } from "lucide-react";
 import { usePrescriptionStore } from "@/store/usePrescriptionStore";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -32,10 +33,27 @@ interface AppSidebarProps {
 
 export function AppSidebar({ onCloseMobile }: AppSidebarProps) {
   const pathname = usePathname();
-  const { resetDemoData } = usePrescriptionStore();
+  const { resetDemoData, activeCase, cases } = usePrescriptionStore();
   const user = useAuthStore((s) => s.user);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [resetting, setResetting] = useState(false);
+
+  // Target case for direct Remediation navigation from sidebar
+  const targetCaseId =
+    activeCase?.id ||
+    cases.find(
+      (c) =>
+        c.auditResult?.status === "BLOCKED" ||
+        c.auditResult?.status === "FLAGGED"
+    )?.id ||
+    cases[0]?.id ||
+    "CASE-2026-1561";
+
+  const blockedCount = cases.filter(
+    (c) =>
+      c.auditResult?.status === "BLOCKED" ||
+      c.auditResult?.status === "FLAGGED"
+  ).length;
 
   const navItems = [
     {
@@ -49,6 +67,13 @@ export function AppSidebar({ onCloseMobile }: AppSidebarProps) {
       href: "/prescriptions/new",
       icon: FilePlus2,
       active: pathname.startsWith("/prescriptions/new"),
+    },
+    {
+      label: "Clinical Remediation",
+      href: `/prescriptions/${encodeURIComponent(targetCaseId)}/remediate`,
+      icon: ShieldAlert,
+      badge: blockedCount > 0 ? `${blockedCount}` : undefined,
+      active: pathname.includes("/remediate"),
     },
     {
       label: "Prescription History",
@@ -100,7 +125,7 @@ export function AppSidebar({ onCloseMobile }: AppSidebarProps) {
                 />
               </div>
               <p className="text-[11px] text-slate-400 font-medium truncate">
-                Clinical Stewardship
+                Antibiotic Safety Support
               </p>
             </div>
           </Link>
@@ -132,7 +157,12 @@ export function AppSidebar({ onCloseMobile }: AppSidebarProps) {
                       : "text-slate-400 group-hover:text-slate-600"
                   }`}
                 />
-                <span className="truncate">{item.label}</span>
+                <span className="truncate flex-1">{item.label}</span>
+                {item.badge && (
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-rose-100 text-rose-700 border border-rose-200">
+                    {item.badge}
+                  </span>
+                )}
               </Link>
             );
           })}

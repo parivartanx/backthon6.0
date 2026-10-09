@@ -90,41 +90,31 @@ function NewPrescriptionContent() {
       });
       return;
     }
-    if (draftSourceType === "manual" && !draftText.trim()) {
-      const msg = "Please enter prescription text or load a clinical sample.";
-      setValidationError(msg);
-      showError({
-        title: "Prescription Text Empty",
-        message: msg,
-        hint: "Type drug name, strength, frequency, and duration.",
-      });
-      return;
-    }
-    if (draftSourceType === "upload" && !draftFile && !draftPreviewUrl) {
-      const msg = "Please select or drop a prescription image.";
-      setValidationError(msg);
-      showError({
-        title: "Prescription Slip Required",
-        message: msg,
-        hint: "Upload a photo or scanned copy of the outpatient slip (JPG, PNG, WebP).",
-      });
-      return;
-    }
-
     try {
-      // Execute Real API Extraction through Zustand & Network Layer
+      // Execute Real Extraction or Direct Case Creation from Inputs
       const createdCase = await extractAndCreateCase();
 
       // Trigger Global Success Dialog with Clear Proceed CTA
-      showSuccess({
-        title: "Prescription Successfully Extracted",
-        message: `Extracted ${createdCase.medicines.length} medication(s) for patient ${createdCase.patient.caseId}. Clinical entities have been parsed and are ready for physician review.`,
-        details: createdCase.medicines.map((m) => `• ${m.brandName} (${m.genericName}) ${m.strength} ${m.frequency} x ${m.duration}`).join("\n"),
-        primaryLabel: "Proceed to Review Medicines",
-        onPrimary: () => {
-          router.push(`/prescriptions/${encodeURIComponent(createdCase.id)}/verify`);
-        },
-      });
+      if (createdCase.medicines.length > 0) {
+        showSuccess({
+          title: "Prescription Successfully Extracted",
+          message: `Extracted ${createdCase.medicines.length} medication(s) for patient ${createdCase.patient.caseId}. Clinical entities are ready for review.`,
+          details: createdCase.medicines.map((m) => `• ${m.brandName} (${m.genericName}) ${m.strength} ${m.frequency} x ${m.duration}`).join("\n"),
+          primaryLabel: "Proceed to Review Medicines",
+          onPrimary: () => {
+            router.push(`/prescriptions/${encodeURIComponent(createdCase.id)}/verify`);
+          },
+        });
+      } else {
+        showSuccess({
+          title: "Prescription Case Created",
+          message: `Clinical details recorded for patient ${createdCase.patient.caseId}. You can now review patient parameters and add prescribed medications.`,
+          primaryLabel: "Proceed to Review Medicines",
+          onPrimary: () => {
+            router.push(`/prescriptions/${encodeURIComponent(createdCase.id)}/verify`);
+          },
+        });
+      }
     } catch (err) {
       const clinicalErr = parseClinicalError(err, "Prescription extraction");
       setValidationError(clinicalErr.userMessage);
@@ -139,11 +129,11 @@ function NewPrescriptionContent() {
   };
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto pb-12">
+    <div className="space-y-6 max-w-7xl mx-auto pb-28">
       {/* Page Header with Shadcn Breadcrumbs + Back Arrow */}
       <PageHeader
         title="New Prescription"
-        description="Enter patient details and prescription, then verify medications before safety review."
+        description="Enter patient details and clinical indication, then verify medications before running the safety check."
         backHref="/dashboard"
         breadcrumbs={[
           { label: "Dashboard", href: "/dashboard" },
@@ -156,7 +146,7 @@ function NewPrescriptionContent() {
 
       {/* Validation Error Banner */}
       {validationError && (
-        <Alert variant="destructive" className="py-3 rounded-xl shadow-2xs">
+        <Alert variant="destructive" className="py-2.5 rounded-xl shadow-2xs">
           <AlertCircle className="w-4 h-4 shrink-0" />
           <AlertDescription className="text-xs ml-2 font-medium">
             {validationError}
@@ -164,31 +154,40 @@ function NewPrescriptionContent() {
         </Alert>
       )}
 
-      {/* Input Methods Tabs */}
-      <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden">
+      {/* SECTION 1: PATIENT CLINICAL DETAILS & INPUT FIELDS (FIRST SECTION) */}
+      <section className="space-y-1.5">
+        <PatientContextForm
+          patient={draftPatient}
+          onChange={(updated) => updateDraftPatient(updated)}
+          disabled={isExtracting}
+        />
+      </section>
+
+      {/* SECTION 2: PRESCRIPTION INTAKE SOURCE (UPLOAD OR MANUAL NOTES) */}
+      <section className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden">
         <Tabs
           value={draftSourceType}
           onValueChange={(val) => setDraftSourceType(val as "upload" | "manual")}
           className="w-full"
         >
-          <TabsList className="w-full grid grid-cols-2 rounded-none border-b border-slate-200 bg-slate-50/50 p-0 h-12">
+          <TabsList className="w-full grid grid-cols-2 rounded-none border-b border-slate-200 bg-slate-50/50 p-0 h-11">
             <TabsTrigger
               value="upload"
               className="gap-2 text-xs font-semibold data-[state=active]:bg-white data-[state=active]:text-[#0D607B] data-[state=active]:border-b-2 data-[state=active]:border-[#169781] rounded-none h-full"
             >
               <UploadCloud className="w-4 h-4" />
-              <span>Upload Prescription Image</span>
+              <span>Upload Prescription Slip (Optional)</span>
             </TabsTrigger>
             <TabsTrigger
               value="manual"
               className="gap-2 text-xs font-semibold data-[state=active]:bg-white data-[state=active]:text-[#0D607B] data-[state=active]:border-b-2 data-[state=active]:border-[#169781] rounded-none h-full"
             >
               <FileText className="w-4 h-4" />
-              <span>Type Prescription Text</span>
+              <span>Type Prescription Notes (Optional)</span>
             </TabsTrigger>
           </TabsList>
 
-          <div className="p-5 sm:p-6">
+          <div className="p-4 sm:p-5">
             {draftSourceType === "upload" ? (
               <PrescriptionUpload disabled={isExtracting} />
             ) : (
@@ -204,43 +203,37 @@ function NewPrescriptionContent() {
             )}
           </div>
         </Tabs>
-      </div>
-
-      {/* Patient Context Form */}
-      <PatientContextForm
-        patient={draftPatient}
-        onChange={(updated) => updateDraftPatient(updated)}
-        disabled={isExtracting}
-      />
+      </section>
 
       {/* Extraction Processing State Overlay */}
       {isExtracting && (
         <LoadingState
-          message="Connecting to clinical extraction engine..."
-          subMessage="Parsing patient demographics, drug names, dosage, frequency, and duration via NLP & Vision OCR"
+          message="Preparing clinical prescription case..."
+          subMessage="Parsing clinical entities, patient parameters, and regimen details via ICMR/WHO safety engine"
         />
       )}
 
-      {/* Bottom Action Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-xl border border-slate-200/90 shadow-2xs">
-        <div className="flex items-center gap-2 text-xs text-slate-500">
-          <Info className="w-4 h-4 text-[#169781] shrink-0" />
-          <span>
-            Your prescription will be processed via real API, followed by verification before the 5-tier safety check.
-          </span>
-        </div>
+      {/* FLOATING FIXED BOTTOM ACTION BAR */}
+      <div className="fixed bottom-0 left-0 right-0 md:left-64 z-30 bg-white/95 backdrop-blur-md border-t border-slate-200/90 shadow-lg px-4 sm:px-8 py-3 transition-all">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-2 text-xs text-slate-600">
+            <Info className="w-4 h-4 text-[#169781] shrink-0" />
+            <span>
+              Slip upload is optional. Click proceed to verify medications and evaluate clinical guidelines.
+            </span>
+          </div>
 
-        {/* CTA Button with Circular Progress Indicator */}
-        <CTAButton
-          type="button"
-          onClick={handleExtract}
-          isLoading={isExtracting}
-          loadingText="Reading & Extracting Medicines..."
-          iconRight={ArrowRight}
-          className="gap-2 px-6 py-2.5 rounded-xl bg-[#169781] hover:bg-[#117866] text-white text-xs sm:text-sm font-semibold shadow-xs transition-all hover:scale-[1.01] shrink-0"
-        >
-          Read Prescription & Review Medicines
-        </CTAButton>
+          <CTAButton
+            type="button"
+            onClick={handleExtract}
+            isLoading={isExtracting}
+            loadingText={draftFile ? "Reading Slip..." : draftText.trim() ? "Reading Notes..." : "Processing Case..."}
+            iconRight={ArrowRight}
+            className="gap-2 px-6 py-2.5 rounded-xl bg-[#169781] hover:bg-[#117866] text-white text-xs sm:text-sm font-semibold shadow-md transition-all hover:scale-[1.01] shrink-0"
+          >
+            {draftFile || draftText.trim() ? "Extract Prescription & Review Medicines" : "Proceed to Review Medicines"}
+          </CTAButton>
+        </div>
       </div>
     </div>
   );

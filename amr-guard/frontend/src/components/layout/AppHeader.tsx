@@ -80,8 +80,8 @@ export function AppHeader({ title, breadcrumbs, onOpenMobile }: AppHeaderProps) 
         {/* Header Utilities & Environment */}
         <div className="flex items-center gap-3">
           <Badge variant="outline" className="hidden sm:inline-flex gap-1.5 px-2.5 py-1 bg-[#E2FAD9] border-[#169781]/20 text-[11px] font-semibold text-[#0d5c36]">
-            <Activity className="w-3.5 h-3.5 text-[#169781]" />
-            <span>Demo Workspace</span>
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span>Live Clinical API</span>
           </Badge>
 
           <Button
@@ -126,7 +126,7 @@ export function AppHeader({ title, breadcrumbs, onOpenMobile }: AppHeaderProps) 
                   AMR Sentinel Clinical Protocol
                 </DialogTitle>
                 <DialogDescription className="text-[11px] text-slate-500">
-                  Five-Tier Antimicrobial Stewardship & Verification Engine
+                  Five-Tier Antibiotic Safety & Verification Engine
                 </DialogDescription>
               </div>
             </div>

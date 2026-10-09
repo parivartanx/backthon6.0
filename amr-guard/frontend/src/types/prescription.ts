@@ -24,11 +24,19 @@ export type PrescriptionWorkflowStatus =
   | "Audited";
 
 export type AuditTriageBand = "GREEN" | "AMBER" | "RED";
-export type AuditStatus = "APPROVED" | "FLAGGED" | "BLOCKED";
+export type AuditStatus = "APPROVED" | "FLAGGED" | "BLOCKED" | "OVERRIDDEN";
 export type RuleSeverity = "BLOCKED" | "HIGH" | "MEDIUM" | "LOW";
+
+export interface ClinicalOverride {
+  rationale: string;
+  doctorName: string;
+  timestamp: string;
+  retainedDrug?: string;
+}
 
 export interface PatientContext {
   caseId: string;
+  patientName?: string;
   age: number | "";
   age_years?: number;
   sex: SexOption;
@@ -118,6 +126,7 @@ export interface PrescriptionCase {
   medicines: MedicineEntry[];
   workflowStatus: PrescriptionWorkflowStatus;
   auditResult?: AuditResult;
+  clinicalOverride?: ClinicalOverride;
   createdAt: string;
   updatedAt: string;
 }

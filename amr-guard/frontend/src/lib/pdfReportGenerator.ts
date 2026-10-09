@@ -45,14 +45,14 @@ export async function generatePrescriptionReportPdf(
   doc.setFont("helvetica", "bold");
   doc.setFontSize(14);
   doc.setTextColor(...textDark);
-  doc.text("AMR SENTINEL CLINICAL AUDIT REPORT", margin, currentY);
+  doc.text("AMR SENTINEL PRESCRIPTION SAFETY REPORT", margin, currentY);
 
   currentY += 4.5;
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
   doc.setTextColor(...textMuted);
   doc.text(
-    "Antimicrobial Resistance Stewardship & Prescription Decision Support",
+    "Antibiotic Safety & Prescription Decision Support",
     margin,
     currentY
   );
@@ -110,25 +110,27 @@ export async function generatePrescriptionReportPdf(
         ? "APPROVED (Guideline Compliant)"
         : audit.status === "BLOCKED"
         ? "BLOCKED (Contraindication Detected)"
-        : "FLAGGED (Stewardship Review Required)";
+        : "FLAGGED (Clinical Review Needed)";
 
     const penalties = audit.penalties;
-    const penSummary = penalties
-      ? `Class: -${penalties.p_class || 0}  |  Duration: -${penalties.p_duration || 0}  |  Indication: -${penalties.p_indication || 0}`
-      : "None";
+    const flaggedItems: string[] = [];
+    if (penalties?.p_class) flaggedItems.push("Drug Class");
+    if (penalties?.p_duration) flaggedItems.push("Treatment Duration");
+    if (penalties?.p_indication) flaggedItems.push("Clinical Indication");
+    const reviewPoints = flaggedItems.length > 0 ? flaggedItems.join(", ") : "Standard Checks Passed";
 
     const auditSummaryData = [
       [
-        { content: "Audit Decision:", styles: { fontStyle: "bold" as const, textColor: textMuted } },
+        { content: "Safety Decision:", styles: { fontStyle: "bold" as const, textColor: textMuted } },
         { content: statusText, styles: { fontStyle: "bold" as const, textColor: textDark } },
-        { content: "Stewardship Score:", styles: { fontStyle: "bold" as const, textColor: textMuted } },
+        { content: "Safety Risk Score:", styles: { fontStyle: "bold" as const, textColor: textMuted } },
         { content: `${audit.score} / 100 (Band: ${audit.band})`, styles: { fontStyle: "bold" as const, textColor: textDark } },
       ],
       [
-        { content: "Evaluation Latency:", styles: { fontStyle: "bold" as const, textColor: textMuted } },
-        { content: `${audit.latency_ms} ms`, styles: { textColor: textDark } },
-        { content: "Penalties Breakdown:", styles: { fontStyle: "bold" as const, textColor: textMuted } },
-        { content: penSummary, styles: { textColor: textDark } },
+        { content: "Care Setting:", styles: { fontStyle: "bold" as const, textColor: textMuted } },
+        { content: prescriptionCase.patient.is_outpatient !== false ? "Outpatient (OPD)" : "Inpatient", styles: { textColor: textDark } },
+        { content: "Review Factors:", styles: { fontStyle: "bold" as const, textColor: textMuted } },
+        { content: reviewPoints, styles: { textColor: textDark } },
       ],
     ];
 
@@ -169,20 +171,20 @@ export async function generatePrescriptionReportPdf(
 
   const patientDetails = [
     [
+      { content: "Patient Name", styles: { fontStyle: "bold" as const } },
+      p.patientName || "—",
       { content: "Age / Sex", styles: { fontStyle: "bold" as const } },
       `${p.age || "—"} yrs / ${p.sex}`,
+    ],
+    [
       { content: "Pregnancy Status", styles: { fontStyle: "bold" as const } },
       p.pregnancyStatus || "Not recorded",
-    ],
-    [
       { content: "Renal Function", styles: { fontStyle: "bold" as const } },
       p.egfr ? `${p.egfr} mL/min (eGFR)` : "Normal / Not recorded",
-      { content: "Culture Report", styles: { fontStyle: "bold" as const } },
-      p.has_culture_report ? "Available" : "Empiric Care (No culture)",
     ],
     [
-      { content: "Canonical Syndrome", styles: { fontStyle: "bold" as const } },
-      p.canonical_syndrome || "Unspecified Syndrome",
+      { content: "Culture Report", styles: { fontStyle: "bold" as const } },
+      p.has_culture_report ? "Available" : "Empiric Care (No culture)",
       { content: "Known Allergies", styles: { fontStyle: "bold" as const } },
       p.allergies || "None reported",
     ],
@@ -289,7 +291,7 @@ export async function generatePrescriptionReportPdf(
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8.5);
   doc.setTextColor(...textDark);
-  doc.text("STEWARDSHIP AUDIT FINDINGS & GUIDELINE DIVERGENCES", margin, currentY);
+  doc.text("PRESCRIPTION SAFETY FINDINGS & RECOMMENDATIONS", margin, currentY);
   currentY += 2;
 
   if (!audit || audit.flags.length === 0) {
@@ -427,7 +429,7 @@ export async function generatePrescriptionReportPdf(
   doc.setFontSize(6.8);
   doc.setTextColor(...textSubtle);
   const disclaimer =
-    "NOTICE: This document is an algorithmic clinical decision support audit generated in accordance with ICMR Standard Treatment Guidelines and WHO AWaRe stewardship principles. It is intended for authorized healthcare providers to support clinical decision-making. Prescribing and diagnostic responsibility remains with the attending physician.";
+    "NOTICE: This document is an automated clinical decision support safety evaluation generated in accordance with ICMR Standard Treatment Guidelines and WHO AWaRe safety guidelines. It is intended for authorized healthcare providers to support clinical decision-making. Prescribing and diagnostic responsibility remains with the attending physician.";
   doc.text(doc.splitTextToSize(disclaimer, pageWidth - margin * 2), margin, currentY);
 
   currentY += 12;
@@ -460,7 +462,7 @@ export async function generatePrescriptionReportPdf(
     doc.line(margin, pageHeight - 8, pageWidth - margin, pageHeight - 8);
 
     doc.text(
-      `AMR Sentinel Clinical Audit • Case Ref: ${prescriptionCase.id} • Confidential Medical Record`,
+      `AMR Sentinel Prescription Safety Report • Case Ref: ${prescriptionCase.id} • Confidential Medical Record`,
       margin,
       pageHeight - 5
     );
@@ -473,7 +475,7 @@ export async function generatePrescriptionReportPdf(
   // -------------------------------------------------------------
   // 9. OUTPUT DISPATCH
   // -------------------------------------------------------------
-  const fileName = `AMR_Clinical_Audit_${prescriptionCase.id || "Case"}.pdf`;
+  const fileName = `AMR_Prescription_Safety_${prescriptionCase.id || "Case"}.pdf`;
 
   if (options.action === "download") {
     doc.save(fileName);

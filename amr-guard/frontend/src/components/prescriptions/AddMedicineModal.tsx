@@ -80,7 +80,7 @@ export function AddMedicineModal({ isOpen, onClose, onAdd }: AddMedicineModalPro
                 Add Prescribed Medication
               </DialogTitle>
               <DialogDescription className="text-[11px] text-slate-500">
-                Append an antimicrobial or supportive adjunct entity
+                Add an antibiotic or supportive medication to this prescription
               </DialogDescription>
             </div>
           </div>
