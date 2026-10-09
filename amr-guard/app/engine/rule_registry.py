@@ -1,0 +1,1 @@
+"""Stub: Rule registry."""

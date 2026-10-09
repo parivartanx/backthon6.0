@@ -1,0 +1,1 @@
+"""Stub: Indication agent."""
