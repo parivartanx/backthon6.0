@@ -510,11 +510,8 @@ export default function RemediationReviewPage() {
             <div className="flex items-center justify-between flex-wrap gap-2 border-b border-slate-100 pb-3">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-bold text-[#0D607B] tracking-wider uppercase bg-[#F1F8FC] border border-[#C9E9EB] px-2 py-0.5 rounded">
-                    Stage 7
-                  </span>
                   <h3 className="text-sm font-bold text-[#0D607B]">
-                    Final Audit Summary & Clinical Decision History
+                    Audit Summary & Clinical Decision History
                   </h3>
                 </div>
                 <p className="text-[11px] text-slate-500 mt-0.5">
