@@ -15,8 +15,12 @@ from app.core.config import settings
 def main():
     kb_path = os.path.join(os.path.dirname(__file__), "..", "app", "knowledge", "data_source")
     
-    # Configure Embedding
-    Settings.embed_model = OpenAIEmbedding(model="text-embedding-3-small", api_key=settings.OPENAI_API_KEY)
+    # Configure Embedding to route through OpenRouter using the OpenAI interface
+    Settings.embed_model = OpenAIEmbedding(
+        model="openai/text-embedding-3-small", 
+        api_key=settings.OPENROUTER_API_KEY,
+        api_base="https://openrouter.ai/api/v1"
+    )
     
     print(f"Reading documents from {kb_path}...")
     documents = SimpleDirectoryReader(input_dir=kb_path, required_exts=[".md"]).load_data()
