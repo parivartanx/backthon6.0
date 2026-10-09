@@ -15,6 +15,7 @@ from app.core.config import settings
 from app.schemas.orchestrator import ContextBundle
 from app.schemas.remediation import RemediationRequest, RemediationResponse, RemediationOption
 from app.agents.tools import TOOL_DEFINITIONS, TOOL_REGISTRY
+from app.agents.prompts import PromptFactory
 
 # ---------------------------------------------------------------------------
 # 1. State Definition
@@ -134,17 +135,13 @@ def format_node(state: ReActAgentState) -> Dict[str, Any]:
         api_key=settings.OPENROUTER_API_KEY,
     )
 
-    prompt = f"""
-    Based on all retrieved guidelines, database regimens, drug profiles, and surveillance data:
-    Synthesize the final clinical recommendation for this query:
-    "{state['clinical_query']}"
-
-    Respond STRICTLY in JSON matching this schema:
-    {target_schema.model_json_schema()}
-    """
+    synthesis_prompt = PromptFactory.create_synthesis_prompt(
+        clinical_query=state["clinical_query"],
+        target_schema=target_schema,
+    )
 
     formatting_messages = list(state["messages"])
-    formatting_messages.append({"role": "user", "content": prompt})
+    formatting_messages.append({"role": "user", "content": synthesis_prompt.user_content()})
 
     try:
         response = client.chat.completions.create(
@@ -202,18 +199,11 @@ def run_verification_orchestrator(clinical_scenario: str) -> ContextBundle:
     Execute ReAct Orchestrator to investigate an unstructured clinical scenario
     and return a structured ContextBundle.
     """
-    system_prompt = (
-        "You are an AMR Verification Agent. Use your available tools (search_amr_guidelines, "
-        "get_database_regimens, get_drug_monograph, get_pathogen_resistance_data) to verify "
-        "whether the prescribed antimicrobials violate clinical guidelines, contraindications, or local resistance patterns."
-    )
+    prompt_strategy = PromptFactory.create_verification_prompt(clinical_scenario)
     initial_state: ReActAgentState = {
         "task_type": "verification",
         "clinical_query": clinical_scenario,
-        "messages": [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": f"Audit this clinical scenario:\n\n{clinical_scenario}"}
-        ],
+        "messages": prompt_strategy.build_messages(),
         "tool_iterations": 0,
         "final_output": ""
     }
@@ -244,32 +234,17 @@ def run_remediation_orchestrator(request: RemediationRequest) -> Optional[Remedi
     flagged = request.flagged_drug or "None"
     pt_desc = f"Age: {request.patient.age_years if request.patient else 'Unknown'}, Pregnant: {request.patient.is_pregnant if request.patient else False}, eGFR: {request.patient.egfr if request.patient else 'Normal'}"
 
-    system_prompt = (
-        "You are an Antimicrobial Stewardship Remediation Agent. Your goal is to provide evidence-based "
-        "de-escalation recommendations and first-line Access regimens for clinicians.\n"
-        "You have tools to:\n"
-        "1. get_database_regimens: Look up officially approved regimens for this condition.\n"
-        "2. search_amr_guidelines: Find ICMR/WHO guideline texts with RRF re-ranking.\n"
-        "3. get_drug_monograph: Check drug safety, pediatric limits, and pregnancy categories.\n"
-        "4. get_pathogen_resistance_data: Avoid empirical drugs with high resistance rates.\n"
-        "Call the appropriate tools before providing your final structured recommendation."
+    prompt_strategy = PromptFactory.create_remediation_prompt(
+        syndrome=syndrome,
+        flagged_drug=flagged,
+        patient_profile=pt_desc,
     )
-
-    user_query = (
-        f"Generate safe stewardship remediation for:\n"
-        f" - Syndrome: {syndrome}\n"
-        f" - Flagged Drug to Replace: {flagged}\n"
-        f" - Patient Profile: {pt_desc}\n"
-        f"Find the standard ICMR/WHO first-line Access regimen and safe alternatives."
-    )
+    user_query = prompt_strategy.user_content()
 
     initial_state: ReActAgentState = {
         "task_type": "remediation",
         "clinical_query": user_query,
-        "messages": [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_query}
-        ],
+        "messages": prompt_strategy.build_messages(),
         "tool_iterations": 0,
         "final_output": ""
     }
