@@ -162,3 +162,22 @@ body {
 [data-slot="select-content"] {
   box-shadow: 0 12px 28px -4px rgba(13, 96, 123, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.08) !important;
 }
+
+/* Print Styles: Hide sidebars, navigation headers, footers and action buttons */
+@media print {
+  aside,
+  nav,
+  header,
+  footer,
+  .no-print,
+  button:not(.allow-print) {
+    display: none !important;
+  }
+
+  body, main {
+    background: white !important;
+    color: black !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+}
