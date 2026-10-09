@@ -20,7 +20,14 @@ from app.engine.constraints import (
     PREGNANCY_CONTRAINDICATED_DRUGS,
     VIRAL_SELF_LIMITING_SYNDROMES,
     SYNDROMES_WITH_ACCESS_FIRST_LINE,
+    is_penicillin_drug,
+    is_cephalosporin_drug,
+    is_carbapenem_drug,
+    is_sulfa_drug,
+    is_macrolide_drug,
+    PEDIATRIC_DAILY_DOSE_CEILINGS_MG_KG,
 )
+
 
 
 # ---------------------------------------------------------------------------
@@ -217,6 +224,194 @@ def check_nephrotoxic_renal_safety(
             )
 
     return None
+
+
+# [PATTERN: Specification] — Tier 1 & Tier 2 Drug Allergy Safety Verification
+def check_drug_allergy_contraindications(
+    patient: PatientContext,
+    line: PrescriptionLine
+) -> Optional[RuleViolation]:
+    """
+    Tier 1 / Tier 2 Drug Allergy Safety Gate.
+    Verifies documented patient allergies against prescribed antimicrobials:
+    - Tier 1 Hard Stop (BLOCKED, 100.0): Direct drug match or core class match (e.g. Penicillin allergy + Amoxicillin, Sulfa allergy + Co-trimoxazole).
+    - Tier 2 Alert (HIGH, 60.0): Beta-lactam cross-reactivity warning (Penicillin allergy + Cephalosporin / Carbapenem).
+    """
+    if not patient.allergies:
+        return None
+
+    norm_allergies = normalize_text(patient.allergies)
+    if not norm_allergies:
+        return None
+
+    # Check for negative allergy declarations (e.g., NKDA, none, nil, no known drug allergies)
+    negations = [
+        "nkda", "none", "nil", "n/a", "na", "no allergies", "no allergy",
+        "no known drug allergies", "no known allergies", "no known drug allergy"
+    ]
+    if norm_allergies in negations:
+        return None
+    if ("nkda" in norm_allergies or "no known" in norm_allergies) and not any(
+        kw in norm_allergies for kw in ["except", "but", "penicillin", "sulfa", "amox", "cipro", "cefixime"]
+    ):
+        return None
+
+    drug_name = line.canonical_drug
+    norm_drug = normalize_text(drug_name)
+
+    is_penicillin_allergic = any(
+        kw in norm_allergies for kw in ["penicillin", "amoxicillin", "ampicillin", "augmentin", "amox", "cloxacillin"]
+    )
+    is_sulfa_allergic = any(
+        kw in norm_allergies for kw in ["sulfa", "sulfonamide", "cotrimoxazole", "co-trimoxazole", "bactrim", "septra", "sulfamethoxazole"]
+    )
+    is_fq_allergic = any(
+        kw in norm_allergies for kw in ["fluoroquinolone", "quinolone", "ciprofloxacin", "cipro", "levofloxacin", "levo", "ofloxacin", "moxifloxacin", "norfloxacin"]
+    )
+    is_macrolide_allergic = any(
+        kw in norm_allergies for kw in ["macrolide", "azithromycin", "clarithromycin", "erythromycin", "roxithromycin"]
+    )
+    is_cephalosporin_allergic = any(
+        kw in norm_allergies for kw in ["cephalosporin", "cefixime", "ceftriaxone", "cefuroxime", "cefpodoxime", "cefalexin", "cephalexin", "cefazolin"]
+    )
+
+    # 1. Tier 1 Direct Class Match: Penicillin
+    if is_penicillin_allergic and is_penicillin_drug(norm_drug):
+        return RuleViolation(
+            tier=1,
+            rule_id="TIER1_DRUG_ALLERGY_CONTRAINDICATION",
+            rule_name="Documented Drug Allergy Hard Stop",
+            severity="BLOCKED",
+            drug=drug_name,
+            penalty_type="contraindication",
+            penalty_score=100.0,
+            rationale=(
+                f"Patient has documented Penicillin allergy ('{patient.allergies}'). Prescribing {drug_name} "
+                "poses life-threatening risk of acute type I IgE-mediated anaphylaxis, bronchospasm, and angioedema."
+            ),
+            remediation=(
+                f"Immediately discontinue {drug_name}. Switch to a non-cross-reacting alternative antimicrobial class "
+                "(e.g., Macrolide, Fluoroquinolone, or Doxycycline if clinically indicated)."
+            ),
+            citation="FDA Penicillin Monograph & British National Formulary (BNF) Allergy Guidelines"
+        )
+
+    # 2. Tier 1 Direct Class Match: Sulfa / Sulfonamide
+    if is_sulfa_allergic and is_sulfa_drug(norm_drug):
+        return RuleViolation(
+            tier=1,
+            rule_id="TIER1_DRUG_ALLERGY_CONTRAINDICATION",
+            rule_name="Documented Drug Allergy Hard Stop",
+            severity="BLOCKED",
+            drug=drug_name,
+            penalty_type="contraindication",
+            penalty_score=100.0,
+            rationale=(
+                f"Patient has documented Sulfa/Sulfonamide allergy ('{patient.allergies}'). Prescribing {drug_name} "
+                "poses high risk of severe hypersensitivity, Stevens-Johnson Syndrome (SJS), and toxic epidermal necrolysis (TEN)."
+            ),
+            remediation=(
+                f"Immediately discontinue {drug_name}. Substitute with non-sulfonamide antimicrobial according to susceptibility."
+            ),
+            citation="FDA Sulfonamide Monograph & ICMR Antimicrobial Guidelines"
+        )
+
+    # 3. Tier 1 Direct Class Match: Fluoroquinolone
+    if is_fq_allergic and is_fluoroquinolone(norm_drug):
+        return RuleViolation(
+            tier=1,
+            rule_id="TIER1_DRUG_ALLERGY_CONTRAINDICATION",
+            rule_name="Documented Drug Allergy Hard Stop",
+            severity="BLOCKED",
+            drug=drug_name,
+            penalty_type="contraindication",
+            penalty_score=100.0,
+            rationale=(
+                f"Patient has documented Fluoroquinolone allergy ('{patient.allergies}'). Prescribing {drug_name} "
+                "is strictly contraindicated due to severe hypersensitivity risk."
+            ),
+            remediation=f"Immediately discontinue {drug_name}. Select an alternative non-quinolone agent.",
+            citation="FDA Fluoroquinolone Monograph & Clinical Practice Guidelines"
+        )
+
+    # 4. Tier 1 Direct Class Match: Macrolide
+    if is_macrolide_allergic and is_macrolide_drug(norm_drug):
+        return RuleViolation(
+            tier=1,
+            rule_id="TIER1_DRUG_ALLERGY_CONTRAINDICATION",
+            rule_name="Documented Drug Allergy Hard Stop",
+            severity="BLOCKED",
+            drug=drug_name,
+            penalty_type="contraindication",
+            penalty_score=100.0,
+            rationale=(
+                f"Patient has documented Macrolide allergy ('{patient.allergies}'). Prescribing {drug_name} "
+                "is strictly contraindicated due to acute macrolide hypersensitivity."
+            ),
+            remediation=f"Immediately discontinue {drug_name}. Select an alternative non-macrolide agent.",
+            citation="FDA Macrolide Monograph & Clinical Safety Guidelines"
+        )
+
+    # 5. Tier 1 Direct Class Match: Cephalosporin
+    if is_cephalosporin_allergic and is_cephalosporin_drug(norm_drug):
+        return RuleViolation(
+            tier=1,
+            rule_id="TIER1_DRUG_ALLERGY_CONTRAINDICATION",
+            rule_name="Documented Drug Allergy Hard Stop",
+            severity="BLOCKED",
+            drug=drug_name,
+            penalty_type="contraindication",
+            penalty_score=100.0,
+            rationale=(
+                f"Patient has documented Cephalosporin allergy ('{patient.allergies}'). Prescribing {drug_name} "
+                "poses acute risk of severe allergic reaction and anaphylaxis."
+            ),
+            remediation=f"Immediately discontinue {drug_name}. Select an alternative non-cephalosporin agent.",
+            citation="FDA Cephalosporin Monograph & BNF Guidelines"
+        )
+
+    # 6. Tier 1 Exact Drug Name Match
+    if norm_drug in norm_allergies and len(norm_drug) >= 4:
+        return RuleViolation(
+            tier=1,
+            rule_id="TIER1_DRUG_ALLERGY_CONTRAINDICATION",
+            rule_name="Documented Drug Allergy Hard Stop",
+            severity="BLOCKED",
+            drug=drug_name,
+            penalty_type="contraindication",
+            penalty_score=100.0,
+            rationale=(
+                f"Patient has documented direct allergy to {drug_name} ('{patient.allergies}'). "
+                f"Prescribing {drug_name} is strictly contraindicated."
+            ),
+            remediation=f"Immediately discontinue {drug_name}. Select an alternative antimicrobial class.",
+            citation="FDA Monograph & Clinical Pharmacotherapy Safety Standards"
+        )
+
+    # 7. Tier 2 Beta-Lactam Cross-Reactivity Alert (Penicillin allergy -> Cephalosporin / Carbapenem)
+    if is_penicillin_allergic and (is_cephalosporin_drug(norm_drug) or is_carbapenem_drug(norm_drug)):
+        drug_class = "Cephalosporin" if is_cephalosporin_drug(norm_drug) else "Carbapenem"
+        return RuleViolation(
+            tier=2,
+            rule_id="TIER2_ALLERGY_CROSS_REACTIVITY_WARNING",
+            rule_name="Beta-Lactam Allergy Cross-Reactivity Warning",
+            severity="HIGH",
+            drug=drug_name,
+            penalty_type="contraindication",
+            penalty_score=60.0,
+            rationale=(
+                f"Patient has documented Penicillin allergy ('{patient.allergies}'). {drug_name} is a {drug_class} "
+                "with shared beta-lactam core structure posing 1-2% cross-reactivity risk. Exercise high caution."
+            ),
+            remediation=(
+                f"Assess severity of prior penicillin reaction. In cases of prior severe IgE-mediated anaphylaxis, "
+                f"avoid all {drug_class}s. If reaction was a mild delayed maculopapular rash, {drug_name} may be administered with close clinical observation."
+            ),
+            citation="British National Formulary (BNF) & Joint Task Force on Practice Parameters (JTFPP) Beta-Lactam Allergy Guidance"
+        )
+
+    return None
+
 
 
 # ---------------------------------------------------------------------------
