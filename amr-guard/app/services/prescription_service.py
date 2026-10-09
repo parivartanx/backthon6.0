@@ -140,7 +140,10 @@ def _audit_and_persist(case: PrescriptionCase, db: Optional[Session] = None) -> 
         age_years=age_val,
         sex="F" if "fem" in p.sex.lower() else "M",
         is_pregnant=is_preg,
+        weight_kg=p.weight_kg,
         egfr=egfr_val,
+        allergies=p.allergies or "NKDA",
+        medical_history=p.medicalHistory or None,
         diagnosis_text=p.suspectedDiagnosis or p.symptoms or None,
     )
 
@@ -158,11 +161,18 @@ def _audit_and_persist(case: PrescriptionCase, db: Optional[Session] = None) -> 
                 brand=m.brandName or None,
                 generic=m.genericName or None,
                 strength=m.strength or None,
+                route=m.route or None,
                 frequency=m.frequency or None,
                 duration_days=dur,
                 aware_tier=m.aware_tier or None,
                 drug_class=m.drug_class or None,
                 is_fdc=m.is_fdc or False,
+                is_nephrotoxic=m.is_nephrotoxic or False,
+                requires_egfr=m.requires_egfr or False,
+                min_egfr_safe=m.min_egfr_safe or 30.0,
+                is_geriatric_contraindicated=m.is_geriatric_contraindicated or False,
+                requires_tdm=m.requires_tdm or False,
+                outpatient_iv_restricted=m.outpatient_iv_restricted or False,
             )
         )
 
