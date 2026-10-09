@@ -486,7 +486,7 @@ export default function RemediationReviewPage() {
         )}
 
         {/* STAGE 6: DEDICATED REMEDIATION PANEL */}
-        <Card className="bg-white border-slate-200/90 shadow-2xs p-6">
+        <Card className="bg-white border-slate-200/90 shadow-2xs p-3.5 sm:p-4">
           <RemediationPanel
             options={displayOptions}
             flags={auditRes?.flags || []}
