@@ -7,9 +7,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
-  title: "AMR-Guard — Clinical Prescription Intelligence",
+  title: "AMR Sentinel — Clinical Antimicrobial Intelligence",
   description:
-    "Antimicrobial resistance prescription auditing and clinical decision support for OPD healthcare professionals.",
+    "Antimicrobial Resistance Surveillance & Five-Tier Clinical Decision Support System based on ICMR STG and WHO AWaRe Framework.",
 };
 
 export default function RootLayout({
