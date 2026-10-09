@@ -128,6 +128,8 @@ class NormalizedDrug(BaseModel):
     is_geriatric_contraindicated: bool = False
     requires_tdm: bool = False
     outpatient_iv_restricted: bool = False
+    usage: Optional[str] = None
+    side_effects: Optional[str] = None
 
 
 class DrugNormalizerAgent:
@@ -183,6 +185,8 @@ class DrugNormalizerAgent:
                     drug.is_geriatric_contraindicated = bool(db_drug.is_geriatric_contraindicated)
                     drug.requires_tdm = bool(db_drug.requires_tdm)
                     drug.outpatient_iv_restricted = bool(db_drug.outpatient_iv_restricted)
+                    drug.usage = db_drug.usage
+                    drug.side_effects = db_drug.side_effects
                     if db_drug.aware_class:
                         drug.aware_tier = db_drug.aware_class
                     return drug

@@ -22,6 +22,8 @@ def seed_database():
                 ("is_geriatric_contraindicated", "BOOLEAN DEFAULT FALSE"),
                 ("requires_tdm", "BOOLEAN DEFAULT FALSE"),
                 ("outpatient_iv_restricted", "BOOLEAN DEFAULT FALSE"),
+                ("usage", "TEXT"),
+                ("side_effects", "TEXT"),
             ]
             for col_name, col_type in new_cols:
                 try:
@@ -90,6 +92,8 @@ def seed_database():
                         existing.is_geriatric_contraindicated = row.get("is_geriatric_contraindicated", "False").lower() == "true"
                         existing.requires_tdm = row.get("requires_tdm", "False").lower() == "true"
                         existing.outpatient_iv_restricted = row.get("outpatient_iv_restricted", "False").lower() == "true"
+                        existing.usage = row.get("usage")
+                        existing.side_effects = row.get("side_effects")
                     else:
                         db.add(Drug(
                             id=d_id,
@@ -106,6 +110,8 @@ def seed_database():
                             is_geriatric_contraindicated=row.get("is_geriatric_contraindicated", "False").lower() == "true",
                             requires_tdm=row.get("requires_tdm", "False").lower() == "true",
                             outpatient_iv_restricted=row.get("outpatient_iv_restricted", "False").lower() == "true",
+                            usage=row.get("usage"),
+                            side_effects=row.get("side_effects"),
                         ))
                     count_drugs += 1
             db.commit()

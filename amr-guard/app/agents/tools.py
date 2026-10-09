@@ -184,6 +184,14 @@ def get_drug_monograph(drug_name: str) -> str:
             "min_age_years": min_age,
             "pediatric_safe": min_age < 18.0,
             "pregnancy_contraindicated": preg_contra,
+            "is_nephrotoxic": bool(drug.is_nephrotoxic) if drug else False,
+            "requires_egfr": bool(drug.requires_egfr) if drug else False,
+            "min_egfr_safe": float(drug.min_egfr_safe or 30.0) if drug else 30.0,
+            "is_geriatric_contraindicated": bool(drug.is_geriatric_contraindicated) if drug else False,
+            "requires_tdm": bool(drug.requires_tdm) if drug else False,
+            "outpatient_iv_restricted": bool(drug.outpatient_iv_restricted) if drug else False,
+            "fda_approved_usage": drug.usage if drug and drug.usage else "Standard clinical indications per susceptibility.",
+            "fda_side_effects_and_warnings": drug.side_effects if drug and drug.side_effects else "Standard adverse drug events.",
             "regulatory_status": "Not Recommended / Banned FDC" if is_fdc else "Approved Single Agent"
         }
 

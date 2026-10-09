@@ -21,6 +21,8 @@ class Drug(Base):
     is_geriatric_contraindicated = Column(Boolean, default=False)
     requires_tdm = Column(Boolean, default=False)
     outpatient_iv_restricted = Column(Boolean, default=False)
+    usage = Column(Text, nullable=True)
+    side_effects = Column(Text, nullable=True)
 
 class Brand(Base):
     __tablename__ = "brands"

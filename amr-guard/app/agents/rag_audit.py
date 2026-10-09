@@ -102,7 +102,8 @@ def audit_prescription_rag_first(
             "3. Tier 3 AWaRe Spectrum: Outpatient empirical Watch-group drugs when Access alternatives exist (Class penalty: 45.0); "
             "Reserve drugs without positive microbiology (Class penalty: 85.0).\n"
             "4. Tier 4 Duration: Mild CAP > 5 days or cystitis > 5 days (Duration penalty).\n"
-            "5. Tier 5 Resistance: Empirical Fluoroquinolones in UTI (>75% local E. coli resistance).\n\n"
+            "5. Tier 5 Resistance: Empirical Fluoroquinolones in UTI (>75% local E. coli resistance).\n"
+            "6. FDA Indications & Boxed Warnings: Cross-reference prescribed antimicrobials against their FDA-approved usage and serious adverse reaction/boxed warning profiles in the drug monograph. Flag any agent contraindicated for the diagnosis (e.g. Daptomycin in pulmonary infections) or whose boxed warnings conflict with patient comorbidities (e.g. Ciprofloxacin in Myasthenia Gravis or arrhythmia).\n\n"
             "You MUST respond strictly in valid JSON matching this schema:\n"
             "{\n"
             '  "status": "APPROVED" | "FLAGGED" | "BLOCKED",\n'
