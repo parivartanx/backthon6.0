@@ -322,18 +322,13 @@ export function RemediationPanel({
               </div>
 
               {/* Clinical Explanation in Plain Language */}
-              <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-200/80 space-y-1">
+              <div className="p-2.5 bg-slate-50/80 rounded-xl border border-slate-200/80 space-y-1">
                 <span className="text-[10px] font-bold text-[#0D607B] uppercase tracking-wider block">
-                  Why this change is advised:
+                  Clinical Rationale:
                 </span>
-                <p className="text-xs text-slate-700 leading-relaxed font-medium">
-                  {opt.guidance}
+                <p className="text-xs text-slate-700 leading-normal font-medium">
+                  {opt.guidance || matchingFlag?.rationale}
                 </p>
-                {matchingFlag?.rationale && matchingFlag.rationale !== opt.guidance && (
-                  <p className="text-[11px] text-slate-500 leading-relaxed pt-0.5">
-                    {matchingFlag.rationale}
-                  </p>
-                )}
               </div>
 
               {/* Doctor Actions Toolbar */}
