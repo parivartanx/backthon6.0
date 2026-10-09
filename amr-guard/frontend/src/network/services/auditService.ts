@@ -1,7 +1,8 @@
-// [SOLID: SRP] Five-Tier Verification Audit Service
+// [SOLID: SRP & Resilience] Five-Tier Verification Audit Service with Seamless Engine Fallback
 import { apiClient } from "../client";
 import { ENDPOINTS } from "../endpoints";
 import { PrescriptionCase, AuditResult } from "@/types/prescription";
+import { auditPrescription as localAuditPrescription } from "@/lib/api";
 
 function parseDurationDays(durationText?: string): number {
   if (!durationText) return 5;
@@ -43,6 +44,18 @@ export async function submitPrescriptionAudit(
     is_outpatient: caseData.patient.is_outpatient ?? true,
   };
 
-  const response = await apiClient.post<AuditResult>(ENDPOINTS.AUDIT, payload);
-  return response.data;
+  try {
+    const response = await apiClient.post<AuditResult>(ENDPOINTS.AUDIT, payload);
+    if (response.data && typeof response.data.score === "number") {
+      return response.data;
+    }
+  } catch (networkError) {
+    console.warn(
+      "Live API audit endpoint unavailable or offline. Falling back to deterministic rule engine:",
+      networkError
+    );
+  }
+
+  // Seamless fallback to deterministic 5-Tier Rule Engine
+  return await localAuditPrescription(caseData);
 }

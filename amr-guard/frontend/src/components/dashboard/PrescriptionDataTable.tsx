@@ -307,26 +307,26 @@ export function PrescriptionDataTable({ data }: PrescriptionDataTableProps) {
                       {auditStatus === "APPROVED" ? (
                         <Badge
                           variant="outline"
-                          className="bg-emerald-50 text-emerald-800 border-emerald-300 gap-1 text-[10px] font-semibold py-0.5 px-2"
+                          className="bg-[#E2FAD9] text-[#0d5c36] border-[#169781]/30 gap-1 text-[10px] font-semibold py-0.5 px-2 rounded-full shadow-2xs"
                         >
-                          <ShieldCheck className="w-3 h-3 text-emerald-600 shrink-0" />
-                          <span>Approved</span>
+                          <ShieldCheck className="w-3 h-3 text-[#169781] shrink-0" />
+                          <span>Safe &amp; Approved</span>
                         </Badge>
                       ) : auditStatus === "BLOCKED" ? (
                         <Badge
                           variant="outline"
-                          className="bg-rose-50 text-rose-800 border-rose-300 gap-1 text-[10px] font-semibold py-0.5 px-2"
+                          className="bg-rose-50 text-rose-700 border-rose-300 gap-1 text-[10px] font-semibold py-0.5 px-2 rounded-full shadow-2xs"
                         >
                           <ShieldAlert className="w-3 h-3 text-rose-600 shrink-0" />
-                          <span>High Risk</span>
+                          <span>High Risk (Blocked)</span>
                         </Badge>
                       ) : auditStatus === "FLAGGED" ? (
                         <Badge
                           variant="outline"
-                          className="bg-amber-50 text-amber-800 border-amber-300 gap-1 text-[10px] font-semibold py-0.5 px-2"
+                          className="bg-amber-50 text-amber-800 border-amber-300 gap-1 text-[10px] font-semibold py-0.5 px-2 rounded-full shadow-2xs"
                         >
                           <AlertTriangle className="w-3 h-3 text-amber-600 shrink-0" />
-                          <span>Review</span>
+                          <span>Needs Review</span>
                         </Badge>
                       ) : item.workflowStatus === "Needs Verification" ? (
                         <Badge

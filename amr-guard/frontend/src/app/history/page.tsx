@@ -133,6 +133,7 @@ export default function AuditHistoryPage() {
     const headers = [
       "Prescription ID",
       "Date",
+      "Patient Name",
       "Patient Age",
       "Patient Sex",
       "Diagnosis",
@@ -146,12 +147,18 @@ export default function AuditHistoryPage() {
     const rows = filteredCases.map((c) => [
       c.id,
       formatPrescriptionDate(c.createdAt),
+      `"${c.patient.patientName || 'Outpatient'}"`,
       c.patient.age || "N/A",
       c.patient.sex,
       `"${c.patient.suspectedDiagnosis || 'General OPD'}"`,
       c.medicines.length,
       `"${c.medicines.map((m) => `${m.brandName} (${m.genericName})`).join("; ")}"`,
-      c.auditResult?.score ?? 85,
+      (() => {
+        const isBlk = c.auditResult?.status === "BLOCKED";
+        const isFlg = c.auditResult?.status === "FLAGGED";
+        const raw = c.auditResult?.score ?? 0;
+        return isBlk ? 0 : isFlg ? Math.max(10, 100 - raw) : Math.max(80, 100 - raw);
+      })(),
       c.auditResult?.status === "BLOCKED" 
         ? "High Risk (Blocked)" 
         : c.auditResult?.status === "FLAGGED" 
@@ -347,13 +354,13 @@ export default function AuditHistoryPage() {
             <table className="w-full text-left text-xs table-fixed">
               <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider text-[10px]">
                 <tr>
-                  <th className="py-3 px-4 w-[160px]">Prescription ID</th>
-                  <th className="py-3 px-4 w-[140px]">Patient</th>
-                  <th className="py-3 px-4 w-[210px]">Diagnosis</th>
-                  <th className="py-3 px-4 w-[220px]">Medicines</th>
-                  <th className="py-3 px-4 w-[140px] text-center">Safety Score</th>
-                  <th className="py-3 px-4 w-[150px]">Review Status</th>
-                  <th className="py-3 px-4 w-[110px] text-right">Actions</th>
+                  <th className="py-3 px-4 w-[140px]">Prescription ID</th>
+                  <th className="py-3 px-4 w-[160px]">Patient</th>
+                  <th className="py-3 px-4 w-[200px]">Diagnosis</th>
+                  <th className="py-3 px-4 w-[210px]">Medicines</th>
+                  <th className="py-3 px-4 w-[130px] text-center">Safety Score</th>
+                  <th className="py-3 px-4 w-[160px]">Review Status</th>
+                  <th className="py-3 px-4 w-[100px] text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -372,8 +379,17 @@ export default function AuditHistoryPage() {
                 ) : (
                   paginatedCases.map((c) => {
                     const status = c.auditResult?.status || "APPROVED";
-                    const score = c.auditResult?.score ?? 85;
                     const alertCount = c.auditResult?.flags?.length ?? 0;
+                    const isBlocked = status === "BLOCKED";
+                    const isFlagged = status === "FLAGGED";
+                    const rawScore = c.auditResult?.score ?? (isBlocked ? 100 : isFlagged ? 50 : 15);
+                    
+                    // True Clinical Safety Score: 0/100 for Blocked, 85-100 for Approved
+                    const safetyScore = isBlocked 
+                      ? 0 
+                      : isFlagged 
+                      ? Math.max(10, Math.min(70, Math.round(100 - rawScore))) 
+                      : Math.max(80, Math.min(100, Math.round(100 - rawScore)));
 
                     // Clean, non-overflowing medicine summary
                     const medCount = c.medicines.length;
@@ -401,15 +417,19 @@ export default function AuditHistoryPage() {
 
                         {/* 2. Patient Profile */}
                         <td className="py-2.5 px-4 truncate">
-                          <span className="font-semibold text-slate-800 text-xs block truncate">
-                            {c.patient.age ? `${c.patient.age}y` : "—"} • {c.patient.sex}
+                          <span 
+                            className="font-bold text-slate-900 text-xs block truncate"
+                            title={c.patient.patientName?.trim() || "Outpatient Patient"}
+                          >
+                            {c.patient.patientName?.trim() || "Outpatient Patient"}
                           </span>
-                          <span className="text-[10px] text-slate-400 block truncate">
+                          <span className="text-[10px] text-slate-500 block truncate">
+                            {c.patient.age ? `${c.patient.age}y` : "Age N/A"} • {c.patient.sex || "Patient"}
                             {c.patient.pregnancyStatus && c.patient.pregnancyStatus !== "Not applicable"
-                              ? c.patient.pregnancyStatus
+                              ? ` • ${c.patient.pregnancyStatus}`
                               : c.patient.egfr
-                              ? `eGFR: ${c.patient.egfr}`
-                              : "Outpatient"}
+                              ? ` • eGFR: ${c.patient.egfr}`
+                              : ""}
                           </span>
                         </td>
 
@@ -435,37 +455,37 @@ export default function AuditHistoryPage() {
                           </div>
                         </td>
 
-                        {/* 5. Safety Score */}
+                        {/* 5. Safety Score (Harmonious with status: 0 for Blocked, Green for Approved) */}
                         <td className="py-2.5 px-4 text-center">
                           <span
-                            className={`inline-flex items-center justify-center font-bold px-2.5 py-0.5 rounded-md text-xs font-mono ${
-                              score >= 80
-                                ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
-                                : score >= 50
-                                ? "bg-amber-50 text-amber-800 border border-amber-200"
-                                : "bg-rose-50 text-rose-800 border border-rose-200"
+                            className={`inline-flex items-center justify-center font-bold px-2.5 py-0.5 rounded-full text-xs font-mono border ${
+                              safetyScore >= 80
+                                ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                                : safetyScore >= 40
+                                ? "bg-amber-50 text-amber-800 border-amber-200"
+                                : "bg-rose-50 text-rose-800 border-rose-200"
                             }`}
                           >
-                            {score.toFixed(0)} / 100
+                            {safetyScore} / 100
                           </span>
                         </td>
 
-                        {/* 6. Friendly Review Status */}
+                        {/* 6. Friendly Review Status Badge */}
                         <td className="py-2.5 px-4 truncate">
-                          {status === "BLOCKED" ? (
-                            <Badge variant="destructive" className="gap-1 text-[11px] px-2 py-0.5 font-semibold bg-rose-600 text-white">
-                              <ShieldAlert className="w-3 h-3 shrink-0" />
-                              <span>High Risk</span>
+                          {isBlocked ? (
+                            <Badge variant="outline" className="gap-1.5 text-[11px] px-2.5 py-0.5 font-semibold bg-rose-50 text-rose-700 border-rose-300 rounded-full shadow-2xs">
+                              <ShieldAlert className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                              <span>High Risk (Blocked)</span>
                             </Badge>
-                          ) : status === "FLAGGED" ? (
-                            <Badge variant="outline" className="gap-1 text-[11px] px-2 py-0.5 bg-amber-50 text-amber-800 border-amber-300 font-semibold">
-                              <AlertTriangle className="w-3 h-3 text-amber-600 shrink-0" />
+                          ) : isFlagged ? (
+                            <Badge variant="outline" className="gap-1.5 text-[11px] px-2.5 py-0.5 bg-amber-50 text-amber-800 border-amber-300 rounded-full font-semibold shadow-2xs">
+                              <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
                               <span>Needs Review {alertCount > 0 ? `(${alertCount})` : ""}</span>
                             </Badge>
                           ) : (
-                            <Badge variant="outline" className="gap-1 text-[11px] px-2 py-0.5 bg-[#E2FAD9] text-[#0d5c36] border-[#169781]/30 font-semibold">
-                              <ShieldCheck className="w-3 h-3 text-[#169781] shrink-0" />
-                              <span>Safe</span>
+                            <Badge variant="outline" className="gap-1.5 text-[11px] px-2.5 py-0.5 bg-[#E2FAD9] text-[#0d5c36] border-[#169781]/30 rounded-full font-semibold shadow-2xs">
+                              <ShieldCheck className="w-3.5 h-3.5 text-[#169781] shrink-0" />
+                              <span>Safe &amp; Approved</span>
                             </Badge>
                           )}
                         </td>
@@ -643,23 +663,42 @@ export default function AuditHistoryPage() {
               </div>
 
               {/* Safety Result */}
-              <div className="p-3 rounded-xl border flex items-center justify-between">
-                <div>
-                  <span className="text-[11px] text-slate-500 block">Guideline Evaluation</span>
-                  <span className="font-bold text-xs text-slate-800">
-                    Safety Score: {quickViewCase.auditResult?.score ?? 85}/100
-                  </span>
-                </div>
-                <div>
-                  {quickViewCase.auditResult?.status === "BLOCKED" ? (
-                    <Badge variant="destructive" className="text-[11px]">High Risk</Badge>
-                  ) : quickViewCase.auditResult?.status === "FLAGGED" ? (
-                    <Badge variant="outline" className="text-[11px] bg-amber-50 text-amber-800 border-amber-300">Needs Review</Badge>
-                  ) : (
-                    <Badge variant="outline" className="text-[11px] bg-emerald-50 text-emerald-800 border-emerald-300">Safe</Badge>
-                  )}
-                </div>
-              </div>
+              {(() => {
+                const qStatus = quickViewCase.auditResult?.status || "APPROVED";
+                const qIsBlocked = qStatus === "BLOCKED";
+                const qIsFlagged = qStatus === "FLAGGED";
+                const qRaw = quickViewCase.auditResult?.score ?? 0;
+                const qScore = qIsBlocked ? 0 : qIsFlagged ? Math.max(10, Math.min(70, Math.round(100 - qRaw))) : Math.max(80, Math.min(100, Math.round(100 - qRaw)));
+
+                return (
+                  <div className="p-3 rounded-xl border border-slate-200 flex items-center justify-between">
+                    <div>
+                      <span className="text-[11px] text-slate-500 block">Guideline Evaluation</span>
+                      <span className="font-bold text-xs text-slate-800">
+                        Safety Score: <span className={qScore >= 80 ? "text-emerald-700" : qScore >= 40 ? "text-amber-700" : "text-rose-700"}>{qScore}/100</span>
+                      </span>
+                    </div>
+                    <div>
+                      {qIsBlocked ? (
+                        <Badge variant="outline" className="text-[11px] bg-rose-50 text-rose-700 border-rose-300 font-semibold gap-1 rounded-full">
+                          <ShieldAlert className="w-3 h-3 text-rose-600" />
+                          <span>High Risk (Blocked)</span>
+                        </Badge>
+                      ) : qIsFlagged ? (
+                        <Badge variant="outline" className="text-[11px] bg-amber-50 text-amber-800 border-amber-300 font-semibold gap-1 rounded-full">
+                          <AlertTriangle className="w-3 h-3 text-amber-600" />
+                          <span>Needs Review</span>
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-[11px] bg-[#E2FAD9] text-[#0d5c36] border-[#169781]/30 font-semibold gap-1 rounded-full">
+                          <ShieldCheck className="w-3 h-3 text-[#169781]" />
+                          <span>Safe &amp; Approved</span>
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
 
             <DialogFooter className="gap-2 pt-2 border-t border-slate-100">
