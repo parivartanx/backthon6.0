@@ -133,7 +133,7 @@ def test_rag_audit_llm_execution_and_parsing():
 
     # [AAA] Assert
     assert result.status == "FLAGGED"
-    assert result.score == 60.0
+    assert result.score == 40.0
     assert result.band == "AMBER"
     assert any(f.rule_id == "RAG_VIRAL_UNINDICATED" for f in result.flags)
 

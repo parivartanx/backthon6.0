@@ -19,6 +19,8 @@ export async function submitPrescriptionAudit(
       is_pregnant: caseData.patient.pregnancyStatus === "Pregnant",
       weight_kg: caseData.patient.weight_kg ? Number(caseData.patient.weight_kg) : null,
       egfr: caseData.patient.egfr ? Number(caseData.patient.egfr) : null,
+      allergies: caseData.patient.allergies || "NKDA",
+      medical_history: caseData.patient.medicalHistory || null,
       diagnosis_text:
         caseData.patient.symptoms || caseData.patient.suspectedDiagnosis || "",
     },
