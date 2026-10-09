@@ -171,20 +171,20 @@ export async function generatePrescriptionReportPdf(
 
   const patientDetails = [
     [
+      { content: "Patient Name", styles: { fontStyle: "bold" as const } },
+      p.patientName || "—",
       { content: "Age / Sex", styles: { fontStyle: "bold" as const } },
       `${p.age || "—"} yrs / ${p.sex}`,
+    ],
+    [
       { content: "Pregnancy Status", styles: { fontStyle: "bold" as const } },
       p.pregnancyStatus || "Not recorded",
-    ],
-    [
       { content: "Renal Function", styles: { fontStyle: "bold" as const } },
       p.egfr ? `${p.egfr} mL/min (eGFR)` : "Normal / Not recorded",
-      { content: "Culture Report", styles: { fontStyle: "bold" as const } },
-      p.has_culture_report ? "Available" : "Empiric Care (No culture)",
     ],
     [
-      { content: "Canonical Syndrome", styles: { fontStyle: "bold" as const } },
-      p.canonical_syndrome || "Unspecified Syndrome",
+      { content: "Culture Report", styles: { fontStyle: "bold" as const } },
+      p.has_culture_report ? "Available" : "Empiric Care (No culture)",
       { content: "Known Allergies", styles: { fontStyle: "bold" as const } },
       p.allergies || "None reported",
     ],

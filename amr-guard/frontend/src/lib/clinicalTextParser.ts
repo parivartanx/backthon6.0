@@ -75,6 +75,17 @@ export function parseClinicalText(text: string): ParsedClinicalFields {
     }
     result.sex = normalizeSex(patientLineMatch[3]);
   } else {
+    // Check standalone patient name (e.g. "Patient: Rahul Verma", "Patient Name: Master Aarav Gupta")
+    const standaloneNameMatch = text.match(
+      /(?:patient(?:\s*name)?|pt\.?(?:\s*name)?)[\s:=-]+([A-Za-z\s.]+?)(?:[,\n\r]|$)/i
+    );
+    if (standaloneNameMatch) {
+      const candidate = standaloneNameMatch[1].trim();
+      if (candidate.length > 1 && !/^(male|female|adult|child|opd|slip|rx)$/i.test(candidate)) {
+        result.patientName = candidate;
+      }
+    }
+
     // Check separate Age matches
     const explicitAgeMatch = text.match(
       /(?:age)[\s:=-]+(\d{1,3})\s*(?:yo|y\/o|yrs|yr|years)?\b/i
@@ -219,6 +230,9 @@ export function mergeParsedPatientContext(
 ): PatientContext {
   const updated: PatientContext = { ...current };
 
+  if (parsed.patientName) {
+    updated.patientName = parsed.patientName;
+  }
   if (parsed.weight_kg !== undefined) {
     updated.weight_kg = parsed.weight_kg;
   }
