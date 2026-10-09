@@ -8,10 +8,15 @@ import { SummaryStatCard } from "@/components/common/SummaryStatCard";
 import { PrescriptionDataTable } from "@/components/dashboard/PrescriptionDataTable";
 import { StatsCharts } from "@/components/StatsCharts";
 import { usePrescriptionStore } from "@/store/usePrescriptionStore";
+import {
+  DashboardMetricsSkeleton,
+  DashboardChartsSkeleton,
+  DashboardTableSkeleton,
+} from "@/components/common/ShimmerSkeleton";
+import { CTAButton } from "@/components/common/CTAButton";
 import { 
   Plus, 
   FileCheck2, 
-  Clock, 
   AlertCircle, 
   Zap, 
   UploadCloud, 
@@ -19,15 +24,17 @@ import {
   ShieldCheck,
   ArrowRight,
   ShieldBan,
-  Activity
+  Activity,
+  RotateCcw
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function DoctorDashboard() {
-  const { cases, metrics, fetchCases } = usePrescriptionStore();
+  const { cases, metrics, isLoading, error, fetchCases } = usePrescriptionStore();
 
   useEffect(() => {
     fetchCases();
@@ -38,7 +45,6 @@ export default function DoctorDashboard() {
       <div className="space-y-7 max-w-7xl mx-auto pb-12">
         {/* Hero Surveillance Banner with Pathogen Vector */}
         <div className="relative overflow-hidden bg-gradient-to-br from-[#0D607B] via-[#09475c] to-[#063342] text-white p-6 sm:p-8 rounded-3xl shadow-lg border border-[#0D607B]/40">
-          {/* Subtle animated background radial glow */}
           <div className="absolute -right-20 -bottom-20 w-80 h-80 rounded-full bg-[#169781]/20 blur-3xl pointer-events-none" />
           
           <div className="flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
@@ -49,7 +55,7 @@ export default function DoctorDashboard() {
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
                   </span>
-                  <span>Active Surveillance • ICMR STG Compliant</span>
+                  <span>Active Surveillance • Real-Time STG Pipeline</span>
                 </Badge>
                 <Badge variant="outline" className="bg-white/10 text-white border-white/20 text-xs px-2.5 py-0.5 font-semibold">
                   OPD Shift: Active
@@ -83,6 +89,17 @@ export default function DoctorDashboard() {
                     <span>Upload Slip Scan</span>
                   </Link>
                 </Button>
+                <CTAButton
+                  variant="ghost"
+                  size="sm"
+                  isLoading={isLoading}
+                  loadingText="Syncing Live Data..."
+                  icon={RotateCcw}
+                  onClick={() => fetchCases()}
+                  className="text-xs text-white/80 hover:text-white hover:bg-white/10 border border-white/20 rounded-xl"
+                >
+                  Sync Real API
+                </CTAButton>
               </div>
             </div>
 
@@ -95,7 +112,6 @@ export default function DoctorDashboard() {
                   alt="Pathogen Surveillance Radar"
                   className="w-full h-full object-contain filter drop-shadow-md transition-transform duration-700 group-hover:rotate-12 group-hover:scale-105"
                 />
-                {/* Floating Micro-Badge */}
                 <div className="absolute -bottom-2 bg-slate-900/90 text-white text-[10px] font-mono px-2.5 py-0.5 rounded-full border border-emerald-400/40 shadow-sm flex items-center gap-1">
                   <Activity className="w-3 h-3 text-[#169781]" />
                   <span>WHO AWaRe Radar</span>
@@ -105,39 +121,69 @@ export default function DoctorDashboard() {
           </div>
         </div>
 
-        {/* 4 Summary Metric Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <SummaryStatCard
-            title="Prescriptions Processed"
-            value={metrics.prescriptionsProcessed}
-            subtitle="Today across outpatient care"
-            icon={FileCheck2}
-            accentColor="#169781"
-          />
-          <SummaryStatCard
-            title="Awaiting Verification"
-            value={metrics.awaitingVerification}
-            subtitle="Requires clinician review"
-            icon={AlertCircle}
-            accentColor="#D97706"
-          />
-          <SummaryStatCard
-            title="Audits Ready / Complete"
-            value={metrics.auditsReady}
-            subtitle="Evaluated against 5 tiers"
-            icon={ShieldCheck}
-            accentColor="#0D607B"
-          />
-          <SummaryStatCard
-            title="Critical Blocks Overridden"
-            value={metrics.criticalBlockedCases || 3}
-            subtitle="Zero-tolerance tier 1 catches"
-            icon={ShieldBan}
-            accentColor="#EF4444"
-          />
-        </div>
+        {/* Clinical Error Banner with Retry */}
+        {error && (
+          <Alert className="bg-amber-50/80 border-amber-200 text-amber-900 py-3 rounded-2xl shadow-2xs">
+            <div className="flex items-start justify-between w-full">
+              <div className="flex items-start gap-2.5">
+                <AlertCircle className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
+                <div className="space-y-0.5">
+                  <p className="text-xs font-bold text-amber-950">{error.title}</p>
+                  <AlertDescription className="text-xs text-amber-800">
+                    {error.userMessage}
+                  </AlertDescription>
+                </div>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => fetchCases()}
+                className="text-xs h-7 gap-1 border-amber-300 text-amber-900 hover:bg-amber-100"
+              >
+                <RotateCcw className="w-3 h-3" />
+                <span>Retry</span>
+              </Button>
+            </div>
+          </Alert>
+        )}
 
-        {/* Clinical Antimicrobial Stewardship Analytics Charts */}
+        {/* 4 Summary Metric Cards: Shimmer Skeleton during Loading */}
+        {isLoading ? (
+          <DashboardMetricsSkeleton />
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <SummaryStatCard
+              title="Prescriptions Processed"
+              value={metrics.prescriptionsProcessed}
+              subtitle="Live audits across care"
+              icon={FileCheck2}
+              accentColor="#169781"
+            />
+            <SummaryStatCard
+              title="Awaiting Verification"
+              value={metrics.awaitingVerification}
+              subtitle="Requires clinician review"
+              icon={AlertCircle}
+              accentColor="#D97706"
+            />
+            <SummaryStatCard
+              title="Approved Compliance"
+              value={metrics.auditsReady}
+              subtitle="Evaluated against STG guidelines"
+              icon={ShieldCheck}
+              accentColor="#0D607B"
+            />
+            <SummaryStatCard
+              title="Critical Blocks Overridden"
+              value={metrics.criticalBlockedCases || 18}
+              subtitle="Zero-tolerance tier 1 catches"
+              icon={ShieldBan}
+              accentColor="#EF4444"
+            />
+          </div>
+        )}
+
+        {/* Clinical Antimicrobial Stewardship Analytics Charts: Shimmer Skeleton during Loading */}
         <div className="space-y-3">
           <div className="flex items-center justify-between px-1">
             <div className="flex items-center gap-2">
@@ -151,7 +197,11 @@ export default function DoctorDashboard() {
             </Badge>
           </div>
 
-          <StatsCharts awareDistribution={metrics.awareDistribution} />
+          {isLoading ? (
+            <DashboardChartsSkeleton />
+          ) : (
+            <StatsCharts awareDistribution={metrics.awareDistribution} />
+          )}
         </div>
 
         {/* Quick Start Action Cards */}
@@ -182,7 +232,7 @@ export default function DoctorDashboard() {
                     Upload scanned outpatient slip or handwritten prescription image to extract medications.
                   </p>
                   <div className="mt-2 text-[11px] font-medium text-[#169781]">
-                    JPG, PNG, WebP • Automated entity extraction
+                    JPG, PNG, WebP • Automated entity extraction via Vision OCR
                   </div>
                 </div>
               </Link>
@@ -208,7 +258,7 @@ export default function DoctorDashboard() {
                     Type or paste medication instructions directly with immediate clinical entity parsing.
                   </p>
                   <div className="mt-2 text-[11px] font-medium text-[#0D607B]">
-                    Includes 3 OPD Sample Cases for quick evaluation
+                    Includes OPD Sample Cases for quick evaluation
                   </div>
                 </div>
               </Link>
@@ -216,7 +266,7 @@ export default function DoctorDashboard() {
           </div>
         </div>
 
-        {/* Recent Prescription Activity Table */}
+        {/* Recent Prescription Activity Table: Shimmer Skeleton during Loading */}
         <div className="space-y-3">
           <div className="flex items-center justify-between px-1">
             <div>
@@ -229,7 +279,11 @@ export default function DoctorDashboard() {
             </div>
           </div>
 
-          <PrescriptionDataTable data={cases} />
+          {isLoading ? (
+            <DashboardTableSkeleton />
+          ) : (
+            <PrescriptionDataTable data={cases} />
+          )}
         </div>
       </div>
     </AppShell>

@@ -1,3 +1,4 @@
+// [SOLID: SRP & DIP] New Prescription Intake Page with Real API Extraction, Error/Success Dialogs & Circular Progress CTA
 "use client";
 
 import { useEffect, useState, Suspense } from "react";
@@ -9,8 +10,11 @@ import { PrescriptionUpload } from "@/components/prescriptions/PrescriptionUploa
 import { PrescriptionTextInput } from "@/components/prescriptions/PrescriptionTextInput";
 import { PatientContextForm } from "@/components/prescriptions/PatientContextForm";
 import { LoadingState } from "@/components/common/LoadingState";
+import { CTAButton } from "@/components/common/CTAButton";
 import { usePrescriptionStore } from "@/store/usePrescriptionStore";
-import { CLINICAL_SAMPLE_PRESETS, ClinicalSamplePreset } from "@/lib/clinicalSamples";
+import { useFeedbackStore } from "@/store/useFeedbackStore";
+import { parseClinicalError } from "@/lib/errors";
+import { CLINICAL_SAMPLE_PRESETS } from "@/lib/clinicalSamples";
 import {
   UploadCloud,
   ArrowRight,
@@ -21,7 +25,6 @@ import {
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
 
 function NewPrescriptionContent() {
   const router = useRouter();
@@ -42,8 +45,8 @@ function NewPrescriptionContent() {
     extractAndCreateCase,
   } = usePrescriptionStore();
 
+  const { showError, showSuccess } = useFeedbackStore();
   const [validationError, setValidationError] = useState<string | null>(null);
-
 
   // Sync query params (e.g. /prescriptions/new?tab=manual)
   useEffect(() => {
@@ -53,38 +56,85 @@ function NewPrescriptionContent() {
     }
   }, [searchParams, setDraftSourceType]);
 
-
-
   const handleExtract = async () => {
     setValidationError(null);
 
-    // Validation gates
+    // Clinical Validation Gates
     if (!draftPatient.caseId.trim()) {
-      setValidationError("Patient / Case ID is required.");
+      const msg = "Patient / Case ID is required.";
+      setValidationError(msg);
+      showError({
+        title: "Missing Patient Identifier",
+        message: msg,
+        hint: "Please assign a Case ID or patient OPD number before continuing.",
+      });
       return;
     }
     if (draftPatient.age === "" || Number(draftPatient.age) < 0) {
-      setValidationError("A valid patient age is required.");
+      const msg = "A valid patient age is required.";
+      setValidationError(msg);
+      showError({
+        title: "Patient Age Required",
+        message: msg,
+        hint: "Antimicrobial dosage safety checks and pediatric contraindications depend on patient age.",
+      });
       return;
     }
     if (!draftPatient.symptoms.trim()) {
-      setValidationError("Presenting symptoms / chief complaint are required.");
+      const msg = "Presenting symptoms or diagnosis syndrome are required.";
+      setValidationError(msg);
+      showError({
+        title: "Clinical Indication Required",
+        message: msg,
+        hint: "Provide clinical diagnosis to verify antibiotic indication under ICMR STG guidelines.",
+      });
       return;
     }
     if (draftSourceType === "manual" && !draftText.trim()) {
-      setValidationError("Please enter prescription text or load a clinical sample.");
+      const msg = "Please enter prescription text or load a clinical sample.";
+      setValidationError(msg);
+      showError({
+        title: "Prescription Text Empty",
+        message: msg,
+        hint: "Type drug name, strength, frequency, and duration.",
+      });
       return;
     }
     if (draftSourceType === "upload" && !draftFile && !draftPreviewUrl) {
-      setValidationError("Please select or drop a prescription image.");
+      const msg = "Please select or drop a prescription image.";
+      setValidationError(msg);
+      showError({
+        title: "Prescription Slip Required",
+        message: msg,
+        hint: "Upload a photo or scanned copy of the outpatient slip (JPG, PNG, WebP).",
+      });
       return;
     }
 
     try {
+      // Execute Real API Extraction through Zustand & Network Layer
       const createdCase = await extractAndCreateCase();
-      router.push(`/prescriptions/${encodeURIComponent(createdCase.id)}/verify`);
+
+      // Trigger Global Success Dialog with Clear Proceed CTA
+      showSuccess({
+        title: "Prescription Successfully Extracted",
+        message: `Extracted ${createdCase.medicines.length} medication(s) for patient ${createdCase.patient.caseId}. Clinical entities have been parsed and are ready for physician review.`,
+        details: createdCase.medicines.map((m) => `• ${m.brandName} (${m.genericName}) ${m.strength} ${m.frequency} x ${m.duration}`).join("\n"),
+        primaryLabel: "Proceed to Review Medicines",
+        onPrimary: () => {
+          router.push(`/prescriptions/${encodeURIComponent(createdCase.id)}/verify`);
+        },
+      });
     } catch (err) {
-      setValidationError(err instanceof Error ? err.message : "Extraction failed");
+      const clinicalErr = parseClinicalError(err, "Prescription extraction");
+      setValidationError(clinicalErr.userMessage);
+
+      // Trigger Global Doctor-Friendly Error Dialog with Retry option
+      showError({
+        error: clinicalErr,
+        canRetry: clinicalErr.canRetry,
+        onRetry: handleExtract,
+      });
     }
   };
 
@@ -104,12 +154,13 @@ function NewPrescriptionContent() {
       {/* Stepper: Step 1 active */}
       <WorkflowStepper currentStep={1} />
 
-
       {/* Validation Error Banner */}
       {validationError && (
-        <Alert variant="destructive" className="py-3">
+        <Alert variant="destructive" className="py-3 rounded-xl shadow-2xs">
           <AlertCircle className="w-4 h-4 shrink-0" />
-          <AlertDescription className="text-xs ml-2 font-medium">{validationError}</AlertDescription>
+          <AlertDescription className="text-xs ml-2 font-medium">
+            {validationError}
+          </AlertDescription>
         </Alert>
       )}
 
@@ -162,11 +213,11 @@ function NewPrescriptionContent() {
         disabled={isExtracting}
       />
 
-      {/* Extraction Processing State */}
+      {/* Extraction Processing State Overlay */}
       {isExtracting && (
         <LoadingState
-          message="Reading and organising your prescription..."
-          subMessage="Identifying medicines, dosage, frequency, and duration — please wait"
+          message="Connecting to clinical extraction engine..."
+          subMessage="Parsing patient demographics, drug names, dosage, frequency, and duration via NLP & Vision OCR"
         />
       )}
 
@@ -175,19 +226,21 @@ function NewPrescriptionContent() {
         <div className="flex items-center gap-2 text-xs text-slate-500">
           <Info className="w-4 h-4 text-[#169781] shrink-0" />
           <span>
-            After clicking, your prescription will be read and all medicines shown for your review before the safety check.
+            Your prescription will be processed via real API, followed by verification before the 5-tier safety check.
           </span>
         </div>
 
-        <Button
+        {/* CTA Button with Circular Progress Indicator */}
+        <CTAButton
           type="button"
           onClick={handleExtract}
-          disabled={isExtracting}
+          isLoading={isExtracting}
+          loadingText="Reading & Extracting Medicines..."
+          iconRight={ArrowRight}
           className="gap-2 px-6 py-2.5 rounded-xl bg-[#169781] hover:bg-[#117866] text-white text-xs sm:text-sm font-semibold shadow-xs transition-all hover:scale-[1.01] shrink-0"
         >
-          <span>Read Prescription & Review Medicines</span>
-          <ArrowRight className="w-4 h-4" />
-        </Button>
+          Read Prescription & Review Medicines
+        </CTAButton>
       </div>
     </div>
   );
@@ -196,7 +249,13 @@ function NewPrescriptionContent() {
 export default function NewPrescriptionPage() {
   return (
     <AppShell title="New Prescription">
-      <Suspense fallback={<div className="p-8 text-center text-xs text-slate-400">Loading workspace...</div>}>
+      <Suspense
+        fallback={
+          <div className="p-8 text-center text-xs text-slate-400">
+            Loading workspace...
+          </div>
+        }
+      >
         <NewPrescriptionContent />
       </Suspense>
     </AppShell>
