@@ -5,6 +5,8 @@ from app.schemas.orchestrator import ContextBundle
 from app.schemas.audit import PrescriptionAuditRequest, AuditResult
 from app.schemas.extract import PrescriptionExtractionResponse
 from app.engine.scoring import audit_prescription
+from app.agents.rag_audit import audit_prescription_rag_first
+from app.core.config import settings
 from app.services.extract_service import extract_prescription_from_image
 from app.services.audit_service import record_audit
 from app.services.latency import LatencyService
@@ -15,19 +17,21 @@ router = APIRouter()
 @router.post("/", response_model=Union[AuditResult, ContextBundle])
 def audit_prescription_endpoint(request: PrescriptionAuditRequest):
     """
-    Audit a prescription against the Five-Tier Verification Pipeline.
-    If structured patient & prescription_lines are provided, runs the pure-Python
-    deterministic core, records the audit in the database, and returns an AuditResult.
+    Audit a prescription against the clinical verification pipeline.
+    Uses Hybrid RAG-First verification (BM25 + vector RRF + LLM) with Tier 1
+    deterministic safety rules and automatic offline fallback.
     If only an unstructured scenario is provided, triggers the Hybrid RAG Orchestrator.
     """
     try:
         if request.patient and request.prescription_lines:
-            # 1. Pure deterministic verification engine (<5ms latency SLA)
+            # 1. Hybrid RAG-First verification engine with safety guard & offline fallback
+            stage_name = "rag_first_verification" if settings.OPENROUTER_API_KEY else "deterministic_verification"
+            sla_target = LatencyService.DEFAULT_RAG_SLA_MS if settings.OPENROUTER_API_KEY else LatencyService.DEFAULT_DETERMINISTIC_SLA_MS
             with LatencyService.profile_stage(
-                "deterministic_verification",
-                sla_limit_ms=LatencyService.DEFAULT_DETERMINISTIC_SLA_MS,
+                stage_name,
+                sla_limit_ms=sla_target,
             ):
-                result = audit_prescription(
+                result = audit_prescription_rag_first(
                     patient=request.patient,
                     prescription_lines=request.prescription_lines,
                     canonical_syndrome=request.canonical_syndrome,
@@ -40,6 +44,7 @@ def audit_prescription_endpoint(request: PrescriptionAuditRequest):
             record_audit(request, result)
 
             return result
+
 
         elif request.scenario:
             # Hybrid RAG Agent Orchestrator (<3000ms latency SLA)

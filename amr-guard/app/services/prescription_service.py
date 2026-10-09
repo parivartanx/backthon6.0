@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 from app.db.models import Audit
 from app.db.session import SessionLocal
 from app.engine.scoring import audit_prescription
+from app.agents.rag_audit import audit_prescription_rag_first
 from app.schemas.audit import PrescriptionAuditRequest
 from app.schemas.patient import PatientContext
 from app.schemas.prescription import (
@@ -176,8 +177,8 @@ def _audit_and_persist(case: PrescriptionCase, db: Optional[Session] = None) -> 
             )
         )
 
-    # Execute deterministic verification engine (<5ms latency)
-    result = audit_prescription(
+    # Execute Hybrid RAG-First verification engine with safety guard and offline fallback
+    result = audit_prescription_rag_first(
         patient=patient_ctx,
         prescription_lines=lines,
         canonical_syndrome=p.canonical_syndrome or p.suspectedDiagnosis or None,
@@ -185,6 +186,7 @@ def _audit_and_persist(case: PrescriptionCase, db: Optional[Session] = None) -> 
         has_positive_microbiology=bool(p.has_positive_microbiology),
         is_outpatient=bool(p.is_outpatient),
     )
+
 
     case.auditResult = result.model_dump()
     case.workflowStatus = "Audited"
