@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { MedicineEntry } from "@/types/prescription";
-import { Pill, PlusCircle, AlertCircle } from "lucide-react";
+import { Pill, AlertCircle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -14,6 +14,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface AddMedicineModalProps {
   isOpen: boolean;
@@ -21,7 +28,7 @@ interface AddMedicineModalProps {
   onAdd: (medicine: MedicineEntry) => void;
 }
 
-// [SOLID: SRP] Add Medicine modal upgraded to shadcn/ui Dialog, Input, and Button
+// [SOLID: SRP] Add Medicine modal built with 100% Shadcn UI primitives
 export function AddMedicineModal({ isOpen, onClose, onAdd }: AddMedicineModalProps) {
   const [brandName, setBrandName] = useState("");
   const [genericName, setGenericName] = useState("");
@@ -70,10 +77,10 @@ export function AddMedicineModal({ isOpen, onClose, onAdd }: AddMedicineModalPro
             </div>
             <div>
               <DialogTitle className="text-sm font-bold text-[#0D607B]">
-                Add Prescribed Medicine
+                Add Prescribed Medication
               </DialogTitle>
               <DialogDescription className="text-[11px] text-slate-500">
-                Manually append an antimicrobial or adjunct medication
+                Append an antimicrobial or supportive adjunct entity
               </DialogDescription>
             </div>
           </div>
@@ -100,14 +107,14 @@ export function AddMedicineModal({ isOpen, onClose, onAdd }: AddMedicineModalPro
                   setBrandName(e.target.value);
                   setError(null);
                 }}
-                placeholder="e.g. Augmentin, Taxim-O"
+                placeholder="e.g. Augmentin, Cifran"
                 className="h-8 text-xs"
               />
             </div>
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Generic Name (Active Molecule)
+                Generic Active Molecule
               </label>
               <Input
                 type="text"
@@ -128,7 +135,7 @@ export function AddMedicineModal({ isOpen, onClose, onAdd }: AddMedicineModalPro
                 type="text"
                 value={strength}
                 onChange={(e) => setStrength(e.target.value)}
-                placeholder="e.g. 625 mg, 200 mg"
+                placeholder="e.g. 625 mg, 500 mg"
                 className="h-8 text-xs"
               />
             </div>
@@ -155,37 +162,39 @@ export function AddMedicineModal({ isOpen, onClose, onAdd }: AddMedicineModalPro
               <label className="block text-xs font-semibold text-slate-700 mb-1">
                 Route
               </label>
-              <select
-                value={route}
-                onChange={(e) => setRoute(e.target.value)}
-                className="w-full h-8 px-2.5 text-xs rounded-lg border border-slate-300 focus:border-[#169781] focus:ring-2 focus:ring-[#E2FAD9] focus:outline-none bg-white"
-              >
-                <option value="Oral">Oral (PO)</option>
-                <option value="Intravenous">Intravenous (IV)</option>
-                <option value="Intramuscular">Intramuscular (IM)</option>
-                <option value="Inhalation">Inhalation</option>
-                <option value="Topical">Topical</option>
-                <option value="Sublingual">Sublingual</option>
-              </select>
+              <Select value={route} onValueChange={(val: string | null) => val && setRoute(val)}>
+                <SelectTrigger className="h-8 text-xs bg-white border-slate-300">
+                  <SelectValue placeholder="Route" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Oral">Oral (PO)</SelectItem>
+                  <SelectItem value="Intravenous">Intravenous (IV)</SelectItem>
+                  <SelectItem value="Intramuscular">Intramuscular (IM)</SelectItem>
+                  <SelectItem value="Inhalation">Inhalation</SelectItem>
+                  <SelectItem value="Topical">Topical</SelectItem>
+                  <SelectItem value="Sublingual">Sublingual</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
                 Frequency
               </label>
-              <select
-                value={frequency}
-                onChange={(e) => setFrequency(e.target.value)}
-                className="w-full h-8 px-2.5 text-xs rounded-lg border border-slate-300 focus:border-[#169781] focus:ring-2 focus:ring-[#E2FAD9] focus:outline-none bg-white"
-              >
-                <option value="Once daily (OD)">Once daily (OD)</option>
-                <option value="Twice daily (BD)">Twice daily (BD)</option>
-                <option value="Three times daily (TID)">Three times daily (TID)</option>
-                <option value="Four times daily (QID)">Four times daily (QID)</option>
-                <option value="As needed (SOS)">As needed (SOS)</option>
-                <option value="At bedtime (HS)">At bedtime (HS)</option>
-                <option value="Stat (Immediate)">Stat (Immediate)</option>
-              </select>
+              <Select value={frequency} onValueChange={(val: string | null) => val && setFrequency(val)}>
+                <SelectTrigger className="h-8 text-xs bg-white border-slate-300">
+                  <SelectValue placeholder="Frequency" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Once daily (OD)">Once daily (OD)</SelectItem>
+                  <SelectItem value="Twice daily (BD)">Twice daily (BD)</SelectItem>
+                  <SelectItem value="Three times daily (TID)">Three times daily (TID)</SelectItem>
+                  <SelectItem value="Four times daily (QID)">Four times daily (QID)</SelectItem>
+                  <SelectItem value="As needed (SOS)">As needed (SOS)</SelectItem>
+                  <SelectItem value="At bedtime (HS)">At bedtime (HS)</SelectItem>
+                  <SelectItem value="Stat (Immediate)">Stat (Immediate)</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div>
@@ -202,11 +211,10 @@ export function AddMedicineModal({ isOpen, onClose, onAdd }: AddMedicineModalPro
             </div>
           </div>
 
-          {/* Modal Footer */}
-          <DialogFooter className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2 sm:gap-2">
+          <DialogFooter className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
             <Button
               type="button"
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={onClose}
               className="text-xs"
@@ -216,10 +224,9 @@ export function AddMedicineModal({ isOpen, onClose, onAdd }: AddMedicineModalPro
             <Button
               type="submit"
               size="sm"
-              className="bg-[#169781] hover:bg-[#117866] text-white text-xs gap-1.5"
+              className="text-xs font-semibold bg-[#169781] hover:bg-[#117866] text-white"
             >
-              <PlusCircle className="w-3.5 h-3.5" />
-              <span>Add to Prescription</span>
+              Add Medicine
             </Button>
           </DialogFooter>
         </form>
