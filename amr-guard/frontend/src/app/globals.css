@@ -194,4 +194,21 @@ body {
   );
   animation: shimmer-wave 1.6s infinite ease-in-out;
   content: "";
+/* Print Styles: Hide sidebars, navigation headers, footers and action buttons */
+@media print {
+  aside,
+  nav,
+  header,
+  footer,
+  .no-print,
+  button:not(.allow-print) {
+    display: none !important;
+  }
+
+  body, main {
+    background: white !important;
+    color: black !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
 }
