@@ -42,7 +42,7 @@ export function VerificationBadge({ status, showHelpIcon = false }: Verification
     <Badge
       variant="outline"
       className="inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-semibold bg-red-50 text-red-800 border-red-300/70 hover:bg-red-50"
-      title="Critical fields missing: Requires manual physician entry before audit."
+      title="Critical fields missing: Requires manual physician entry before prescription safety check."
     >
       <AlertTriangle className="w-3.5 h-3.5 text-red-600" />
       <span>Missing Data</span>

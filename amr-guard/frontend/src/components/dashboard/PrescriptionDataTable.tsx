@@ -13,7 +13,8 @@ import {
   Clock, 
   Pill,
   ShieldCheck,
-  User
+  User,
+  Plus
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -28,6 +29,32 @@ interface PrescriptionDataTableProps {
 export function PrescriptionDataTable({ data }: PrescriptionDataTableProps) {
   const router = useRouter();
   const [selectedStatus, setSelectedStatus] = useState<string>("ALL");
+
+  if (data.length === 0) {
+    return (
+      <div className="bg-white rounded-2xl border border-slate-200/80 p-8 sm:p-12 text-center space-y-4">
+        <div className="w-14 h-14 rounded-2xl bg-[#F1F8FC] border border-[#C9E9EB] flex items-center justify-center text-[#0D607B] mx-auto shadow-2xs">
+          <FileText className="w-7 h-7 text-[#169781]" />
+        </div>
+        <div className="space-y-1 max-w-sm mx-auto">
+          <h3 className="text-sm font-bold text-slate-800">No Prescriptions Audited Yet Today</h3>
+          <p className="text-xs text-slate-500 leading-relaxed">
+            Prescriptions you create and evaluate with the clinical safety engine will appear here in real-time.
+          </p>
+        </div>
+        <Button
+          asChild
+          size="sm"
+          className="gap-2 px-5 py-2 rounded-xl bg-[#169781] hover:bg-[#117866] text-white text-xs font-semibold shadow-xs"
+        >
+          <Link href="/prescriptions/new">
+            <Plus className="w-3.5 h-3.5" />
+            <span>New Prescription Intake</span>
+          </Link>
+        </Button>
+      </div>
+    );
+  }
 
   const filteredData = useMemo(() => {
     if (selectedStatus === "ALL") return data;
