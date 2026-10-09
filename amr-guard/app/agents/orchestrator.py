@@ -1,40 +1,55 @@
+import os
 import json
+from typing import TypedDict, Annotated, Sequence
+from langgraph.graph import StateGraph, END
 from openai import OpenAI
 from app.core.config import settings
-from app.agents.tools import search_amr_knowledge
 from app.schemas.orchestrator import ContextBundle
+from app.agents.tools import search_amr_knowledge
 
-def run_verification_orchestrator(clinical_scenario: str) -> ContextBundle:
-    """
-    Custom Agent Loop: Uses tools to gather context and returns a strict ContextBundle.
-    """
+# 1. Define State
+class AgentState(TypedDict):
+    scenario: str
+    search_queries: list[str]
+    retrieved_context: list[str]
+    bundle: str # Storing the JSON output string
+
+# 2. Define Nodes
+def analyze_node(state: AgentState):
+    """Decides what queries to run based on the scenario."""
+    # Stub: just query the whole scenario
+    queries = state.get("search_queries", [])
+    if not queries:
+        queries.append(state["scenario"])
+    return {"search_queries": queries}
+
+def search_node(state: AgentState):
+    """Executes the LlamaIndex tool."""
+    contexts = state.get("retrieved_context", [])
+    query = state["search_queries"][-1]
+    
+    # Use our tool which in a real implementation calls LlamaIndex
+    result = search_amr_knowledge(query)
+    
+    contexts.append(result)
+    return {"retrieved_context": contexts}
+
+def format_node(state: AgentState):
+    """Uses OpenRouter to build the strict ContextBundle."""
     client = OpenAI(
         base_url="https://openrouter.ai/api/v1",
         api_key=settings.OPENROUTER_API_KEY,
     )
     
-    system_instruction = (
-        "You are an AMR Verification Agent. You must use the `search_amr_knowledge` tool to "
-        "investigate the clinical scenario. Once you have enough context, stop and "
-        "format your final output strictly according to the ContextBundle schema. "
-        "You must respond in JSON format matching the schema."
-    )
-    
-    print(f"[Orchestrator] Thinking about: {clinical_scenario}")
-    
-    # Simulated tool call decision
-    tool_response_text = search_amr_knowledge(clinical_scenario)
-    print(f"[Orchestrator] Tool returned: {tool_response_text}")
-    
     prompt = f"""
-    Evaluate this scenario using the retrieved knowledge.
+    Evaluate this scenario.
     
-    Scenario: {clinical_scenario}
+    Scenario: {state["scenario"]}
     
-    Retrieved Knowledge:
-    {tool_response_text}
+    Retrieved Knowledge: 
+    {state["retrieved_context"]}
     
-    Schema:
+    Respond STRICTLY in JSON matching this schema:
     {ContextBundle.model_json_schema()}
     """
     
@@ -42,10 +57,38 @@ def run_verification_orchestrator(clinical_scenario: str) -> ContextBundle:
         model=settings.OPENROUTER_MODEL,
         response_format={"type": "json_object"},
         messages=[
-            {"role": "system", "content": system_instruction},
+            {"role": "system", "content": "You are an AMR Verification Agent."},
             {"role": "user", "content": prompt}
         ],
         temperature=0.0,
     )
+    return {"bundle": response.choices[0].message.content}
+
+# 3. Build Graph
+workflow = StateGraph(AgentState)
+workflow.add_node("analyze", analyze_node)
+workflow.add_node("search", search_node)
+workflow.add_node("format", format_node)
+
+workflow.set_entry_point("analyze")
+workflow.add_edge("analyze", "search")
+workflow.add_edge("search", "format")
+workflow.add_edge("format", END)
+
+app = workflow.compile()
+
+def run_verification_orchestrator(clinical_scenario: str) -> ContextBundle:
+    """Executes the LangGraph workflow."""
+    print(f"[Orchestrator] Starting LangGraph for: {clinical_scenario}")
     
-    return ContextBundle.model_validate_json(response.choices[0].message.content)
+    initial_state = {
+        "scenario": clinical_scenario,
+        "search_queries": [],
+        "retrieved_context": [],
+        "bundle": ""
+    }
+    
+    result = app.invoke(initial_state)
+    bundle_json = result["bundle"]
+    
+    return ContextBundle.model_validate_json(bundle_json)

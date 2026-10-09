@@ -14,3 +14,8 @@ httpx
 pgvector
 rank_bm25
 openai
+langgraph
+llama-index
+llama-index-vector-stores-postgres
+llama-index-embeddings-openai
+llama-index-llms-openai

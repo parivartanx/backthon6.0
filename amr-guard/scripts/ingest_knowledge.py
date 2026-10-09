@@ -1,80 +1,48 @@
 import os
 import sys
+from dotenv import load_dotenv
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
+load_dotenv()
 
-from app.db.session import SessionLocal
-from app.db.models import KnowledgeChunk
+from sqlalchemy import make_url
+from llama_index.core import SimpleDirectoryReader, StorageContext, VectorStoreIndex
+from llama_index.vector_stores.postgres import PGVectorStore
+from llama_index.embeddings.openai import OpenAIEmbedding
+from llama_index.core import Settings
 from app.core.config import settings
 
-def chunk_markdown(content: str, max_chars: int = 1000) -> list[str]:
-    """Simple stub chunker. In production, use a proper Markdown splitter."""
-    chunks = []
-    current_chunk = ""
-    for paragraph in content.split("\n\n"):
-        if len(current_chunk) + len(paragraph) > max_chars:
-            if current_chunk:
-                chunks.append(current_chunk.strip())
-            current_chunk = paragraph
-        else:
-            current_chunk += "\n\n" + paragraph
-    if current_chunk:
-        chunks.append(current_chunk.strip())
-    return chunks
-
 def main():
-    kb_path = os.path.join(os.path.dirname(__file__), "..", "app", "knowledge", "data_source", "AMR_KNOWLEDGE_BASE.md")
-    if not os.path.exists(kb_path):
-        print(f"Knowledge base not found at {kb_path}")
-        return
+    kb_path = os.path.join(os.path.dirname(__file__), "..", "app", "knowledge", "data_source")
+    
+    # Configure Embedding
+    Settings.embed_model = OpenAIEmbedding(model="text-embedding-3-small", api_key=settings.OPENAI_API_KEY)
+    
+    print(f"Reading documents from {kb_path}...")
+    documents = SimpleDirectoryReader(input_dir=kb_path, required_exts=[".md"]).load_data()
+    print(f"Loaded {len(documents)} document chunks.")
 
-    print("Reading AMR Knowledge Base...")
-    with open(kb_path, "r", encoding="utf-8") as f:
-        content = f.read()
+    # Convert the sqlalchemy URL into a format psycopg2 expects
+    url = make_url(settings.DATABASE_URL)
     
-    print("Chunking content...")
-    chunks = chunk_markdown(content)
-    print(f"Generated {len(chunks)} chunks.")
-
-    # client = genai.Client(api_key=settings.GEMINI_API_KEY)
+    print("Connecting to Vector Store...")
+    vector_store = PGVectorStore.from_params(
+        database=url.database,
+        host=url.host,
+        password=url.password,
+        port=url.port,
+        user=url.username,
+        table_name="amr_knowledge_index",
+        embed_dim=1536, # Standard for OpenAI text-embedding-3-small
+    )
     
-    db = SessionLocal()
+    storage_context = StorageContext.from_defaults(vector_store=vector_store)
     
-    print("Generating embeddings and saving to DB...")
-    
-    for i, chunk_text in enumerate(chunks):
-        if not chunk_text.strip():
-            continue
-            
-        try:
-            # --- STUB FOR EMBEDDINGS ---
-            # In production:
-            # response = client.models.embed_content(
-            #     model="text-embedding-004",
-            #     contents=chunk_text
-            # )
-            # embedding = response.embeddings[0].values
-            
-            embedding = [0.0] * 768 # Dummy embedding for pgvector
-            
-            kc = KnowledgeChunk(
-                source_id=f"KB_CHUNK_{i}",
-                chunk_text=chunk_text,
-                embedding=embedding,
-                metadata_json={"source": "AMR_KNOWLEDGE_BASE.md", "index": i}
-            )
-            db.add(kc)
-            
-            if i % 1000 == 0:
-                print(f"Processed {i} chunks...")
-                
-        except Exception as e:
-            print(f"Error on chunk {i}: {e}")
-            break
-            
-    db.commit()
-    db.close()
-    print("Knowledge ingestion complete! Vector DB is primed.")
+    print("Ingesting and generating embeddings...")
+    index = VectorStoreIndex.from_documents(
+        documents, storage_context=storage_context, show_progress=True
+    )
+    print("Knowledge ingestion complete! LlamaIndex PGVectorStore is primed.")
 
 if __name__ == "__main__":
     main()
