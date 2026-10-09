@@ -53,11 +53,7 @@ function NewPrescriptionContent() {
     }
   }, [searchParams, setDraftSourceType]);
 
-  const handleSelectPreset = (preset: ClinicalSamplePreset) => {
-    setSelectedPresetId(preset.id);
-    loadDraftPreset(preset);
-    setValidationError(null);
-  };
+
 
   const handleExtract = async () => {
     setValidationError(null);
@@ -148,7 +144,10 @@ function NewPrescriptionContent() {
               <PrescriptionTextInput
                 value={draftText}
                 onChange={setDraftText}
-                onLoadSample={() => handleSelectPreset(CLINICAL_SAMPLE_PRESETS[0])}
+                onLoadSample={() => {
+                  loadDraftPreset(CLINICAL_SAMPLE_PRESETS[0]);
+                  setValidationError(null);
+                }}
                 disabled={isExtracting}
               />
             )}
