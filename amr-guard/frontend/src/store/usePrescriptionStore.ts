@@ -5,7 +5,8 @@ import {
   DashboardMetrics, 
   PatientContext, 
   MedicineEntry,
-  AuditResult
+  AuditResult,
+  ExtractionResult
 } from "@/types/prescription";
 import { 
   getPrescriptions, 
@@ -23,6 +24,7 @@ import { parseClinicalText, mergeParsedPatientContext } from "@/lib/clinicalText
 
 export const createDefaultPatient = (): PatientContext => ({
   caseId: `CASE-2026-${Math.floor(1000 + Math.random() * 9000)}`,
+  patientName: "",
   age: "",
   sex: "Male",
   pregnancyStatus: "Not applicable",
@@ -222,45 +224,54 @@ export const usePrescriptionStore = create<PrescriptionState>((set, get) => ({
     set({ isExtracting: true });
 
     try {
-      let extraction;
+      let extraction: ExtractionResult | null = null;
 
-      if (draftSourceType === "upload") {
-        if (!draftFile) {
-          throw new ClinicalError({
-            code: "VALIDATION_FAILED",
-            title: "Prescription Image Required",
-            userMessage: "Please select or capture a prescription slip image to extract.",
-            hint: "Supported formats include JPG, PNG, and WebP.",
-            canRetry: false,
-          });
-        }
-        // Call Real Multimodal OCR API (/audit/from-image) - No mock fallback
+      // [SOLID: SRP] Flexible intake: Extract from image if provided; otherwise extract from text if provided
+      if (draftFile) {
+        // Call Real Multimodal OCR API (/audit/from-image)
         extraction = await extractFromImage(draftFile);
-      } else {
-        if (!draftText.trim()) {
-          throw new ClinicalError({
-            code: "VALIDATION_FAILED",
-            title: "Prescription Text Required",
-            userMessage: "Please enter clinical prescription details to extract.",
-            hint: "Include medication names, dosage, and duration.",
-            canRetry: false,
-          });
-        }
-        // Call Real NLP Extraction API (/extract/) - No mock fallback
+      } else if (draftText.trim()) {
+        // Call Real NLP Extraction API (/extract/)
         extraction = await extractFromText(draftText);
       }
 
+      // If neither slip image nor typed text was supplied, create case directly from form inputs
+      const finalMedicines: MedicineEntry[] = extraction?.medicines || [];
+      const extractedPatient = extraction?.patient || {};
+
+      const fallbackNotes = [
+        `Clinical Intake Slip`,
+        `Patient ID: ${draftPatient.caseId || "N/A"}`,
+        `Age / Sex: ${draftPatient.age || "—"} yrs, ${draftPatient.sex}`,
+        draftPatient.weight_kg ? `Weight: ${draftPatient.weight_kg} kg` : null,
+        draftPatient.allergies ? `Allergies: ${draftPatient.allergies}` : null,
+        draftPatient.suspectedDiagnosis ? `Diagnosis: ${draftPatient.suspectedDiagnosis}` : null,
+        draftPatient.symptoms ? `Symptoms: ${draftPatient.symptoms}` : null,
+      ]
+        .filter(Boolean)
+        .join("\n");
+
       const newCase: PrescriptionCase = {
         id: draftPatient.caseId || `CASE-2026-${Math.floor(1000 + Math.random() * 9000)}`,
-        sourceType: draftSourceType,
-        sourceText: draftText || `Prescription slip: ${draftFile?.name || "Uploaded scan"}`,
+        sourceType: draftFile ? "upload" : "manual",
+        sourceText: draftText || (draftFile ? `Prescription slip: ${draftFile.name}` : fallbackNotes),
         imagePreviewUrl: draftPreviewUrl || undefined,
         imageFileName: draftFile?.name,
         patient: {
           ...draftPatient,
-          ...extraction.patient,
+          ...extractedPatient,
+          // Clinician form values take precedence
+          caseId: draftPatient.caseId || extractedPatient.caseId || "",
+          patientName: draftPatient.patientName || extractedPatient.patientName || "",
+          age: draftPatient.age || extractedPatient.age || "",
+          sex: draftPatient.sex || extractedPatient.sex || "Other",
+          pregnancyStatus: draftPatient.pregnancyStatus || extractedPatient.pregnancyStatus || "Not applicable",
+          weight_kg: draftPatient.weight_kg ?? extractedPatient.weight_kg,
+          egfr: draftPatient.egfr ?? extractedPatient.egfr,
+          symptoms: draftPatient.symptoms || extractedPatient.symptoms || "",
+          suspectedDiagnosis: draftPatient.suspectedDiagnosis || extractedPatient.suspectedDiagnosis || "",
         },
-        medicines: extraction.medicines,
+        medicines: finalMedicines,
         workflowStatus: "Extraction Complete",
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
