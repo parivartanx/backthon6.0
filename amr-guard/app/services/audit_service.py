@@ -14,9 +14,10 @@ def record_audit(
     request: PrescriptionAuditRequest,
     result: AuditResult,
     db: Optional[Session] = None
-) -> None:
+) -> Optional[int]:
     """
     Persist an audit run into the database for retrospective stewardship surveillance.
+    Returns the generated database audit ID if successful.
     """
     should_close = False
     if db is None:
@@ -35,10 +36,13 @@ def record_audit(
         )
         db.add(audit_entry)
         db.commit()
+        db.refresh(audit_entry)
+        return audit_entry.id
     except Exception as e:
         db.rollback()
         # Non-fatal log so auditing never fails due to background DB logging
         print(f"[AuditService] Warning: Failed to record audit in DB: {e}")
+        return None
     finally:
         if should_close:
             db.close()

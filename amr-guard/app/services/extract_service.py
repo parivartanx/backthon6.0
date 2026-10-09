@@ -26,8 +26,31 @@ def extract_prescription_from_text(text: str) -> PrescriptionExtractionResponse:
     return _agent.extract_from_text(text)
 
 
-def extract_prescription_from_image(file_bytes: bytes, content_type: str = "image/jpeg") -> PrescriptionExtractionResponse:
+def extract_prescription_from_image(
+    file_bytes: bytes,
+    content_type: str = "image/jpeg",
+    filename: str = "",
+) -> PrescriptionExtractionResponse:
     """
-    Extract structured prescription entities from an uploaded prescription image using Vision LLM.
+    Extract structured prescription entities from an uploaded prescription image or document.
     """
-    return _agent.extract_from_image(file_bytes, content_type)
+    return _agent.extract_from_document(file_bytes, content_type=content_type, filename=filename)
+
+
+def extract_prescription_from_pdf(file_bytes: bytes) -> PrescriptionExtractionResponse:
+    """
+    Extract structured prescription entities from an uploaded PDF document (digital or scanned).
+    """
+    return _agent.extract_from_pdf(file_bytes)
+
+
+def extract_prescription_from_document(
+    file_bytes: bytes,
+    content_type: str = "application/pdf",
+    filename: str = "",
+) -> PrescriptionExtractionResponse:
+    """
+    Unified extraction from any supported document format (PDF, PNG, JPG, WebP).
+    """
+    return _agent.extract_from_document(file_bytes, content_type=content_type, filename=filename)
+

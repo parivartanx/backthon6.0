@@ -4,6 +4,7 @@ from app.services.audit_service import get_stewardship_statistics
 
 router = APIRouter()
 
+@router.get("", response_model=StatsResponse)
 @router.get("/", response_model=StatsResponse)
 def get_stats():
     """

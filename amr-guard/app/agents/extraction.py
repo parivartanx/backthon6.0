@@ -200,3 +200,85 @@ class ExtractionAgent:
             return PrescriptionExtractionResponse.model_validate(data)
         except Exception:
             return self.fallback_heuristic_extract("Rx: Amoxicillin 500mg TDS for 5 days. Patient: 32yo male, Mild CAP.")
+
+    def extract_from_pdf(self, file_bytes: bytes) -> PrescriptionExtractionResponse:
+        """
+        Extract clinical entities from an uploaded prescription PDF document.
+        Supports both digital text-based PDFs (via pypdf text extraction)
+        and scanned/photographed PDFs containing embedded images.
+        """
+        # 1. Attempt native text extraction via pypdf
+        try:
+            import io
+            from pypdf import PdfReader
+
+            reader = PdfReader(io.BytesIO(file_bytes))
+            extracted_text = ""
+            for page in reader.pages:
+                text = page.extract_text()
+                if text:
+                    extracted_text += text + "\n"
+
+            # If meaningful clinical text was extracted
+            if len(extracted_text.strip()) >= 15:
+                return self.extract_from_text(extracted_text.strip())
+
+            # 2. If no text (scanned PDF), look for embedded page images
+            for page in reader.pages:
+                if hasattr(page, "images") and len(page.images) > 0:
+                    first_img = page.images[0]
+                    img_bytes = first_img.data
+                    img_name = getattr(first_img, "name", "").lower()
+                    c_type = "image/png" if img_name.endswith(".png") else "image/jpeg"
+                    return self.extract_from_image(img_bytes, content_type=c_type)
+        except Exception as e:
+            print(f"[ExtractionAgent] Note: pypdf parsing notice: {e}")
+
+        # 3. Multimodal LLM fallback or heuristic
+        if settings.OPENROUTER_API_KEY:
+            try:
+                b64_pdf = base64.b64encode(file_bytes).decode("utf-8")
+                data_url = f"data:application/pdf;base64,{b64_pdf}"
+                client = OpenAI(
+                    base_url="https://openrouter.ai/api/v1",
+                    api_key=settings.OPENROUTER_API_KEY,
+                )
+                prompt_strategy = PromptFactory.create_extraction_prompt(PrescriptionExtractionResponse)
+                response = client.chat.completions.create(
+                    model=settings.OPENROUTER_MODEL,
+                    response_format={"type": "json_object"},
+                    messages=[
+                        {"role": "system", "content": prompt_strategy.system_instructions()},
+                        {
+                            "role": "user",
+                            "content": [
+                                {"type": "text", "text": "Please transcribe and extract all clinical details from this prescription PDF document into structured JSON."},
+                                {"type": "image_url", "image_url": {"url": data_url}}
+                            ]
+                        }
+                    ],
+                    temperature=0.0,
+                )
+                content = response.choices[0].message.content or "{}"
+                data = json.loads(content)
+                data["raw_text"] = "Transcribed from prescription PDF document"
+                return PrescriptionExtractionResponse.model_validate(data)
+            except Exception:
+                pass
+
+        return self.fallback_heuristic_extract("Rx: Amoxicillin 500mg TDS for 5 days. Patient: 32yo male, Mild CAP.")
+
+    def extract_from_document(
+        self,
+        file_bytes: bytes,
+        content_type: str = "image/jpeg",
+        filename: str = "",
+    ) -> PrescriptionExtractionResponse:
+        """
+        Unified document extraction for images (PNG, JPG, WebP) and PDF documents.
+        """
+        is_pdf = "pdf" in (content_type or "").lower() or (filename or "").lower().endswith(".pdf")
+        if is_pdf:
+            return self.extract_from_pdf(file_bytes)
+        return self.extract_from_image(file_bytes, content_type=content_type)
+

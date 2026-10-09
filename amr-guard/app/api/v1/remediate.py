@@ -4,6 +4,7 @@ from app.services.remediation_service import get_remediation_guidance
 
 router = APIRouter()
 
+@router.post("", response_model=RemediationResponse)
 @router.post("/", response_model=RemediationResponse)
 def remediate_prescription(request: RemediationRequest):
     """

@@ -11,6 +11,7 @@ from app.services.latency import LatencyService
 
 router = APIRouter()
 
+@router.post("", response_model=Union[AuditResult, ContextBundle])
 @router.post("/", response_model=Union[AuditResult, ContextBundle])
 def audit_prescription_endpoint(request: PrescriptionAuditRequest):
     """
@@ -60,20 +61,30 @@ def audit_prescription_endpoint(request: PrescriptionAuditRequest):
 
 
 @router.post("/from-image", response_model=PrescriptionExtractionResponse)
+@router.post("/from-image/", response_model=PrescriptionExtractionResponse)
+@router.post("/from-document", response_model=PrescriptionExtractionResponse)
+@router.post("/from-document/", response_model=PrescriptionExtractionResponse)
 async def audit_prescription_from_image(file: UploadFile = File(...)):
     """
-    Multimodal Vision OCR: Transcribe and parse a photographed or scanned
-    prescription image into structured clinical entities for physician review.
+    Multimodal Vision OCR & PDF Document Extraction: Transcribe and parse a
+    photographed, scanned, or digital PDF / image prescription document
+    into structured clinical entities for physician review.
     """
     try:
-        content_type = file.content_type or "image/jpeg"
+        content_type = file.content_type or "application/octet-stream"
+        filename = file.filename or ""
         file_bytes = await file.read()
         if not file_bytes:
             raise HTTPException(status_code=400, detail="Uploaded file is empty.")
 
-        extracted = extract_prescription_from_image(file_bytes, content_type)
+        extracted = extract_prescription_from_image(
+            file_bytes=file_bytes,
+            content_type=content_type,
+            filename=filename,
+        )
         return extracted
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Image prescription OCR failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Document prescription extraction failed: {str(e)}")
+
