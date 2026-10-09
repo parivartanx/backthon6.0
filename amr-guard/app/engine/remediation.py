@@ -28,7 +28,11 @@ def generate_remediations(violations: List[RuleViolation]) -> List[RemediationOp
             elif "Nitrofurantoin" in v.rule_name:
                 suggested_drug = "Oral Fosfomycin (single dose)"
         elif v.tier == 2:
-            if "Viral" in v.rule_name or v.penalty_type == "indication":
+            if "NSAID" in v.rule_name or "Duplication" in v.rule_name:
+                rec_type = "SWITCH_DRUG"
+                suggested_drug = "Paracetamol (single-agent symptomatic therapy)"
+                suggested_duration = 3
+            elif "Viral" in v.rule_name or v.penalty_type == "indication":
                 rec_type = "MANDATE_SYMPTOMATIC"
                 suggested_drug = "ORS + Zinc (if diarrhea) / Paracetamol (if URTI)"
                 suggested_duration = 0

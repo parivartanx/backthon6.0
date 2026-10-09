@@ -380,3 +380,29 @@ def is_macrolide_drug(drug_name: str) -> bool:
     return any(m in norm for m in MACROLIDE_DRUGS)
 
 
+# [PATTERN: Domain Data Structure] — Systemic NSAID registry for therapeutic duplication detection
+NSAID_DRUGS: Set[str] = {
+    "diclofenac",
+    "diclofenac sodium",
+    "diclofenac potassium",
+    "ibuprofen",
+    "naproxen",
+    "ketorolac",
+    "piroxicam",
+    "indomethacin",
+    "meloxicam",
+    "mefenamic acid",
+    "etoricoxib",
+    "celecoxib",
+    "aceclofenac",
+    "ketoprofen",
+    "nimesulide",
+}
+
+def is_nsaid_drug(drug_name: str) -> bool:
+    """Check if drug is a systemic non-steroidal anti-inflammatory drug (NSAID)."""
+    norm = normalize_text(drug_name)
+    return any(nsaid in norm for nsaid in NSAID_DRUGS)
+
+
+
