@@ -44,6 +44,8 @@ class MedicineEntry(BaseModel):
     verificationStatus: str = Field("Verified", description="Verification status: Verified, Needs Verification, Missing")
     is_nephrotoxic: Optional[bool] = Field(False, description="Nephrotoxicity potential")
     requires_egfr: Optional[bool] = Field(False, description="Requires baseline renal panel")
+    min_egfr_safe: Optional[float] = Field(30.0, description="Minimum safe eGFR cut-off")
+    is_geriatric_contraindicated: Optional[bool] = Field(False, description="Contraindicated in elderly")
     requires_tdm: Optional[bool] = Field(False, description="Requires therapeutic drug monitoring")
     outpatient_iv_restricted: Optional[bool] = Field(False, description="Restricted outpatient IV infusion")
 
