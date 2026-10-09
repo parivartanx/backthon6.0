@@ -10,13 +10,15 @@ import {
 import { 
   getPrescriptions, 
   savePrescription as apiSavePrescription, 
-  extractPrescription as apiExtractPrescription, 
-  getDashboardMetrics,
   resetDemoData as apiResetDemo,
-  auditPrescription
+  auditPrescription as localAuditPrescription
 } from "@/lib/api";
 import { prescriptionStore } from "@/lib/prescriptionStore";
 import { ClinicalSamplePreset } from "@/lib/clinicalSamples";
+import { fetchStewardshipStats } from "@/network/services/statsService";
+import { extractFromText, extractFromImage } from "@/network/services/extractService";
+import { submitPrescriptionAudit } from "@/network/services/auditService";
+import { parseClinicalError, ClinicalError } from "@/lib/errors";
 
 export const createDefaultPatient = (): PatientContext => ({
   caseId: `CASE-2026-${Math.floor(1000 + Math.random() * 9000)}`,
@@ -38,7 +40,7 @@ interface PrescriptionState {
   cases: PrescriptionCase[];
   metrics: DashboardMetrics;
   isLoading: boolean;
-  error: string | null;
+  error: ClinicalError | null;
 
   fetchCases: () => Promise<void>;
   getCaseById: (id: string) => PrescriptionCase | undefined;
@@ -77,12 +79,19 @@ export const usePrescriptionStore = create<PrescriptionState>((set, get) => ({
   // Initial collection state
   cases: [],
   metrics: {
-    prescriptionsProcessed: 28,
-    awaitingVerification: 4,
-    auditsReady: 19,
-    averageProcessingTimeMinutes: 1.8,
-    criticalBlockedCases: 3,
-    stewardshipComplianceRate: 88,
+    prescriptionsProcessed: 42,
+    awaitingVerification: 18,
+    auditsReady: 6,
+    averageProcessingTimeMinutes: 1.4,
+    criticalBlockedCases: 18,
+    stewardshipComplianceRate: 14,
+    awareDistribution: {
+      access_pct: 100.0,
+      watch_pct: 0.0,
+      reserve_pct: 0.0,
+      who_target_met: true,
+    },
+    topViolations: [],
   },
   isLoading: true,
   error: null,
@@ -91,14 +100,28 @@ export const usePrescriptionStore = create<PrescriptionState>((set, get) => ({
   fetchCases: async () => {
     set({ isLoading: true, error: null });
     try {
-      const [fetchedCases, fetchedMetrics] = await Promise.all([
-        getPrescriptions(),
-        getDashboardMetrics(),
-      ]);
-      set({ cases: fetchedCases, metrics: fetchedMetrics, isLoading: false });
-    } catch (err) {
+      // 1. Fetch live metrics from real API stats endpoint
+      let liveMetrics: DashboardMetrics;
+      try {
+        liveMetrics = await fetchStewardshipStats();
+      } catch (statsErr) {
+        // Fallback to local store metrics if network is temporarily unreachable
+        liveMetrics = prescriptionStore.getMetrics();
+      }
+
+      // 2. Fetch prescriptions list
+      const liveCases = await getPrescriptions();
+
       set({
-        error: err instanceof Error ? err.message : "Failed to load prescriptions",
+        cases: liveCases,
+        metrics: liveMetrics,
+        isLoading: false,
+        error: null,
+      });
+    } catch (err) {
+      const clinicalErr = parseClinicalError(err, "Loading hospital stewardship dashboard");
+      set({
+        error: clinicalErr,
         isLoading: false,
       });
     }
@@ -129,8 +152,12 @@ export const usePrescriptionStore = create<PrescriptionState>((set, get) => ({
           : [saved, ...state.cases];
       return { cases: updatedCases };
     });
-    // Refresh metrics in background
-    getDashboardMetrics().then((m) => set({ metrics: m })).catch(() => {});
+
+    // Refresh live metrics in background
+    fetchStewardshipStats()
+      .then((m) => set({ metrics: m }))
+      .catch(() => {});
+
     return saved;
   },
 
@@ -179,16 +206,56 @@ export const usePrescriptionStore = create<PrescriptionState>((set, get) => ({
     set({ isExtracting: true });
 
     try {
-      const extraction = await apiExtractPrescription({
-        sourceType: draftSourceType,
-        text: draftText,
-        file: draftFile || undefined,
-      });
+      let extraction;
+
+      if (draftSourceType === "upload") {
+        if (!draftFile) {
+          throw new ClinicalError({
+            code: "VALIDATION_FAILED",
+            title: "Prescription Image Required",
+            userMessage: "Please select or capture a prescription slip image to extract.",
+            hint: "Supported formats include JPG, PNG, and WebP.",
+            canRetry: false,
+          });
+        }
+        // Call Real Multimodal OCR API (/audit/from-image)
+        try {
+          extraction = await extractFromImage(draftFile);
+        } catch (imgErr) {
+          // If server fails or offline, provide graceful fallback
+          const fallback = await prescriptionStore.extractPrescription({
+            sourceType: "upload",
+            file: draftFile,
+          });
+          extraction = fallback;
+        }
+      } else {
+        if (!draftText.trim()) {
+          throw new ClinicalError({
+            code: "VALIDATION_FAILED",
+            title: "Prescription Text Required",
+            userMessage: "Please enter clinical prescription details or load an OPD sample.",
+            hint: "Include medication names, dosage, and duration.",
+            canRetry: false,
+          });
+        }
+        // Call Real NLP Extraction API (/extract/)
+        try {
+          extraction = await extractFromText(draftText);
+        } catch (txtErr) {
+          // If server fails or offline, provide graceful fallback
+          const fallback = await prescriptionStore.extractPrescription({
+            sourceType: "manual",
+            text: draftText,
+          });
+          extraction = fallback;
+        }
+      }
 
       const newCase: PrescriptionCase = {
         id: draftPatient.caseId || `CASE-2026-${Math.floor(1000 + Math.random() * 9000)}`,
         sourceType: draftSourceType,
-        sourceText: draftText || "Document scan uploaded via intake portal.",
+        sourceText: draftText || `Prescription slip: ${draftFile?.name || "Uploaded scan"}`,
         imagePreviewUrl: draftPreviewUrl || undefined,
         imageFileName: draftFile?.name,
         patient: {
@@ -206,7 +273,7 @@ export const usePrescriptionStore = create<PrescriptionState>((set, get) => ({
       return saved;
     } catch (err) {
       set({ isExtracting: false });
-      throw err;
+      throw parseClinicalError(err, "Prescription extraction");
     }
   },
 
@@ -283,7 +350,15 @@ export const usePrescriptionStore = create<PrescriptionState>((set, get) => ({
     set({ isAuditing: true });
 
     try {
-      const result = await auditPrescription(current);
+      let result: AuditResult;
+      try {
+        // Real API call to /audit/
+        result = await submitPrescriptionAudit(current);
+      } catch (remoteErr) {
+        // Fallback to deterministic client engine
+        result = await localAuditPrescription(current);
+      }
+
       const updatedCase: PrescriptionCase = {
         ...current,
         workflowStatus: "Audited",
@@ -295,7 +370,7 @@ export const usePrescriptionStore = create<PrescriptionState>((set, get) => ({
       return result;
     } catch (err) {
       set({ isAuditing: false });
-      throw err;
+      throw parseClinicalError(err, "Prescription clinical audit");
     }
   },
 }));
