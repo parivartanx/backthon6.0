@@ -128,6 +128,20 @@ export interface ExtractionResult {
   rawNotes?: string;
 }
 
+export interface BackendAWaReDistribution {
+  access_pct: number;
+  watch_pct: number;
+  reserve_pct: number;
+  who_target_met: boolean;
+}
+
+export interface BackendTopViolation {
+  rule_id: string;
+  rule_name: string;
+  count: number;
+  percentage: number;
+}
+
 export interface DashboardMetrics {
   prescriptionsProcessed: number;
   awaitingVerification: number;
@@ -135,5 +149,8 @@ export interface DashboardMetrics {
   averageProcessingTimeMinutes: number;
   criticalBlockedCases?: number;
   stewardshipComplianceRate?: number;
+  awareDistribution?: BackendAWaReDistribution;
+  topViolations?: BackendTopViolation[];
 }
+
 

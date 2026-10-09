@@ -4,31 +4,24 @@ import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AppShell } from "@/components/layout/AppShell";
 import { WorkflowStepper } from "@/components/common/WorkflowStepper";
+import { PageHeader } from "@/components/common/PageHeader";
 import { PrescriptionUpload } from "@/components/prescriptions/PrescriptionUpload";
 import { PrescriptionTextInput } from "@/components/prescriptions/PrescriptionTextInput";
 import { PatientContextForm } from "@/components/prescriptions/PatientContextForm";
 import { LoadingState } from "@/components/common/LoadingState";
 import { usePrescriptionStore } from "@/store/usePrescriptionStore";
 import { CLINICAL_SAMPLE_PRESETS, ClinicalSamplePreset } from "@/lib/clinicalSamples";
-import { 
-  FileText, 
-  UploadCloud, 
-  FlaskConical, 
-  ArrowRight, 
+import {
+  UploadCloud,
+  ArrowRight,
   AlertCircle,
-  Info
+  Info,
+  FileText,
 } from "lucide-react";
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 function NewPrescriptionContent() {
   const router = useRouter();
@@ -50,7 +43,7 @@ function NewPrescriptionContent() {
   } = usePrescriptionStore();
 
   const [validationError, setValidationError] = useState<string | null>(null);
-  const [selectedPresetId, setSelectedPresetId] = useState<string>("");
+
 
   // Sync query params (e.g. /prescriptions/new?tab=manual)
   useEffect(() => {
@@ -60,11 +53,7 @@ function NewPrescriptionContent() {
     }
   }, [searchParams, setDraftSourceType]);
 
-  const handleSelectPreset = (preset: ClinicalSamplePreset) => {
-    setSelectedPresetId(preset.id);
-    loadDraftPreset(preset);
-    setValidationError(null);
-  };
+
 
   const handleExtract = async () => {
     setValidationError(null);
@@ -101,60 +90,20 @@ function NewPrescriptionContent() {
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-12">
+      {/* Page Header with Shadcn Breadcrumbs + Back Arrow */}
+      <PageHeader
+        title="New Prescription"
+        description="Enter patient details and prescription, then verify medications before safety review."
+        backHref="/dashboard"
+        breadcrumbs={[
+          { label: "Dashboard", href: "/dashboard" },
+          { label: "New Prescription" },
+        ]}
+      />
+
       {/* Stepper: Step 1 active */}
       <WorkflowStepper currentStep={1} />
 
-      {/* Screen Header */}
-      <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-bold text-[#0D607B] tracking-tight">
-            New Prescription Intake Workspace
-          </h1>
-          <p className="text-xs text-slate-500 mt-1">
-            Digitize handwritten OPD slips or enter medication regimens for clinical data extraction
-          </p>
-        </div>
-
-        {/* Clinical Sample Scenario Selector (Shadcn UI Select) */}
-        <div className="flex items-center gap-2.5 bg-[#F1F8FC] border border-[#C9E9EB] px-3 py-1.5 rounded-xl w-full sm:w-auto">
-          <FlaskConical className="w-4 h-4 text-[#169781] shrink-0" />
-          <span className="text-xs font-semibold text-[#0D607B] shrink-0 hidden sm:inline">
-            Load Sample:
-          </span>
-          <div className="w-full sm:w-80 md:w-96">
-            <Select
-              value={selectedPresetId}
-              onValueChange={(val: string | null) => {
-                if (val) {
-                  const p = CLINICAL_SAMPLE_PRESETS.find((x) => x.id === val);
-                  if (p) handleSelectPreset(p);
-                }
-              }}
-            >
-              <SelectTrigger className="h-8.5 text-xs bg-white border-slate-200/90 text-slate-700 shadow-2xs">
-                <SelectValue placeholder="Select realistic OPD case scenario..." />
-              </SelectTrigger>
-              <SelectContent align="end" className="w-[360px] sm:w-[440px]">
-                {CLINICAL_SAMPLE_PRESETS.map((p) => (
-                  <SelectItem key={p.id} value={p.id} className="text-xs py-2 px-3">
-                    <div className="flex flex-col gap-0.5 text-left w-full pr-2">
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="font-semibold text-slate-800">{p.title}</span>
-                        <span className="text-[10px] font-medium px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 border border-slate-200 shrink-0">
-                          {p.category}
-                        </span>
-                      </div>
-                      <span className="text-[11px] text-slate-500 font-normal line-clamp-1">
-                        {p.description}
-                      </span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-      </div>
 
       {/* Validation Error Banner */}
       {validationError && (
@@ -184,7 +133,7 @@ function NewPrescriptionContent() {
               className="gap-2 text-xs font-semibold data-[state=active]:bg-white data-[state=active]:text-[#0D607B] data-[state=active]:border-b-2 data-[state=active]:border-[#169781] rounded-none h-full"
             >
               <FileText className="w-4 h-4" />
-              <span>Enter Prescription Text</span>
+              <span>Type Prescription Text</span>
             </TabsTrigger>
           </TabsList>
 
@@ -195,7 +144,10 @@ function NewPrescriptionContent() {
               <PrescriptionTextInput
                 value={draftText}
                 onChange={setDraftText}
-                onLoadSample={() => handleSelectPreset(CLINICAL_SAMPLE_PRESETS[0])}
+                onLoadSample={() => {
+                  loadDraftPreset(CLINICAL_SAMPLE_PRESETS[0]);
+                  setValidationError(null);
+                }}
                 disabled={isExtracting}
               />
             )}
@@ -213,8 +165,8 @@ function NewPrescriptionContent() {
       {/* Extraction Processing State */}
       {isExtracting && (
         <LoadingState
-          message="Extracting clinical prescription parameters..."
-          subMessage="Identifying antimicrobial molecules, strengths, frequencies, routes and durations"
+          message="Reading and organising your prescription..."
+          subMessage="Identifying medicines, dosage, frequency, and duration — please wait"
         />
       )}
 
@@ -223,7 +175,7 @@ function NewPrescriptionContent() {
         <div className="flex items-center gap-2 text-xs text-slate-500">
           <Info className="w-4 h-4 text-[#169781] shrink-0" />
           <span>
-            Phase 1 parses prescription entities into a structured, editable clinical table for verification.
+            After clicking, your prescription will be read and all medicines shown for your review before the safety check.
           </span>
         </div>
 
@@ -231,9 +183,9 @@ function NewPrescriptionContent() {
           type="button"
           onClick={handleExtract}
           disabled={isExtracting}
-          className="gap-2 px-6 py-2.5 rounded-xl bg-[#169781] hover:bg-[#117866] text-white text-xs sm:text-sm font-semibold shadow-xs"
+          className="gap-2 px-6 py-2.5 rounded-xl bg-[#169781] hover:bg-[#117866] text-white text-xs sm:text-sm font-semibold shadow-xs transition-all hover:scale-[1.01] shrink-0"
         >
-          <span>Extract Prescription Details</span>
+          <span>Read Prescription & Review Medicines</span>
           <ArrowRight className="w-4 h-4" />
         </Button>
       </div>
@@ -243,13 +195,7 @@ function NewPrescriptionContent() {
 
 export default function NewPrescriptionPage() {
   return (
-    <AppShell
-      title="New Prescription Intake"
-      breadcrumbs={[
-        { label: "Dashboard", href: "/dashboard" },
-        { label: "New Prescription" },
-      ]}
-    >
+    <AppShell title="New Prescription">
       <Suspense fallback={<div className="p-8 text-center text-xs text-slate-400">Loading workspace...</div>}>
         <NewPrescriptionContent />
       </Suspense>

@@ -151,7 +151,7 @@ export default function DoctorDashboard() {
             </Badge>
           </div>
 
-          <StatsCharts />
+          <StatsCharts awareDistribution={metrics.awareDistribution} />
         </div>
 
         {/* Quick Start Action Cards */}

@@ -17,8 +17,9 @@ import {
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PieChart as PieIcon, BarChart3, ShieldCheck } from "lucide-react";
+import { BackendAWaReDistribution } from "@/types/prescription";
 
-const AWARE_DATA = [
+const DEFAULT_AWARE_DATA = [
   { name: "Access (First-Line)", value: 58, color: "#169781" },
   { name: "Watch (High Risk)", value: 34, color: "#F59E0B" },
   { name: "Reserve (Last Resort)", value: 8, color: "#EF4444" },
@@ -33,7 +34,22 @@ const WEEKLY_AUDIT_DATA = [
   { day: "Sat", approved: 19, flagged: 4, blocked: 1 },
 ];
 
-export function StatsCharts() {
+interface StatsChartsProps {
+  awareDistribution?: BackendAWaReDistribution;
+}
+
+export function StatsCharts({ awareDistribution }: StatsChartsProps) {
+  const awareData = awareDistribution
+    ? [
+        { name: "Access (First-Line)", value: Math.round(awareDistribution.access_pct), color: "#169781" },
+        { name: "Watch (High Risk)", value: Math.round(awareDistribution.watch_pct), color: "#F59E0B" },
+        { name: "Reserve (Last Resort)", value: Math.round(awareDistribution.reserve_pct), color: "#EF4444" },
+      ]
+    : DEFAULT_AWARE_DATA;
+
+  const accessPct = awareDistribution ? Math.round(awareDistribution.access_pct) : 58;
+  const isTargetMet = awareDistribution ? awareDistribution.who_target_met : accessPct >= 60;
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
       {/* Chart 1: WHO AWaRe Spectrum Distribution */}
@@ -53,8 +69,15 @@ export function StatsCharts() {
                 </CardDescription>
               </div>
             </div>
-            <Badge variant="outline" className="text-[10px] bg-emerald-50 text-emerald-700 border-emerald-300 font-semibold">
-              58% Access
+            <Badge
+              variant="outline"
+              className={`text-[10px] font-semibold ${
+                isTargetMet
+                  ? "bg-emerald-50 text-emerald-700 border-emerald-300"
+                  : "bg-amber-50 text-amber-700 border-amber-300"
+              }`}
+            >
+              {accessPct}% Access {isTargetMet ? "(Target Met)" : "(Below Target)"}
             </Badge>
           </div>
         </CardHeader>
@@ -64,7 +87,7 @@ export function StatsCharts() {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={AWARE_DATA}
+                  data={awareData}
                   cx="50%"
                   cy="50%"
                   innerRadius={55}
@@ -72,7 +95,7 @@ export function StatsCharts() {
                   paddingAngle={4}
                   dataKey="value"
                 >
-                  {AWARE_DATA.map((entry, index) => (
+                  {awareData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>

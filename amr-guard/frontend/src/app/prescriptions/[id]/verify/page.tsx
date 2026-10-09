@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { AppShell } from "@/components/layout/AppShell";
 import { WorkflowStepper } from "@/components/common/WorkflowStepper";
+import { PageHeader } from "@/components/common/PageHeader";
 import { LoadingState } from "@/components/common/LoadingState";
 import { PrescriptionSourceViewer } from "@/components/prescriptions/PrescriptionSourceViewer";
 import { MedicineTable } from "@/components/prescriptions/MedicineTable";
@@ -201,52 +202,50 @@ export default function VerifyPrescriptionPage() {
       ]}
     >
       <div className="space-y-6 max-w-7xl mx-auto pb-12">
+        {/* Page Header with Breadcrumbs + Back Arrow */}
+        <PageHeader
+          title={isAudited ? "Safety Audit Results" : "Review Prescription Medicines"}
+          description={
+            isAudited
+              ? "View the safety check results, recommendations, and any flagged concerns for this prescription."
+              : "Check that all medicines, dosages, and durations are correct before running the safety check."
+          }
+          backHref="/dashboard"
+          breadcrumbs={[
+            { label: "Dashboard", href: "/dashboard" },
+            { label: "Prescriptions", href: "/dashboard" },
+            { label: isAudited ? "Safety Audit" : `Review ${currentCase.id}` },
+          ]}
+        />
+
         {/* Stepper: Step 2 active or Step 3 if Audited */}
         <WorkflowStepper currentStep={isAudited ? 3 : 2} />
 
-        {/* Screen Header */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2.5">
-              <h1 className="text-xl font-bold text-[#0D607B] tracking-tight">
-                {isAudited ? "AMR Sentinel Clinical Audit Console" : "Verify Prescription Details"}
-              </h1>
-              {isAudited ? (
-                <Badge variant="outline" className={`gap-1 font-semibold text-[11px] ${
-                  currentCase.auditResult?.status === "APPROVED"
-                    ? "bg-emerald-50 text-emerald-800 border-emerald-300"
-                    : currentCase.auditResult?.status === "BLOCKED"
-                    ? "bg-rose-50 text-rose-800 border-rose-300"
-                    : "bg-amber-50 text-amber-800 border-amber-300"
-                }`}>
-                  <ShieldCheck className="w-3.5 h-3.5" />
-                  <span>Audit Complete: {currentCase.auditResult?.status}</span>
-                </Badge>
-              ) : isAlreadyAudited ? (
-                <Badge variant="outline" className="gap-1 bg-[#E2FAD9] text-[#0d5c36] border-[#169781]/20 font-semibold text-[11px]">
-                  <ShieldCheck className="w-3.5 h-3.5 text-[#169781]" />
-                  <span>Ready for Audit</span>
-                </Badge>
-              ) : (
-                <Badge variant="outline" className="gap-1 bg-amber-50 text-amber-800 border-amber-300/60 font-semibold text-[11px]">
-                  <AlertCircle className="w-3.5 h-3.5 text-amber-600" />
-                  <span>Awaiting Verification</span>
-                </Badge>
-              )}
-            </div>
-            <p className="text-xs text-slate-500 mt-1">
-              Case ID: <strong className="text-slate-800">{currentCase.id}</strong> • Cross-reference extracted medication entities with original clinical slip
-            </p>
+        {/* Inline Action Toolbar */}
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <div className="flex items-center gap-2">
+            {isAudited ? (
+              <span className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg border ${
+                currentCase.auditResult?.status === "APPROVED"
+                  ? "bg-emerald-50 text-emerald-800 border-emerald-300"
+                  : currentCase.auditResult?.status === "BLOCKED"
+                  ? "bg-rose-50 text-rose-800 border-rose-300"
+                  : "bg-amber-50 text-amber-800 border-amber-300"
+              }`}>
+                <ShieldCheck className="w-3.5 h-3.5" />
+                {currentCase.auditResult?.status === "APPROVED"
+                  ? "Prescription Approved"
+                  : currentCase.auditResult?.status === "BLOCKED"
+                  ? "Prescription Blocked — Unsafe"
+                  : "Prescription Needs Review"}
+              </span>
+            ) : (
+              <span className="text-xs text-slate-500">
+                Case: <strong className="text-slate-800">{currentCase.id}</strong>
+              </span>
+            )}
           </div>
-
-          <div className="flex items-center gap-2 flex-wrap">
-            <Button asChild variant="outline" size="sm" className="gap-1.5 text-xs text-slate-600">
-              <Link href="/prescriptions/new">
-                <ArrowLeft className="w-3.5 h-3.5" />
-                <span>New Intake</span>
-              </Link>
-            </Button>
-
+          <div className="flex items-center gap-2">
             {isAudited ? (
               <Button
                 type="button"
@@ -257,7 +256,7 @@ export default function VerifyPrescriptionPage() {
                 className="gap-1.5 text-xs text-[#0D607B] border-[#C9E9EB] hover:bg-[#F1F8FC]"
               >
                 <RotateCcw className={`w-3.5 h-3.5 ${isAuditing ? "animate-spin" : ""}`} />
-                <span>Re-Audit Rules</span>
+                <span>Run Safety Check Again</span>
               </Button>
             ) : (
               <Button
@@ -268,7 +267,7 @@ export default function VerifyPrescriptionPage() {
                 className="gap-1.5 text-xs font-semibold text-white bg-[#169781] hover:bg-[#117866] shadow-xs"
               >
                 <ShieldCheck className="w-4 h-4 stroke-[2.5]" />
-                <span>{isAuditing ? "Auditing 5-Tiers..." : "Run AMR Sentinel Audit"}</span>
+                <span>{isAuditing ? "Running Safety Check..." : "Run Prescription Safety Check"}</span>
               </Button>
             )}
           </div>
