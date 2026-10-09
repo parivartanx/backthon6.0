@@ -430,7 +430,7 @@ export default function VerifyPrescriptionPage() {
                 >
                   <Link href={`/prescriptions/${currentCase.id}/remediate`}>
                     <ExternalLink className="w-3.5 h-3.5" />
-                    <span>Open Remediation Page (Stage 6)</span>
+                    <span>Open Clinical Remediation</span>
                   </Link>
                 </Button>
                 <Button

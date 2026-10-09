@@ -11,7 +11,7 @@ import {
 } from "@/types/prescription";
 import { prescriptionStore } from "./prescriptionStore";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://nine-peaches-wash.loca.lt/api/v1";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
 
 /**
  * Standard fetch helper with error handling
