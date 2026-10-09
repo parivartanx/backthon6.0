@@ -19,8 +19,7 @@ import {
   ShieldCheck,
   ArrowRight,
   ShieldBan,
-  Activity,
-  Sparkles
+  Activity
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -98,7 +97,7 @@ export default function DoctorDashboard() {
                 />
                 {/* Floating Micro-Badge */}
                 <div className="absolute -bottom-2 bg-slate-900/90 text-white text-[10px] font-mono px-2.5 py-0.5 rounded-full border border-emerald-400/40 shadow-sm flex items-center gap-1">
-                  <Sparkles className="w-3 h-3 text-[#169781]" />
+                  <Activity className="w-3 h-3 text-[#169781]" />
                   <span>WHO AWaRe Radar</span>
                 </div>
               </div>

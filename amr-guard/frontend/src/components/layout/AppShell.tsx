@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { AppSidebar } from "./AppSidebar";
 import { AppHeader } from "./AppHeader";
+import { AppFooter } from "./AppFooter";
 import { X } from "lucide-react";
 
 interface AppShellProps {
@@ -50,9 +51,10 @@ export function AppShell({ children, breadcrumbs, title }: AppShellProps) {
           breadcrumbs={breadcrumbs}
           onOpenMobile={() => setMobileMenuOpen(true)}
         />
-        <main className="flex-1 p-4 md:p-8 max-w-7xl w-full mx-auto">
+        <main className="flex-1 p-4 md:p-8 max-w-7xl w-full mx-auto min-w-0">
           {children}
         </main>
+        <AppFooter />
       </div>
     </div>
   );

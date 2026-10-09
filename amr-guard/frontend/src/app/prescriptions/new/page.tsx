@@ -116,12 +116,12 @@ function NewPrescriptionContent() {
         </div>
 
         {/* Clinical Sample Scenario Selector (Shadcn UI Select) */}
-        <div className="flex items-center gap-2 bg-[#F1F8FC] border border-[#C9E9EB] p-1.5 rounded-xl self-start md:self-auto">
-          <FlaskConical className="w-4 h-4 text-[#169781] ml-2 shrink-0" />
-          <span className="text-xs font-semibold text-[#0D607B] hidden sm:inline">
+        <div className="flex items-center gap-2.5 bg-[#F1F8FC] border border-[#C9E9EB] px-3 py-1.5 rounded-xl w-full sm:w-auto">
+          <FlaskConical className="w-4 h-4 text-[#169781] shrink-0" />
+          <span className="text-xs font-semibold text-[#0D607B] shrink-0 hidden sm:inline">
             Load Sample:
           </span>
-          <div className="w-64">
+          <div className="w-full sm:w-80 md:w-96">
             <Select
               value={selectedPresetId}
               onValueChange={(val: string | null) => {
@@ -131,13 +131,23 @@ function NewPrescriptionContent() {
                 }
               }}
             >
-              <SelectTrigger className="h-8 text-xs bg-white border-slate-200">
-                <SelectValue placeholder="Select realistic OPD case..." />
+              <SelectTrigger className="h-8.5 text-xs bg-white border-slate-200/90 text-slate-700 shadow-2xs">
+                <SelectValue placeholder="Select realistic OPD case scenario..." />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent align="end" className="w-[360px] sm:w-[440px]">
                 {CLINICAL_SAMPLE_PRESETS.map((p) => (
-                  <SelectItem key={p.id} value={p.id} className="text-xs">
-                    {p.title}
+                  <SelectItem key={p.id} value={p.id} className="text-xs py-2 px-3">
+                    <div className="flex flex-col gap-0.5 text-left w-full pr-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-semibold text-slate-800">{p.title}</span>
+                        <span className="text-[10px] font-medium px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 border border-slate-200 shrink-0">
+                          {p.category}
+                        </span>
+                      </div>
+                      <span className="text-[11px] text-slate-500 font-normal line-clamp-1">
+                        {p.description}
+                      </span>
+                    </div>
                   </SelectItem>
                 ))}
               </SelectContent>
