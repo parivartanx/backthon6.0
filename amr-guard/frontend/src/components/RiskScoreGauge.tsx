@@ -10,7 +10,7 @@ interface RiskScoreGaugeProps {
   score: number; // 0.0 to 100.0
   band: AuditTriageBand;
   penalties?: PenaltiesBreakdown;
-  status: "APPROVED" | "FLAGGED" | "BLOCKED";
+  status: "APPROVED" | "FLAGGED" | "BLOCKED" | "OVERRIDDEN";
   latencyMs?: number;
 }
 
@@ -19,7 +19,7 @@ export function RiskScoreGauge({
   band,
   penalties = { p_class: 0, p_duration: 0, p_indication: 0 },
   status,
-  latencyMs = 3,
+  latencyMs,
 }: RiskScoreGaugeProps) {
   const gradientId = useId();
   const radius = 78;
@@ -134,9 +134,15 @@ export function RiskScoreGauge({
             <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
               Score / 100
             </span>
-            <span className="text-[9px] font-mono text-emerald-600 bg-emerald-50 px-1.5 py-0.2 rounded mt-1">
-              {latencyMs}ms execution
-            </span>
+            {latencyMs !== undefined && latencyMs > 0 ? (
+              <span className="text-[9px] font-mono text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded mt-1">
+                {latencyMs}ms check
+              </span>
+            ) : (
+              <span className="text-[9px] font-medium text-[#169781] bg-[#E2FAD9] px-1.5 py-0.5 rounded mt-1">
+                Verified
+              </span>
+            )}
           </div>
         </div>
 
