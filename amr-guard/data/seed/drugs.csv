@@ -1,1 +1,20 @@
 id,generic_name,drug_class,is_antibiotic,aware_class,is_fluoroquinolone,pregnancy_contraindicated,min_age_years
+1,Amoxicillin,Aminopenicillin,True,Access,False,False,0.0
+2,Amoxicillin-Clavulanate,Beta-lactam + Inhibitor,True,Access,False,False,0.0
+3,Nitrofurantoin,Nitrofuran,True,Access,False,False,1.0
+4,Fosfomycin,Phosphonic acid,True,Access,False,False,12.0
+5,Cefalexin,First-gen Cephalosporin,True,Access,False,False,0.0
+6,Cefixime,Third-gen Cephalosporin,True,Watch,False,False,0.5
+7,Azithromycin,Macrolide,True,Watch,False,False,0.5
+8,Ciprofloxacin,Fluoroquinolone,True,Watch,True,True,18.0
+9,Levofloxacin,Fluoroquinolone,True,Watch,True,True,18.0
+10,Ofloxacin,Fluoroquinolone,True,Watch,True,True,18.0
+11,Norfloxacin,Fluoroquinolone,True,Watch,True,True,18.0
+12,Doxycycline,Tetracycline,True,Access,False,True,18.0
+13,Meropenem,Carbapenem,True,Reserve,False,False,0.25
+14,Linezolid,Oxazolidinone,True,Reserve,False,False,0.0
+15,Colistin,Polymyxin,True,Reserve,False,False,0.0
+16,Amikacin,Aminoglycoside,True,Access,False,True,0.0
+17,Gentamicin,Aminoglycoside,True,Access,False,True,0.0
+18,Oral Rehydration Salts (ORS) + Zinc,Supportive Rehydration,False,Access,False,False,0.0
+19,Paracetamol,Antipyretic Analgesic,False,Access,False,False,0.0

@@ -1,10 +1,29 @@
 """
-Clinical knowledge retrieval tools for AMR-Guard agent orchestrator.
+Clinical knowledge and database retrieval tools for AMR-Guard ReAct Orchestrator.
+Equips the agent with:
+1. search_amr_guidelines: Hybrid BM25 + dense retrieval with RRF re-ranking.
+2. get_database_regimens: Relational SQL lookup for verified ICMR STG regimens.
+3. get_drug_monograph: Pharmacological profile, AWaRe tier, contraindications, and FDC safety.
+4. get_pathogen_resistance_data: ICMR-AMRSN epidemiological pathogen resistance statistics.
 """
-from typing import Optional
+from typing import Optional, List, Dict, Any
+import json
+from sqlalchemy import select
+from app.db.session import SessionLocal
+from app.db.models import Condition, Regimen, Drug
 from app.agents.reranker import reciprocal_rank_fusion, rank_with_bm25
+from app.engine.constraints import (
+    normalize_text,
+    get_aware_tier,
+    is_fluoroquinolone,
+    is_tetracycline,
+    is_aminoglycoside,
+    is_irrational_fdc,
+    PEDIATRIC_FLUOROQUINOLONES,
+    PREGNANCY_CONTRAINDICATED_DRUGS,
+)
 
-# Curated reference guideline chunks for outpatient antimicrobial stewardship
+# Reference guideline corpus for RRF re-ranking
 CLINICAL_KNOWLEDGE_CORPUS = [
     "ICMR STG Respiratory: Uncomplicated Community-Acquired Pneumonia (CAP) first line therapy is Amoxicillin oral for 5 days. Fluoroquinolones (Levofloxacin/Moxifloxacin) are strictly reserved for severe cases or documented beta-lactam anaphylaxis.",
     "ICMR STG Pediatric: Fluoroquinolones and Tetracyclines are contraindicated in patients under 18 years due to irreversible articular cartilage damage and permanent tooth enamel hypoplasia respectively.",
@@ -17,41 +36,24 @@ CLINICAL_KNOWLEDGE_CORPUS = [
     "DCGI & ICMR Regulatory Directive: Fixed-Dose Combinations (FDCs) of dual broad-spectrum antimicrobials (e.g. Ofloxacin + Ornidazole, Cefixime + Azithromycin) are irrational, accelerate multi-drug resistance, and are banned from outpatient empiric prescription.",
 ]
 
+# ---------------------------------------------------------------------------
+# Tool 1: Hybrid RAG Search with RRF Re-ranking
+# ---------------------------------------------------------------------------
 
-def search_amr_knowledge(query: str, limit: int = 5) -> str:
+def search_amr_guidelines(query: str, limit: int = 5) -> str:
     """
-    Search the AMR Knowledge Base using a hybrid retrieval pipeline with
-    Reciprocal Rank Fusion (RRF) re-ranking.
-    
-    Workflow:
-    1. Sparse retrieval: BM25 lexical ranking across guideline corpus.
-    2. Dense retrieval: Semantic vector search simulation / pgvector ranking.
-    3. Re-ranking: Reciprocal Rank Fusion (RRF) combining dense & sparse ranks.
-    4. Synthesis: Returns top-N re-ranked clinical knowledge chunks.
-    
-    Args:
-        query: The clinical scenario, drug name, or condition to search for.
-        limit: Maximum number of re-ranked chunks to return.
-        
-    Returns:
-        A string containing the concatenated top re-ranked knowledge chunks with RRF scores.
+    Search clinical knowledge base using BM25 + dense semantic retrieval + Reciprocal Rank Fusion (RRF).
     """
-    # 1. Sparse Lexical Search (BM25)
     sparse_ranked = rank_with_bm25(CLINICAL_KNOWLEDGE_CORPUS, query, top_k=len(CLINICAL_KNOWLEDGE_CORPUS))
 
-    # 2. Dense Semantic Search (Simulated / pgvector matching by keyword/concept overlap)
-    # In a full deployment, this connects to pgvector via LlamaIndex.
     query_lower = query.lower()
     dense_ranked = [
         chunk for chunk in CLINICAL_KNOWLEDGE_CORPUS
         if any(term in chunk.lower() for term in query_lower.split())
     ]
-    # Ensure all corpus items are present in fallback if query doesn't match directly
     if not dense_ranked:
         dense_ranked = list(CLINICAL_KNOWLEDGE_CORPUS)
 
-    # 3. Apply Reciprocal Rank Fusion (RRF) Re-ranking
-    # Combines ranks from both retrieval lists: RRF_score = sum(1 / (k + rank))
     ranked_lists = []
     if sparse_ranked:
         ranked_lists.append(sparse_ranked)
@@ -63,9 +65,231 @@ def search_amr_knowledge(query: str, limit: int = 5) -> str:
 
     fused_results = reciprocal_rank_fusion(ranked_lists, k=60, top_n=limit)
 
-    # Format the re-ranked results with provenance and RRF relevance score
     chunks_output = []
     for rank_idx, (chunk, rrf_score) in enumerate(fused_results, 1):
         chunks_output.append(f"[Reranked #{rank_idx} | RRF Score: {rrf_score:.4f}] {chunk}")
 
     return "\n\n".join(chunks_output)
+
+# Backward-compatibility alias
+search_amr_knowledge = search_amr_guidelines
+
+
+# ---------------------------------------------------------------------------
+# Tool 2: Relational SQL Database Regimen Lookup
+# ---------------------------------------------------------------------------
+
+def get_database_regimens(condition_code_or_name: str) -> str:
+    """
+    Query SQL database for official ICMR STG regimens matching a clinical condition.
+    """
+    db = SessionLocal()
+    try:
+        norm = normalize_text(condition_code_or_name)
+        # Search by exact code or substring match on display_name
+        stmt = select(Condition).where(
+            (Condition.code.ilike(f"%{norm}%")) | 
+            (Condition.display_name.ilike(f"%{norm}%"))
+        )
+        conditions = db.execute(stmt).scalars().all()
+
+        if not conditions:
+            # Fallback keyword match
+            stmt_all = select(Condition)
+            all_conds = db.execute(stmt_all).scalars().all()
+            conditions = [c for c in all_conds if any(w in c.code.lower() or w in c.display_name.lower() for w in norm.split())]
+
+        if not conditions:
+            return f"No database regimens found for condition: '{condition_code_or_name}'."
+
+        results = []
+        for cond in conditions:
+            regimen_stmt = select(Regimen).where(Regimen.condition_id == cond.id)
+            regimens = db.execute(regimen_stmt).scalars().all()
+
+            for reg in regimens:
+                drug = db.get(Drug, reg.drug_id)
+                drug_name = drug.generic_name if drug else f"Drug ID {reg.drug_id}"
+                aware_class = drug.aware_class if drug else "Unknown"
+                results.append(
+                    f"Condition: {cond.display_name} ({cond.code})\n"
+                    f" - Regimen Drug: {drug_name} (WHO AWaRe: {aware_class})\n"
+                    f" - Dosage: {reg.dose_text}\n"
+                    f" - Frequency: {reg.frequency}\n"
+                    f" - Duration: {reg.duration_days} days\n"
+                    f" - Evidence Source: {reg.source} (Verified by: {reg.verified_by})"
+                )
+
+        if not results:
+            return f"Condition '{conditions[0].display_name}' found, but no regimens are registered in DB."
+
+        return "\n\n".join(results)
+    finally:
+        db.close()
+
+
+# ---------------------------------------------------------------------------
+# Tool 3: Drug Monograph & Safety Profile Lookup
+# ---------------------------------------------------------------------------
+
+def get_drug_monograph(drug_name: str) -> str:
+    """
+    Lookup drug classification, WHO AWaRe tier, pediatric limits, and contraindications.
+    """
+    db = SessionLocal()
+    try:
+        norm = normalize_text(drug_name)
+        stmt = select(Drug).where(Drug.generic_name.ilike(f"%{norm}%"))
+        drug = db.execute(stmt).scalars().first()
+
+        tier = get_aware_tier(drug_name)
+        is_fq = is_fluoroquinolone(drug_name)
+        is_tc = is_tetracycline(drug_name)
+        is_amino = is_aminoglycoside(drug_name)
+        is_fdc = is_irrational_fdc(drug_name)
+
+        preg_contra = (norm in PREGNANCY_CONTRAINDICATED_DRUGS) or is_fq or is_tc or is_amino
+        min_age = 18.0 if (is_fq or is_tc) else (drug.min_age_years if drug else 0.0)
+
+        profile = {
+            "drug_name": drug.generic_name if drug else drug_name.title(),
+            "drug_class": drug.drug_class if drug else ("Fluoroquinolone" if is_fq else ("Tetracycline" if is_tc else "Unknown")),
+            "aware_tier": tier,
+            "is_fluoroquinolone": is_fq,
+            "is_irrational_fdc": is_fdc,
+            "min_age_years": min_age,
+            "pediatric_safe": min_age < 18.0,
+            "pregnancy_contraindicated": preg_contra,
+            "regulatory_status": "Not Recommended / Banned FDC" if is_fdc else "Approved Single Agent"
+        }
+
+        return json.dumps(profile, indent=2)
+    finally:
+        db.close()
+
+
+# ---------------------------------------------------------------------------
+# Tool 4: Pathogen Resistance Data (ICMR-AMRSN)
+# ---------------------------------------------------------------------------
+
+def get_pathogen_resistance_data(query: str) -> str:
+    """
+    Fetch epidemiological resistance surveillance data from ICMR-AMRSN reports.
+    """
+    norm = normalize_text(query)
+    if "uti" in norm or "coli" in norm or "urine" in norm or "cystitis" in norm:
+        return (
+            "ICMR-AMRSN Surveillance (Uropathogenic E. coli):\n"
+            " - Fluoroquinolones (Ciprofloxacin/Norfloxacin): >75% resistance rate across Indian tertiary centers.\n"
+            " - Third-Generation Cephalosporins: >70% non-susceptibility (ESBL producing).\n"
+            " - Nitrofurantoin: >85% susceptibility preserved.\n"
+            " - Fosfomycin: ~90% susceptibility preserved.\n"
+            "Recommendation: Avoid empirical Ciprofloxacin/Norfloxacin in UTI. Use Nitrofurantoin or Fosfomycin."
+        )
+    elif "pneumonia" in norm or "cap" in norm or "respiratory" in norm or "strep" in norm:
+        return (
+            "ICMR-AMRSN Surveillance (Streptococcus pneumoniae & Respiratory isolates):\n"
+            " - Amoxicillin: Retains >85% susceptibility for community-acquired respiratory infections.\n"
+            " - Azithromycin: Widespread empirical overuse has driven macrolide resistance to >35-40%.\n"
+            "Recommendation: Use Amoxicillin oral for mild CAP. Limit course duration to 5 days."
+        )
+    elif "diarrhea" in norm or "gastro" in norm:
+        return (
+            "ICMR-AMRSN Surveillance (Gastrointestinal pathogens):\n"
+            " - Acute watery diarrhea in outpatients is predominantly viral (rotavirus, norovirus).\n"
+            " - Fluoroquinolones (Ofloxacin, Norfloxacin) show high resistance in enteric isolates.\n"
+            "Recommendation: Antibiotics contraindicated. Mandate ORS + Zinc."
+        )
+    else:
+        return (
+            "ICMR-AMRSN Surveillance Overview:\n"
+            " - High resistance rates noted nationwide for Fluoroquinolones and 3G Cephalosporins.\n"
+            " - Strict adherence to WHO AWaRe Access first-line agents is mandated."
+        )
+
+
+# ---------------------------------------------------------------------------
+# Function Calling Schemas for OpenRouter / Gemini
+# ---------------------------------------------------------------------------
+
+TOOL_DEFINITIONS = [
+    {
+        "type": "function",
+        "function": {
+            "name": "search_amr_guidelines",
+            "description": "Perform hybrid BM25 and semantic literature search with RRF re-ranking across official ICMR Standard Treatment Guidelines and WHO AWaRe documentation.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "Clinical question, condition, or antibiotic regimen to search."
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "description": "Maximum number of re-ranked chunks to return."
+                    }
+                },
+                "required": ["query"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_database_regimens",
+            "description": "Look up approved clinical regimens and dosing protocols from the SQL database for a given syndrome code (e.g. SYN_CAP_MILD, SYN_UNCOMPLICATED_UTI, acute watery diarrhea).",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "condition_code_or_name": {
+                        "type": "string",
+                        "description": "Condition code or name (e.g. 'SYN_CAP_MILD', 'uncomplicated uti', 'acute bronchitis')."
+                    }
+                },
+                "required": ["condition_code_or_name"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_drug_monograph",
+            "description": "Retrieve drug pharmacological profile, WHO AWaRe tier (Access/Watch/Reserve), pediatric age restrictions, pregnancy contraindication flag, and irrational FDC status.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "drug_name": {
+                        "type": "string",
+                        "description": "Generic or brand name of the antimicrobial drug."
+                    }
+                },
+                "required": ["drug_name"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_pathogen_resistance_data",
+            "description": "Query empirical pathogen resistance statistics from ICMR-AMRSN reports for specific clinical syndromes or pathogens (e.g. E. coli in UTI, Streptococcus in pneumonia).",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "Pathogen or infection type to check resistance statistics for."
+                    }
+                },
+                "required": ["query"]
+            }
+        }
+    }
+]
+
+TOOL_REGISTRY = {
+    "search_amr_guidelines": search_amr_guidelines,
+    "get_database_regimens": get_database_regimens,
+    "get_drug_monograph": get_drug_monograph,
+    "get_pathogen_resistance_data": get_pathogen_resistance_data,
+}

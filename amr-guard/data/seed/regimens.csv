@@ -1,1 +1,11 @@
 id,condition_id,drug_id,dose_text,frequency,duration_days,source,verified_by
+1,1,1,500mg,TID,5,ICMR STG CAP 2022,ICMR Stewardship Committee
+2,2,3,100mg,BID,5,ICMR STG UTI 2022,ICMR Stewardship Committee
+3,2,4,3g single sachet,Once,1,ICMR STG UTI 2022,ICMR Stewardship Committee
+4,3,19,650mg SOS,PRN,3,ICMR STG Respiratory 2022,Symptomatic Care Panel
+5,4,19,650mg SOS,PRN,3,ICMR STG Common Cold,Symptomatic Care Panel
+6,5,19,650mg SOS,PRN,3,ICMR STG URTI,Symptomatic Care Panel
+7,7,18,1 sachet in 1L water + 20mg Zinc,Daily,14,ICMR STG Diarrhea & WHO,WHO IMCI Committee
+8,8,1,500mg,TID,5,ICMR STG Pharyngitis,ICMR Stewardship Committee
+9,9,1,40-45 mg/kg/day,TID,5,ICMR Pediatric STG AOM,Pediatric Stewardship Panel
+10,10,5,500mg,QID,5,ICMR STG SSTI,ICMR Stewardship Committee
