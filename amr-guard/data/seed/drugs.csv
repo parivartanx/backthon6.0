@@ -79,3 +79,128 @@ id,generic_name,drug_class,is_antibiotic,aware_class,is_fluoroquinolone,pregnanc
 78,Dextromethorphan,Antitussive,False,Access,False,False,6.0,False,False,30.0,False,False,False
 79,Normal Saline Nasal Drops,Nasal Decongestant,False,Access,False,False,0.0,False,False,30.0,False,False,False
 80,Zinc Sulfate,Micronutrient Supplement,False,Access,False,False,0.0,False,False,30.0,False,False,False
+81,Penicillin G,Natural Penicillin,True,Access,False,False,0.0,False,False,30.0,False,False,False
+82,Penicillin V,Natural Penicillin,True,Access,False,False,0.0,False,False,30.0,False,False,False
+83,Benzathine penicillin G,Natural Penicillin,True,Access,False,False,0.0,False,False,30.0,False,False,False
+84,Procaine penicillin G,Natural Penicillin,True,Access,False,False,0.0,False,False,30.0,False,False,False
+85,Bacampicillin,Aminopenicillin,True,Access,False,False,0.0,False,False,30.0,False,False,False
+86,Pivampicillin,Aminopenicillin,True,Access,False,False,0.0,False,False,30.0,False,False,False
+87,Talampicillin,Aminopenicillin,True,Access,False,False,0.0,False,False,30.0,False,False,False
+88,Epicillin,Beta-Lactams,True,Access,False,False,0.0,False,False,30.0,False,False,False
+89,Hetacillin,Beta-Lactams,True,Access,False,False,0.0,False,False,30.0,False,False,False
+90,Methicillin,Beta-Lactams,True,Access,False,False,0.0,True,True,30.0,False,False,False
+91,Nafcillin,Beta-Lactams,True,Access,False,False,0.0,False,False,30.0,False,False,False
+92,Oxacillin,Beta-Lactams,True,Access,False,False,0.0,False,False,30.0,False,False,False
+93,Dicloxacillin,Aminopenicillin,True,Access,False,False,0.0,False,False,30.0,False,False,False
+94,Flucloxacillin,Aminopenicillin,True,Access,False,False,0.0,False,False,30.0,False,False,False
+95,Temocillin,Beta-Lactams,True,Access,False,False,0.0,False,False,30.0,False,False,False
+96,Carbenicillin,Beta-Lactams,True,Access,False,False,0.0,False,False,30.0,False,False,False
+97,Ticarcillin,Beta-Lactams,True,Access,False,False,0.0,False,False,30.0,False,False,False
+98,Piperacillin,Beta-Lactams,True,Access,False,False,0.0,False,False,30.0,False,False,False
+99,Mezlocillin,Beta-Lactams,True,Access,False,False,0.0,False,False,30.0,False,False,False
+100,Azlocillin,Beta-Lactams,True,Access,False,False,0.0,False,False,30.0,False,False,False
+101,Sulbenicillin,Beta-Lactams,True,Access,False,False,0.0,False,False,30.0,False,False,False
+102,Ampicillin-sulbactam,Aminopenicillin,True,Access,False,False,0.0,False,False,30.0,False,False,False
+103,Ticarcillin-clavulanate,Beta-Lactams,True,Access,False,False,0.0,False,False,30.0,False,False,False
+104,Amoxicillin-sulbactam,Aminopenicillin,True,Access,False,False,0.0,False,False,30.0,False,False,False
+105,Cephalexin,First-gen Cephalosporin,True,Access,False,False,0.0,False,False,30.0,False,False,False
+106,Cephradine,First-gen Cephalosporin,True,Access,False,False,0.0,False,False,30.0,False,False,False
+107,Cephapirin,Cephalosporin,True,Access,False,False,0.0,False,False,30.0,False,False,False
+108,Cephalothin,Cephalosporin,True,Access,False,False,0.0,True,True,30.0,False,False,False
+109,Cefazaflur,Cephalosporin,True,Access,False,False,0.0,False,False,30.0,False,False,False
+110,Cefroxadine,Cephalosporin,True,Access,False,False,0.0,False,False,30.0,False,False,False
+111,Cefaclor,Second-gen Cephalosporin,True,Watch,False,False,0.0,False,False,30.0,False,False,False
+112,Cefamandole,Cephalosporin,True,Access,False,False,0.0,False,False,30.0,False,False,False
+113,Cefoxitin,Second-gen Cephalosporin,True,Watch,False,False,0.0,False,False,30.0,False,False,False
+114,Ceforanide,Cephalosporin,True,Access,False,False,0.0,False,False,30.0,False,False,False
+115,Cefotetan,Second-gen Cephalosporin,True,Watch,False,False,0.0,False,False,30.0,False,False,False
+116,Cefonicid,Cephalosporin,True,Access,False,False,0.0,False,False,30.0,False,False,False
+117,Cefmetazole,Cephalosporin,True,Access,False,False,0.0,False,False,30.0,False,False,False
+118,Cefbuperazone,Cephalosporin,True,Access,False,False,0.0,False,False,30.0,False,False,False
+119,Cefcapene,Cephalosporin,True,Access,False,False,0.0,False,False,30.0,False,False,False
+120,Cefdaloxime,Cephalosporin,True,Access,False,False,0.0,False,False,30.0,False,False,False
+121,Cefditoren,Third-gen Cephalosporin,True,Watch,False,False,0.0,False,False,30.0,False,False,False
+122,Cefetamet,Cephalosporin,True,Access,False,False,0.0,False,False,30.0,False,False,False
+123,Cefmenoxime,Cephalosporin,True,Access,False,False,0.0,False,False,30.0,False,False,False
+124,Cefodizime,Cephalosporin,True,Access,False,False,0.0,False,False,30.0,False,False,False
+125,Cefoperazone,Cephalosporin,True,Watch,False,False,0.0,False,False,30.0,False,False,False
+126,Cefpimizole,Cephalosporin,True,Access,False,False,0.0,False,False,30.0,False,False,False
+127,Cefteram,Cephalosporin,True,Access,False,False,0.0,False,False,30.0,False,False,False
+128,Ceftibuten,Third-gen Cephalosporin,True,Watch,False,False,0.0,False,False,30.0,False,False,False
+129,Ceftiofur,Cephalosporin,True,Access,False,False,0.0,False,False,30.0,False,False,False
+130,Ceftizoxime,Cephalosporin,True,Access,False,False,0.0,False,False,30.0,False,False,False
+131,Latamoxef,Penicillin,True,Access,False,False,0.0,False,False,30.0,False,False,False
+132,Cefepime,Fourth-gen Cephalosporin,True,Watch,False,False,0.0,False,False,30.0,False,False,False
+133,Cefozopran,Cephalosporin,True,Access,False,False,0.0,False,False,30.0,False,False,False
+134,Cefpirome,Fourth-gen Cephalosporin,True,Watch,False,False,0.0,False,False,30.0,False,False,False
+135,Cefquinome,Cephalosporin,True,Access,False,False,0.0,False,False,30.0,False,False,False
+136,Ceftobiprole,Fifth-gen / Siderophore Cephalosporin,True,Reserve,False,False,0.0,False,False,30.0,False,False,False
+137,Ceftaroline,Fifth-gen / Siderophore Cephalosporin,True,Watch,False,False,0.0,False,False,30.0,False,False,False
+138,Imipenem,Carbapenem,True,Reserve,False,False,0.0,False,False,30.0,False,False,True
+139,Doripenem,Carbapenem,True,Reserve,False,False,0.0,False,False,30.0,False,False,True
+140,Panipenem,Carbapenem,True,Reserve,False,False,0.0,False,False,30.0,False,False,True
+141,Biapenem,Carbapenem,True,Reserve,False,False,0.0,False,False,30.0,False,False,True
+142,Tebipenem,Carbapenem,True,Reserve,False,False,0.0,False,False,30.0,False,False,True
+143,Tomopenem,Carbapenem,True,Reserve,False,False,0.0,False,False,30.0,False,False,True
+144,Tigemonam,Monobactam,True,Reserve,False,False,0.0,False,False,30.0,False,False,False
+145,Carumonam,Monobactam,True,Reserve,False,False,0.0,False,False,30.0,False,False,False
+146,Telithromycin,Macrolide,True,Watch,False,False,0.0,False,False,30.0,False,False,False
+147,Dirithromycin,Macrolide,True,Watch,False,False,0.0,False,False,30.0,False,False,False
+148,Josamycin,Macrolides & Ketolides,True,Watch,False,False,0.0,False,False,30.0,False,False,False
+149,Kitasamycin,Macrolides & Ketolides,True,Watch,False,False,0.0,False,False,30.0,False,False,False
+150,Midecamycin,Macrolides & Ketolides,True,Watch,False,False,0.0,False,False,30.0,False,False,False
+151,Oleandomycin,Macrolides & Ketolides,True,Watch,False,False,0.0,False,False,30.0,False,False,False
+152,Spiramycin,Macrolide,True,Watch,False,False,0.0,False,False,30.0,False,False,False
+153,Troleandomycin,Macrolides & Ketolides,True,Watch,False,False,0.0,False,False,30.0,False,False,False
+154,Tylosin,Macrolides & Ketolides,True,Watch,False,False,0.0,False,False,30.0,False,False,False
+155,Fidaxomicin,Macrolides & Ketolides,True,Watch,False,False,0.0,False,False,30.0,False,False,False
+156,Solithromycin,Macrolide,True,Watch,False,False,0.0,False,False,30.0,False,False,False
+157,Cethromycin,Macrolide,True,Watch,False,False,0.0,False,False,30.0,False,False,False
+158,Enoxacin,Fluoroquinolones & Quinolones,True,Watch,False,False,0.0,False,False,30.0,False,False,False
+159,Gatifloxacin,Fluoroquinolone,True,Watch,False,False,0.0,False,False,30.0,False,False,False
+160,Lomefloxacin,Fluoroquinolone,True,Watch,True,True,18.0,False,False,30.0,False,False,False
+161,Nalidixic acid,Fluoroquinolone,True,Watch,False,False,0.0,False,False,30.0,False,False,False
+162,Cinoxacin,Fluoroquinolone,True,Watch,False,False,0.0,False,False,30.0,False,False,False
+163,Pipemidic acid,Fluoroquinolones & Quinolones,True,Watch,False,False,0.0,False,False,30.0,False,False,False
+164,Oxolinic acid,Specialized & Miscellaneous Antimicrobials,True,Access,False,False,0.0,False,False,30.0,False,False,False
+165,Flumequine,Fluoroquinolones & Quinolones,True,Watch,False,False,0.0,False,False,30.0,False,False,False
+166,Pefloxacin,Fluoroquinolone,True,Watch,True,True,18.0,False,False,30.0,False,False,False
+167,Fleroxacin,Fluoroquinolones & Quinolones,True,Watch,False,False,0.0,False,False,30.0,False,False,False
+168,Sparfloxacin,Fluoroquinolone,True,Watch,True,True,18.0,False,False,30.0,False,False,False
+169,Tosufloxacin,Fluoroquinolone,True,Watch,False,False,0.0,False,False,30.0,False,False,False
+170,Balofloxacin,Fluoroquinolone,True,Watch,True,True,18.0,False,False,30.0,False,False,False
+171,Delafloxacin,Fluoroquinolone,True,Watch,False,False,0.0,False,False,30.0,False,False,False
+172,Ozenoxacin,Fluoroquinolones & Quinolones,True,Watch,False,False,0.0,False,False,30.0,False,False,False
+173,Besifloxacin,Fluoroquinolone,True,Watch,False,False,0.0,False,False,30.0,False,False,False
+174,Prulifloxacin,Fluoroquinolone,True,Watch,False,False,0.0,False,False,30.0,False,False,False
+175,Pazufloxacin,Fluoroquinolone,True,Watch,False,False,0.0,False,False,30.0,False,False,False
+176,Demeclocycline,Tetracycline,True,Access,False,True,18.0,False,False,30.0,False,False,False
+177,Oxytetracycline,Tetracycline,True,Access,False,True,18.0,False,False,30.0,False,False,False
+178,Chlortetracycline,Tetracycline,True,Access,False,True,18.0,False,False,30.0,False,False,False
+179,Methacycline,Tetracycline,True,Access,False,False,0.0,False,False,30.0,False,False,False
+180,Rolitetracycline,Tetracycline,True,Access,False,True,18.0,False,False,30.0,False,False,False
+181,Lymecycline,Tetracycline,True,Access,False,False,0.0,False,False,30.0,False,False,False
+182,Meclocycline,Tetracycline,True,Access,False,False,0.0,False,False,30.0,False,False,False
+183,Eravacycline,Tetracycline,True,Access,False,False,0.0,False,False,30.0,False,False,False
+184,Omadacycline,Tetracycline,True,Access,False,False,0.0,False,False,30.0,False,False,False
+185,Sarecycline,Tetracycline,True,Access,False,False,0.0,False,False,30.0,False,False,False
+186,Neomycin,Aminoglycoside,True,Access,False,False,0.0,True,True,30.0,False,False,False
+187,Netilmicin,Aminoglycoside,True,Access,False,False,0.0,True,True,30.0,False,False,False
+188,Paromomycin,Aminoglycoside,True,Access,False,False,0.0,True,True,30.0,False,False,False
+189,Spectinomycin,Aminoglycoside,True,Access,False,False,0.0,False,False,30.0,False,False,False
+190,Sisomicin,Aminoglycosides & Aminocyclitols,True,Access,False,False,0.0,True,True,30.0,False,False,False
+191,Dibekacin,Aminoglycosides & Aminocyclitols,True,Access,False,False,0.0,True,True,30.0,False,False,False
+192,Ribostamycin,Aminoglycosides & Aminocyclitols,True,Access,False,False,0.0,True,True,30.0,False,False,False
+193,Framycetin,Aminoglycosides & Aminocyclitols,True,Access,False,False,0.0,False,False,30.0,False,False,False
+194,Isepamicin,Aminoglycosides & Aminocyclitols,True,Access,False,False,0.0,True,True,30.0,False,False,False
+195,Arbekacin,Aminoglycosides & Aminocyclitols,True,Access,False,False,0.0,True,True,30.0,False,False,False
+196,Telavancin,Glycopeptide,True,Watch,False,False,0.0,True,True,30.0,False,False,False
+197,Dalbavancin,Glycopeptide,True,Watch,False,False,0.0,False,False,30.0,False,False,False
+198,Oritavancin,Glycopeptide,True,Watch,False,False,0.0,False,False,30.0,False,False,False
+199,Ramoplanin,Glycopeptides & Lipoglycopeptides,True,Watch,False,False,0.0,False,False,30.0,False,False,False
+200,Lincomycin,Lincosamide,True,Access,False,False,0.0,False,False,30.0,False,False,False
+201,Pirlimycin,Lincosamides,True,Access,False,False,0.0,False,False,30.0,False,False,False
+202,Radezolid,Oxazolidinones,True,Reserve,False,False,0.0,False,False,30.0,False,False,False
+203,Secnidazole,Nitroimidazole,True,Access,False,False,0.0,False,False,30.0,False,False,False
+204,Fusidic acid,Steroidal Antibacterials,True,Access,False,False,0.0,False,False,30.0,False,False,False
+205,Mupirocin,Isoleucyl-tRNA Synthetase Inhibitors,True,Access,False,False,0.0,False,False,30.0,False,False,False
