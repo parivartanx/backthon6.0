@@ -8,6 +8,7 @@ from app.db.session import SessionLocal
 from app.db.models import Audit
 from app.schemas.audit import AuditResult, PrescriptionAuditRequest
 from app.schemas.stats import StatsResponse, AWaReDistribution, TopViolationStat
+from app.services.latency import LatencyService
 
 def record_audit(
     request: PrescriptionAuditRequest,
@@ -150,6 +151,8 @@ def get_stewardship_statistics(db: Optional[Session] = None) -> StatsResponse:
             "DATA_SOURCE_INTEGRITY": "Verified SHA256 against ICMR/NCDC Manifest"
         }
 
+        latency_summary = LatencyService.calculate_cohort_statistics(db)
+
         return StatsResponse(
             total_audits=total_live if total_live >= 5 else (128 + total_live),
             blocked_count=blocked,
@@ -165,6 +168,7 @@ def get_stewardship_statistics(db: Optional[Session] = None) -> StatsResponse:
             ),
             top_violations=top_viols,
             surveillance_benchmarks=benchmarks,
+            latency_metrics=latency_summary,
         )
     finally:
         if should_close:

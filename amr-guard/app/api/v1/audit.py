@@ -7,6 +7,7 @@ from app.schemas.extract import PrescriptionExtractionResponse
 from app.engine.scoring import audit_prescription
 from app.services.extract_service import extract_prescription_from_image
 from app.services.audit_service import record_audit
+from app.services.latency import LatencyService
 
 router = APIRouter()
 
@@ -20,15 +21,19 @@ def audit_prescription_endpoint(request: PrescriptionAuditRequest):
     """
     try:
         if request.patient and request.prescription_lines:
-            # 1. Pure deterministic verification engine (<5ms latency)
-            result = audit_prescription(
-                patient=request.patient,
-                prescription_lines=request.prescription_lines,
-                canonical_syndrome=request.canonical_syndrome,
-                has_culture_report=request.has_culture_report,
-                has_positive_microbiology=request.has_positive_microbiology,
-                is_outpatient=request.is_outpatient,
-            )
+            # 1. Pure deterministic verification engine (<5ms latency SLA)
+            with LatencyService.profile_stage(
+                "deterministic_verification",
+                sla_limit_ms=LatencyService.DEFAULT_DETERMINISTIC_SLA_MS,
+            ):
+                result = audit_prescription(
+                    patient=request.patient,
+                    prescription_lines=request.prescription_lines,
+                    canonical_syndrome=request.canonical_syndrome,
+                    has_culture_report=request.has_culture_report,
+                    has_positive_microbiology=request.has_positive_microbiology,
+                    is_outpatient=request.is_outpatient,
+                )
 
             # 2. Record audit run in database for dashboard surveillance
             record_audit(request, result)
@@ -36,8 +41,12 @@ def audit_prescription_endpoint(request: PrescriptionAuditRequest):
             return result
 
         elif request.scenario:
-            # Hybrid RAG Agent Orchestrator
-            context = run_verification_orchestrator(request.scenario)
+            # Hybrid RAG Agent Orchestrator (<3000ms latency SLA)
+            with LatencyService.profile_stage(
+                "rag_orchestrator",
+                sla_limit_ms=LatencyService.DEFAULT_RAG_SLA_MS,
+            ):
+                context = run_verification_orchestrator(request.scenario)
             return context
         else:
             raise HTTPException(
