@@ -1,2 +1,2 @@
-"use client";
-export function PrescriptionUpload() { return <div>PrescriptionUpload stub</div>; }
+// [SOLID: OCP & DRY] Re-export actual PrescriptionUpload implementation
+export * from "./prescriptions/PrescriptionUpload";
