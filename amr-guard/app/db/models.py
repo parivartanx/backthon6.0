@@ -15,6 +15,12 @@ class Drug(Base):
     is_fluoroquinolone = Column(Boolean)
     pregnancy_contraindicated = Column(Boolean)
     min_age_years = Column(Float)
+    is_nephrotoxic = Column(Boolean, default=False)
+    requires_egfr = Column(Boolean, default=False)
+    min_egfr_safe = Column(Float, default=30.0)
+    is_geriatric_contraindicated = Column(Boolean, default=False)
+    requires_tdm = Column(Boolean, default=False)
+    outpatient_iv_restricted = Column(Boolean, default=False)
 
 class Brand(Base):
     __tablename__ = "brands"

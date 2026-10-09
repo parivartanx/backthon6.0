@@ -70,6 +70,12 @@ def seed_database():
                         existing.is_fluoroquinolone = row["is_fluoroquinolone"].lower() == "true"
                         existing.pregnancy_contraindicated = row["pregnancy_contraindicated"].lower() == "true"
                         existing.min_age_years = float(row["min_age_years"])
+                        existing.is_nephrotoxic = row.get("is_nephrotoxic", "False").lower() == "true"
+                        existing.requires_egfr = row.get("requires_egfr", "False").lower() == "true"
+                        existing.min_egfr_safe = float(row.get("min_egfr_safe", "30.0") or 30.0)
+                        existing.is_geriatric_contraindicated = row.get("is_geriatric_contraindicated", "False").lower() == "true"
+                        existing.requires_tdm = row.get("requires_tdm", "False").lower() == "true"
+                        existing.outpatient_iv_restricted = row.get("outpatient_iv_restricted", "False").lower() == "true"
                     else:
                         db.add(Drug(
                             id=d_id,
@@ -79,7 +85,13 @@ def seed_database():
                             aware_class=row["aware_class"],
                             is_fluoroquinolone=row["is_fluoroquinolone"].lower() == "true",
                             pregnancy_contraindicated=row["pregnancy_contraindicated"].lower() == "true",
-                            min_age_years=float(row["min_age_years"])
+                            min_age_years=float(row["min_age_years"]),
+                            is_nephrotoxic=row.get("is_nephrotoxic", "False").lower() == "true",
+                            requires_egfr=row.get("requires_egfr", "False").lower() == "true",
+                            min_egfr_safe=float(row.get("min_egfr_safe", "30.0") or 30.0),
+                            is_geriatric_contraindicated=row.get("is_geriatric_contraindicated", "False").lower() == "true",
+                            requires_tdm=row.get("requires_tdm", "False").lower() == "true",
+                            outpatient_iv_restricted=row.get("outpatient_iv_restricted", "False").lower() == "true",
                         ))
                     count_drugs += 1
             db.commit()

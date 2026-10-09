@@ -9,6 +9,12 @@ class NormalizedDrug(BaseModel):
     is_fluoroquinolone: bool = False
     pregnancy_contraindicated: bool = False
     min_age_years: Optional[float] = None
+    is_nephrotoxic: bool = False
+    requires_egfr: bool = False
+    min_egfr_safe: float = 30.0
+    is_geriatric_contraindicated: bool = False
+    requires_tdm: bool = False
+    outpatient_iv_restricted: bool = False
 
 class NormalizedRule(BaseModel):
     code: str
