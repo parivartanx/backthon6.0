@@ -20,7 +20,14 @@ from app.engine.constraints import (
     PREGNANCY_CONTRAINDICATED_DRUGS,
     VIRAL_SELF_LIMITING_SYNDROMES,
     SYNDROMES_WITH_ACCESS_FIRST_LINE,
+    is_penicillin_drug,
+    is_cephalosporin_drug,
+    is_carbapenem_drug,
+    is_sulfa_drug,
+    is_macrolide_drug,
+    PEDIATRIC_DAILY_DOSE_CEILINGS_MG_KG,
 )
+
 
 
 # ---------------------------------------------------------------------------
@@ -217,6 +224,321 @@ def check_nephrotoxic_renal_safety(
             )
 
     return None
+
+
+# [PATTERN: Specification] — Tier 1 & Tier 2 Drug Allergy Safety Verification
+def check_drug_allergy_contraindications(
+    patient: PatientContext,
+    line: PrescriptionLine
+) -> Optional[RuleViolation]:
+    """
+    Tier 1 / Tier 2 Drug Allergy Safety Gate.
+    Verifies documented patient allergies against prescribed antimicrobials:
+    - Tier 1 Hard Stop (BLOCKED, 100.0): Direct drug match or core class match (e.g. Penicillin allergy + Amoxicillin, Sulfa allergy + Co-trimoxazole).
+    - Tier 2 Alert (HIGH, 60.0): Beta-lactam cross-reactivity warning (Penicillin allergy + Cephalosporin / Carbapenem).
+    """
+    if not patient.allergies:
+        return None
+
+    norm_allergies = normalize_text(patient.allergies)
+    if not norm_allergies:
+        return None
+
+    # Check for negative allergy declarations (e.g., NKDA, none, nil, no known drug allergies)
+    negations = [
+        "nkda", "none", "nil", "n/a", "na", "no allergies", "no allergy",
+        "no known drug allergies", "no known allergies", "no known drug allergy"
+    ]
+    if norm_allergies in negations:
+        return None
+    if ("nkda" in norm_allergies or "no known" in norm_allergies) and not any(
+        kw in norm_allergies for kw in ["except", "but", "penicillin", "sulfa", "amox", "cipro", "cefixime"]
+    ):
+        return None
+
+    drug_name = line.canonical_drug
+    norm_drug = normalize_text(drug_name)
+
+    is_penicillin_allergic = any(
+        kw in norm_allergies for kw in ["penicillin", "amoxicillin", "ampicillin", "augmentin", "amox", "cloxacillin"]
+    )
+    is_sulfa_allergic = any(
+        kw in norm_allergies for kw in ["sulfa", "sulfonamide", "cotrimoxazole", "co-trimoxazole", "bactrim", "septra", "sulfamethoxazole"]
+    )
+    is_fq_allergic = any(
+        kw in norm_allergies for kw in ["fluoroquinolone", "quinolone", "ciprofloxacin", "cipro", "levofloxacin", "levo", "ofloxacin", "moxifloxacin", "norfloxacin"]
+    )
+    is_macrolide_allergic = any(
+        kw in norm_allergies for kw in ["macrolide", "azithromycin", "clarithromycin", "erythromycin", "roxithromycin"]
+    )
+    is_cephalosporin_allergic = any(
+        kw in norm_allergies for kw in ["cephalosporin", "cefixime", "ceftriaxone", "cefuroxime", "cefpodoxime", "cefalexin", "cephalexin", "cefazolin"]
+    )
+
+    # 1. Tier 1 Direct Class Match: Penicillin
+    if is_penicillin_allergic and is_penicillin_drug(norm_drug):
+        return RuleViolation(
+            tier=1,
+            rule_id="TIER1_DRUG_ALLERGY_CONTRAINDICATION",
+            rule_name="Documented Drug Allergy Hard Stop",
+            severity="BLOCKED",
+            drug=drug_name,
+            penalty_type="contraindication",
+            penalty_score=100.0,
+            rationale=(
+                f"Patient has documented Penicillin allergy ('{patient.allergies}'). Prescribing {drug_name} "
+                "poses life-threatening risk of acute type I IgE-mediated anaphylaxis, bronchospasm, and angioedema."
+            ),
+            remediation=(
+                f"Immediately discontinue {drug_name}. Switch to a non-cross-reacting alternative antimicrobial class "
+                "(e.g., Macrolide, Fluoroquinolone, or Doxycycline if clinically indicated)."
+            ),
+            citation="FDA Penicillin Monograph & British National Formulary (BNF) Allergy Guidelines"
+        )
+
+    # 2. Tier 1 Direct Class Match: Sulfa / Sulfonamide
+    if is_sulfa_allergic and is_sulfa_drug(norm_drug):
+        return RuleViolation(
+            tier=1,
+            rule_id="TIER1_DRUG_ALLERGY_CONTRAINDICATION",
+            rule_name="Documented Drug Allergy Hard Stop",
+            severity="BLOCKED",
+            drug=drug_name,
+            penalty_type="contraindication",
+            penalty_score=100.0,
+            rationale=(
+                f"Patient has documented Sulfa/Sulfonamide allergy ('{patient.allergies}'). Prescribing {drug_name} "
+                "poses high risk of severe hypersensitivity, Stevens-Johnson Syndrome (SJS), and toxic epidermal necrolysis (TEN)."
+            ),
+            remediation=(
+                f"Immediately discontinue {drug_name}. Substitute with non-sulfonamide antimicrobial according to susceptibility."
+            ),
+            citation="FDA Sulfonamide Monograph & ICMR Antimicrobial Guidelines"
+        )
+
+    # 3. Tier 1 Direct Class Match: Fluoroquinolone
+    if is_fq_allergic and is_fluoroquinolone(norm_drug):
+        return RuleViolation(
+            tier=1,
+            rule_id="TIER1_DRUG_ALLERGY_CONTRAINDICATION",
+            rule_name="Documented Drug Allergy Hard Stop",
+            severity="BLOCKED",
+            drug=drug_name,
+            penalty_type="contraindication",
+            penalty_score=100.0,
+            rationale=(
+                f"Patient has documented Fluoroquinolone allergy ('{patient.allergies}'). Prescribing {drug_name} "
+                "is strictly contraindicated due to severe hypersensitivity risk."
+            ),
+            remediation=f"Immediately discontinue {drug_name}. Select an alternative non-quinolone agent.",
+            citation="FDA Fluoroquinolone Monograph & Clinical Practice Guidelines"
+        )
+
+    # 4. Tier 1 Direct Class Match: Macrolide
+    if is_macrolide_allergic and is_macrolide_drug(norm_drug):
+        return RuleViolation(
+            tier=1,
+            rule_id="TIER1_DRUG_ALLERGY_CONTRAINDICATION",
+            rule_name="Documented Drug Allergy Hard Stop",
+            severity="BLOCKED",
+            drug=drug_name,
+            penalty_type="contraindication",
+            penalty_score=100.0,
+            rationale=(
+                f"Patient has documented Macrolide allergy ('{patient.allergies}'). Prescribing {drug_name} "
+                "is strictly contraindicated due to acute macrolide hypersensitivity."
+            ),
+            remediation=f"Immediately discontinue {drug_name}. Select an alternative non-macrolide agent.",
+            citation="FDA Macrolide Monograph & Clinical Safety Guidelines"
+        )
+
+    # 5. Tier 1 Direct Class Match: Cephalosporin
+    if is_cephalosporin_allergic and is_cephalosporin_drug(norm_drug):
+        return RuleViolation(
+            tier=1,
+            rule_id="TIER1_DRUG_ALLERGY_CONTRAINDICATION",
+            rule_name="Documented Drug Allergy Hard Stop",
+            severity="BLOCKED",
+            drug=drug_name,
+            penalty_type="contraindication",
+            penalty_score=100.0,
+            rationale=(
+                f"Patient has documented Cephalosporin allergy ('{patient.allergies}'). Prescribing {drug_name} "
+                "poses acute risk of severe allergic reaction and anaphylaxis."
+            ),
+            remediation=f"Immediately discontinue {drug_name}. Select an alternative non-cephalosporin agent.",
+            citation="FDA Cephalosporin Monograph & BNF Guidelines"
+        )
+
+    # 6. Tier 1 Exact Drug Name Match
+    if norm_drug in norm_allergies and len(norm_drug) >= 4:
+        return RuleViolation(
+            tier=1,
+            rule_id="TIER1_DRUG_ALLERGY_CONTRAINDICATION",
+            rule_name="Documented Drug Allergy Hard Stop",
+            severity="BLOCKED",
+            drug=drug_name,
+            penalty_type="contraindication",
+            penalty_score=100.0,
+            rationale=(
+                f"Patient has documented direct allergy to {drug_name} ('{patient.allergies}'). "
+                f"Prescribing {drug_name} is strictly contraindicated."
+            ),
+            remediation=f"Immediately discontinue {drug_name}. Select an alternative antimicrobial class.",
+            citation="FDA Monograph & Clinical Pharmacotherapy Safety Standards"
+        )
+
+    # 7. Tier 2 Beta-Lactam Cross-Reactivity Alert (Penicillin allergy -> Cephalosporin / Carbapenem)
+    if is_penicillin_allergic and (is_cephalosporin_drug(norm_drug) or is_carbapenem_drug(norm_drug)):
+        drug_class = "Cephalosporin" if is_cephalosporin_drug(norm_drug) else "Carbapenem"
+        return RuleViolation(
+            tier=2,
+            rule_id="TIER2_ALLERGY_CROSS_REACTIVITY_WARNING",
+            rule_name="Beta-Lactam Allergy Cross-Reactivity Warning",
+            severity="HIGH",
+            drug=drug_name,
+            penalty_type="contraindication",
+            penalty_score=60.0,
+            rationale=(
+                f"Patient has documented Penicillin allergy ('{patient.allergies}'). {drug_name} is a {drug_class} "
+                "with shared beta-lactam core structure posing 1-2% cross-reactivity risk. Exercise high caution."
+            ),
+            remediation=(
+                f"Assess severity of prior penicillin reaction. In cases of prior severe IgE-mediated anaphylaxis, "
+                f"avoid all {drug_class}s. If reaction was a mild delayed maculopapular rash, {drug_name} may be administered with close clinical observation."
+            ),
+            citation="British National Formulary (BNF) & Joint Task Force on Practice Parameters (JTFPP) Beta-Lactam Allergy Guidance"
+        )
+
+    return None
+
+
+# [PATTERN: Specification] — Tier 1 & Tier 2 Comorbidity Black-Box Warning Gate
+def check_comorbidity_contraindications(
+    patient: PatientContext,
+    line: PrescriptionLine
+) -> Optional[RuleViolation]:
+    """
+    Tier 1 / Tier 2 Comorbidity Black-Box Warning Gate.
+    Verifies documented patient medical history / comorbidities against prescribed antimicrobials:
+    - Tier 1 Hard Stop (BLOCKED, 100.0):
+      * Myasthenia Gravis + Fluoroquinolones (Black Box: fatal neuromuscular respiratory depression)
+      * Myasthenia Gravis + Aminoglycosides (neuromuscular blockade)
+      * G6PD Deficiency + Nitrofurantoin or Sulfonamides (acute hemolytic anemia crisis)
+    - Tier 2 Serious Warning (HIGH, 60.0):
+      * Long QT Syndrome / Arrhythmia + Fluoroquinolones or Macrolides (Torsades de Pointes)
+      * Epilepsy / Seizure Disorder + Carbapenems (lowers seizure threshold)
+    """
+    history_text = f"{patient.medical_history or ''} {patient.diagnosis_text or ''}".lower()
+    if not history_text.strip():
+        return None
+
+    drug_name = line.canonical_drug
+    norm_drug = normalize_text(drug_name)
+
+    # 1. Myasthenia Gravis (Tier 1 Fatal Contraindication)
+    is_myasthenia = "myasthenia" in history_text
+    if is_myasthenia:
+        if is_fluoroquinolone(norm_drug) or is_aminoglycoside(norm_drug):
+            offending_class = "Fluoroquinolones" if is_fluoroquinolone(norm_drug) else "Aminoglycosides"
+            return RuleViolation(
+                tier=1,
+                rule_id="TIER1_COMORBIDITY_FATAL_CONTRAINDICATION",
+                rule_name="Myasthenia Gravis Neuromuscular Blockade Contraindication",
+                severity="BLOCKED",
+                drug=drug_name,
+                penalty_type="contraindication",
+                penalty_score=100.0,
+                rationale=(
+                    f"Patient has documented Myasthenia Gravis. {drug_name} ({offending_class}) "
+                    "carries an FDA Black Box Warning for exacerbating neuromuscular weakness, "
+                    "which can precipitate life-threatening acute respiratory muscle paralysis."
+                ),
+                remediation=(
+                    f"Immediately discontinue {drug_name}. Switch to an alternative class without neuromuscular "
+                    "blocking activity (e.g. Beta-lactams or Macrolides with close monitoring)."
+                ),
+                citation="FDA Black Box Warning & Myasthenia Gravis Foundation Clinical Prescribing Safety Guidelines"
+            )
+
+    # 2. G6PD Deficiency (Tier 1 Fatal Contraindication)
+    is_g6pd = ("g6pd" in history_text) or ("glucose-6-phosphate" in history_text)
+    if is_g6pd:
+        is_nitro = "nitrofurantoin" in norm_drug
+        is_sulfa = is_sulfa_drug(norm_drug)
+        if is_nitro or is_sulfa:
+            offending_class = "Nitrofurantoin" if is_nitro else "Sulfonamides"
+            return RuleViolation(
+                tier=1,
+                rule_id="TIER1_COMORBIDITY_FATAL_CONTRAINDICATION",
+                rule_name="G6PD Deficiency Acute Hemolysis Contraindication",
+                severity="BLOCKED",
+                drug=drug_name,
+                penalty_type="contraindication",
+                penalty_score=100.0,
+                rationale=(
+                    f"Patient has documented G6PD Deficiency. {drug_name} ({offending_class}) "
+                    "triggers severe acute oxidative stress in red blood cells, causing life-threatening "
+                    "acute intravascular hemolytic anemia and renal tubular hemoglobinuria."
+                ),
+                remediation=(
+                    f"Immediately discontinue {drug_name}. Prescribe non-oxidative antimicrobials "
+                    "(e.g., Amoxicillin, Cefalexin, or Fosfomycin for UTI)."
+                ),
+                citation="WHO Model Formulary & Clinical Pharmacogenetics Implementation Consortium (CPIC) Guidelines"
+            )
+
+    # 3. Long QT Syndrome / Cardiac Arrhythmia (Tier 2 High Warning)
+    is_qt = any(kw in history_text for kw in ["long qt", "prolonged qt", "torsades", "arrhythmia"])
+    if is_qt:
+        if is_fluoroquinolone(norm_drug) or is_macrolide_drug(norm_drug):
+            offending_class = "Fluoroquinolones" if is_fluoroquinolone(norm_drug) else "Macrolides"
+            return RuleViolation(
+                tier=2,
+                rule_id="TIER2_COMORBIDITY_SERIOUS_WARNING",
+                rule_name="Cardiac Arrhythmia / Long QT Prolongation Warning",
+                severity="HIGH",
+                drug=drug_name,
+                penalty_type="contraindication",
+                penalty_score=60.0,
+                rationale=(
+                    f"Patient has documented cardiac conduction disorder / Long QT history. "
+                    f"{drug_name} ({offending_class}) causes dose-dependent QT interval prolongation "
+                    "and increases the risk of polymorphic ventricular tachycardia (Torsades de Pointes)."
+                ),
+                remediation=(
+                    f"Monitor baseline and serial ECG QTc intervals, or switch to an antimicrobial without "
+                    "QT-prolonging potential (e.g., Beta-lactams)."
+                ),
+                citation="CredibleMeds QT Drugs List & American Heart Association Prescribing Safety Standards"
+            )
+
+    # 4. Epilepsy / Seizure Disorder (Tier 2 High Warning)
+    is_seizure = any(kw in history_text for kw in ["epilepsy", "seizure", "convulsion"])
+    if is_seizure:
+        if "imipenem" in norm_drug or is_carbapenem_drug(norm_drug):
+            return RuleViolation(
+                tier=2,
+                rule_id="TIER2_COMORBIDITY_SERIOUS_WARNING",
+                rule_name="Seizure Disorder Carbapenem Threshold Warning",
+                severity="HIGH",
+                drug=drug_name,
+                penalty_type="contraindication",
+                penalty_score=60.0,
+                rationale=(
+                    f"Patient has documented seizure disorder / epilepsy. {drug_name} crosses the "
+                    "blood-brain barrier and binds GABA receptors, significantly lowering seizure threshold."
+                ),
+                remediation=(
+                    f"Avoid high-dose carbapenems (particularly Imipenem-Cilastatin). If a carbapenem is essential, "
+                    "Meropenem exhibits significantly lower neurotoxicity."
+                ),
+                citation="FDA Package Insert Warnings & Infectious Diseases Society of America (IDSA)"
+            )
+
+    return None
+
+
 
 
 # ---------------------------------------------------------------------------

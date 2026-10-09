@@ -50,6 +50,88 @@ PREGNANCY_CONTRAINDICATED_DRUGS: Set[str] = {
     "clarithromycin",
 }
 
+# [PATTERN: Domain Data Structure] — Canonical allergy class drug registries
+PENICILLIN_DRUGS: Set[str] = {
+    "amoxicillin",
+    "ampicillin",
+    "piperacillin",
+    "cloxacillin",
+    "oxacillin",
+    "penicillin v",
+    "penicillin",
+    "benzylpenicillin",
+    "amox-clav",
+    "amoxicillin-clavulanate",
+    "amoxicillin + clavulanic acid",
+    "co-amoxiclav",
+    "tazobactam",
+    "piperacillin-tazobactam",
+    "piperacillin + tazobactam",
+    "methicillin",
+    "flucloxacillin",
+}
+
+CEPHALOSPORIN_DRUGS: Set[str] = {
+    "cefixime",
+    "ceftriaxone",
+    "cefuroxime",
+    "cefuroxime axetil",
+    "cefpodoxime",
+    "cefalexin",
+    "cephalexin",
+    "cefazolin",
+    "cefadroxil",
+    "cefaclor",
+    "cefdinir",
+    "cefepime",
+    "cefotaxime",
+    "ceftaroline",
+    "ceftazidime",
+    "cefprozil",
+    "cefoperazone",
+    "cefiderocol",
+}
+
+CARBAPENEM_DRUGS: Set[str] = {
+    "meropenem",
+    "imipenem",
+    "imipenem-cilastatin",
+    "ertapenem",
+    "doripenem",
+}
+
+SULFA_DRUGS: Set[str] = {
+    "co-trimoxazole",
+    "cotrimoxazole",
+    "trimethoprim-sulfamethoxazole",
+    "trimethoprim + sulfamethoxazole",
+    "sulfamethoxazole",
+    "bactrim",
+    "septra",
+    "sulfamethoxazole-trimethoprim",
+    "sulfadiazine",
+    "sulfasalazine",
+}
+
+MACROLIDE_DRUGS: Set[str] = {
+    "azithromycin",
+    "clarithromycin",
+    "erythromycin",
+    "roxithromycin",
+}
+
+# [PATTERN: Domain Data Structure] — Authoritative pediatric weight-based daily dose ceilings (mg/kg/day)
+# Sources: ICMR Treatment Guidelines for Antimicrobials in Pediatrics 2023 & WHO Model Formulary for Children
+PEDIATRIC_DAILY_DOSE_CEILINGS_MG_KG: dict[str, float] = {
+    "amoxicillin": 100.0,
+    "amoxicillin-clavulanate": 90.0,
+    "amox-clav": 90.0,
+    "amoxicillin + clavulanic acid": 90.0,
+    "cefixime": 16.0,
+    "azithromycin": 20.0,
+}
+
+
 # ---------------------------------------------------------------------------
 # Tier 2: Viral / Self-Limiting Syndromes & Irrational FDCs
 # ---------------------------------------------------------------------------
@@ -267,4 +349,34 @@ def is_antibiotic_drug(drug_name: str) -> bool:
         or is_tetracycline(drug_name)
         or is_aminoglycoside(drug_name)
     )
+
+
+# [SOLID: SRP] — Drug family classification helpers for allergy & safety verification
+def is_penicillin_drug(drug_name: str) -> bool:
+    """Check if drug is a penicillin-class antimicrobial."""
+    norm = normalize_text(drug_name)
+    return any(p in norm for p in PENICILLIN_DRUGS)
+
+def is_cephalosporin_drug(drug_name: str) -> bool:
+    """Check if drug is a cephalosporin-class antimicrobial."""
+    norm = normalize_text(drug_name)
+    if norm.startswith("cef") or norm.startswith("ceph") or " cef" in norm or "-cef" in norm:
+        return True
+    return any(c in norm for c in CEPHALOSPORIN_DRUGS)
+
+def is_carbapenem_drug(drug_name: str) -> bool:
+    """Check if drug is a carbapenem-class antimicrobial."""
+    norm = normalize_text(drug_name)
+    return any(c in norm for c in CARBAPENEM_DRUGS)
+
+def is_sulfa_drug(drug_name: str) -> bool:
+    """Check if drug is a sulfonamide-class antimicrobial."""
+    norm = normalize_text(drug_name)
+    return any(s in norm for s in SULFA_DRUGS)
+
+def is_macrolide_drug(drug_name: str) -> bool:
+    """Check if drug is a macrolide-class antimicrobial."""
+    norm = normalize_text(drug_name)
+    return any(m in norm for m in MACROLIDE_DRUGS)
+
 

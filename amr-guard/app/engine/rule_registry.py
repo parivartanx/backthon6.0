@@ -11,6 +11,8 @@ from app.engine.rules import (
     check_pregnancy_contraindications,
     check_nitrofurantoin_renal_age,
     check_nephrotoxic_renal_safety,
+    check_drug_allergy_contraindications,
+    check_comorbidity_contraindications,
     check_viral_self_limiting_indication,
     check_unapproved_fdc,
     check_unmapped_syndrome_advisory,
@@ -58,6 +60,35 @@ RULE_METADATA = [
         "description": "Blocks full-dose nephrotoxic agents when eGFR < 30 mL/min.",
         "citation": "KDIGO AKI Guidelines & Clinical Pharmacokinetics"
     },
+    {
+        "id": "TIER1_DRUG_ALLERGY_CONTRAINDICATION",
+        "tier": 1,
+        "name": "Documented Drug Allergy Hard Stop",
+        "description": "Zero-tolerance gate blocking drugs to which the patient has a documented allergy or same-class hypersensitivity.",
+        "citation": "FDA Monograph Warnings & British National Formulary (BNF)"
+    },
+    {
+        "id": "TIER2_ALLERGY_CROSS_REACTIVITY_WARNING",
+        "tier": 2,
+        "name": "Beta-Lactam Allergy Cross-Reactivity Alert",
+        "description": "High alert for beta-lactam cross-reactivity (penicillin allergy receiving cephalosporins or carbapenems).",
+        "citation": "British National Formulary (BNF) & Joint Task Force on Practice Parameters (JTFPP)"
+    },
+    {
+        "id": "TIER1_COMORBIDITY_FATAL_CONTRAINDICATION",
+        "tier": 1,
+        "name": "Comorbidity Fatal Black-Box Contraindication",
+        "description": "Zero-tolerance gate blocking fatal drug-disease interactions (e.g. Myasthenia Gravis + FQs, G6PD + Nitrofurantoin).",
+        "citation": "FDA Black Box Warnings & Clinical Practice Guidelines"
+    },
+    {
+        "id": "TIER2_COMORBIDITY_SERIOUS_WARNING",
+        "tier": 2,
+        "name": "Comorbidity Serious Warning",
+        "description": "High warning for serious drug-disease interactions (e.g. Long QT + FQs/Macrolides, Epilepsy + Carbapenems).",
+        "citation": "AHA Prescribing Safety Standards & IDSA"
+    },
+
     {
         "id": "TIER2_VIRAL_INDICATION_GATE",
         "tier": 2,
@@ -165,6 +196,15 @@ def evaluate_all_rules(
         v_nephro = check_nephrotoxic_renal_safety(patient, line)
         if v_nephro:
             violations.append(v_nephro)
+
+        v_allergy = check_drug_allergy_contraindications(patient, line)
+        if v_allergy:
+            violations.append(v_allergy)
+
+        v_comorb = check_comorbidity_contraindications(patient, line)
+        if v_comorb:
+            violations.append(v_comorb)
+
 
         # Tier 2: Indication & Diagnosis Legitimacy
         v_viral = check_viral_self_limiting_indication(active_syndrome, line)
