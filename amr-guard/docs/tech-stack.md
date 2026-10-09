@@ -58,6 +58,7 @@ graph TD
         RAG["LlamaIndex Hybrid RAG"]
         BM25["rank_bm25 (Lexical)"]
         Embed["text-embedding-3-small"]
+        RRF["Reciprocal Rank Fusion (RRF Re-ranking)"]
     end
 
     subgraph DeterministicCore ["Deterministic Core (Pure Python)"]
@@ -135,6 +136,7 @@ graph TD
 | **llama-index-vector-stores-postgres** | Adapter | Connects LlamaIndex storage context directly to PostgreSQL vector tables. |
 | **pgvector** | Extension & Python driver | Vector similarity search (cosine distance) for clinical literature retrieval. |
 | **rank_bm25** | Library | Lexical BM25 keyword search used in combination with vector search for hybrid retrieval. |
+| **RRF Re-ranking Engine** | `app.agents.reranker` | Reciprocal Rank Fusion ($k=60$) combining dense semantic and BM25 sparse retrieval lists into a consensus top-N ranking. |
 | **RapidFuzz** | Latest | Ultra-fast C++ string similarity for drug brand resolution and phonetic typo tolerance. |
 
 ### 3.4 Database & Persistence Layer
