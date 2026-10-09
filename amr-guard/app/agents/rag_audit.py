@@ -216,9 +216,12 @@ def audit_prescription_rag_first(
         )
 
         existing_rule_ids = {f.rule_id for f in flags}
+        prepended_flags = []
         for sv in safety_violations:
             if sv.rule_id not in existing_rule_ids:
-                flags.append(sv)
+                prepended_flags.append(sv)
+                existing_rule_ids.add(sv.rule_id)
+        flags = prepended_flags + flags
 
         has_tier_1 = any(v.tier == 1 or v.severity == "BLOCKED" for v in flags)
 
