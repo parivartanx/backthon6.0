@@ -3,6 +3,7 @@ import json
 from openai import OpenAI
 from app.core.config import settings
 from app.schemas.ingestion import IngestionResult
+from app.agents.prompts import PromptFactory
 
 def process_okf_data(raw_content: str, data_type: str) -> IngestionResult:
     """
@@ -13,25 +14,16 @@ def process_okf_data(raw_content: str, data_type: str) -> IngestionResult:
         api_key=settings.OPENROUTER_API_KEY,
     )
     
-    prompt = f"""
-    You are an AMR-Guard data ingestion assistant.
-    Extract the '{data_type}' data from the following OKF-formatted content (could be messy CSV or Markdown).
-    Return the normalized data strictly as JSON matching the requested schema.
-    
-    Schema:
-    {IngestionResult.model_json_schema()}
-    
-    Content:
-    {raw_content}
-    """
+    prompt_strategy = PromptFactory.create_ingestion_prompt(
+        raw_content=raw_content,
+        data_type=data_type,
+        target_schema=IngestionResult,
+    )
     
     response = client.chat.completions.create(
         model=settings.OPENROUTER_MODEL,
         response_format={"type": "json_object"},
-        messages=[
-            {"role": "system", "content": "You are a data extraction assistant. Always output JSON."},
-            {"role": "user", "content": prompt}
-        ],
+        messages=prompt_strategy.build_messages(),
         temperature=0.0,
     )
     
