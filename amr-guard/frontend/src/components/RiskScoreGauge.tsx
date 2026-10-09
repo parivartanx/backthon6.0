@@ -4,7 +4,7 @@
 import React, { useId } from "react";
 import { AuditTriageBand, PenaltiesBreakdown } from "@/types/prescription";
 import { Badge } from "@/components/ui/badge";
-import { ShieldCheck, AlertTriangle, ShieldAlert, Sparkles } from "lucide-react";
+import { ShieldCheck, AlertTriangle, ShieldAlert } from "lucide-react";
 
 interface RiskScoreGaugeProps {
   score: number; // 0.0 to 100.0
@@ -180,7 +180,7 @@ export function RiskScoreGauge({
       {/* Footer Note */}
       <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
         <span className="flex items-center gap-1">
-          <Sparkles className="w-3.5 h-3.5 text-[#169781]" />
+          <ShieldCheck className="w-3.5 h-3.5 text-[#169781]" />
           <span>ICMR STG / WHO AWaRe 2023 Rules</span>
         </span>
         <span className="font-mono text-[10px] text-slate-400">Zero-LLM Latency Gate</span>
