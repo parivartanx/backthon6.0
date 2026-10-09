@@ -489,7 +489,7 @@ export default function VerifyPrescriptionPage() {
                   )}
                 </CardTitle>
               </div>
-              {currentCase.patient.canonical_syndrome && (
+              {currentCase.patient.canonical_syndrome && currentCase.patient.canonical_syndrome.trim().length > 1 && (
                 <Badge variant="outline" className="text-[10px] bg-[#F1F8FC] border-[#C9E9EB] text-[#0D607B]">
                   Syndrome: {currentCase.patient.canonical_syndrome}
                 </Badge>

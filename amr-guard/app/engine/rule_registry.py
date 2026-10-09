@@ -10,10 +10,13 @@ from app.engine.rules import (
     check_pediatric_contraindications,
     check_pregnancy_contraindications,
     check_nitrofurantoin_renal_age,
+    check_nephrotoxic_renal_safety,
     check_viral_self_limiting_indication,
     check_unapproved_fdc,
+    check_unmapped_syndrome_advisory,
     check_watch_escalation,
     check_reserve_airgap,
+    check_outpatient_iv_safeguard,
     check_cap_duration,
     check_uti_duration,
     check_uti_fluoroquinolone_resistance,
@@ -42,6 +45,20 @@ RULE_METADATA = [
         "citation": "Beers Criteria & ICMR Geriatric Guidelines"
     },
     {
+        "id": "TIER1_NEPHROTOXIC_MISSING_EGFR",
+        "tier": 1,
+        "name": "Mandatory Baseline Renal Function Hold",
+        "description": "Blocks narrow-therapeutic-index nephrotoxic drugs when eGFR is missing in elderly or for high-risk antimicrobials.",
+        "citation": "KDIGO Guidelines & FDA Black Box / TDM Standards"
+    },
+    {
+        "id": "TIER1_NEPHROTOXIC_RENAL_IMPAIRMENT",
+        "tier": 1,
+        "name": "Severe Renal Impairment Contraindication",
+        "description": "Blocks full-dose nephrotoxic agents when eGFR < 30 mL/min.",
+        "citation": "KDIGO AKI Guidelines & Clinical Pharmacokinetics"
+    },
+    {
         "id": "TIER2_VIRAL_INDICATION_GATE",
         "tier": 2,
         "name": "Viral / Self-Limiting Infection Gate",
@@ -56,6 +73,13 @@ RULE_METADATA = [
         "citation": "CDSCO Banned FDCs Gazette"
     },
     {
+        "id": "TIER2_UNMAPPED_SYNDROME_ADVISORY",
+        "tier": 2,
+        "name": "Unconfirmed Indication / Vague Symptom Advisory",
+        "description": "Advisory flag when Watch/Reserve antimicrobials are prescribed for non-canonical symptoms without culture (P_indication = 30).",
+        "citation": "ICMR Standard Treatment Guidelines 2022 & WHO AWaRe Policy"
+    },
+    {
         "id": "TIER3_AWARE_WATCH_ESCALATION",
         "tier": 3,
         "name": "Watch-Group Over-Escalation Check",
@@ -68,6 +92,13 @@ RULE_METADATA = [
         "name": "Reserve-Group Air-Gap Gate",
         "description": "Blocks outpatient empirical Reserve group prescribing without microbiology (P_class = 85).",
         "citation": "WHO Reserve Stewardship Protocols"
+    },
+    {
+        "id": "TIER3_OUTPATIENT_IV_SAFEGUARD",
+        "tier": 3,
+        "name": "Outpatient Parenteral Antimicrobial Safeguard",
+        "description": "Flags high-potency intravenous antimicrobials prescribed in outpatient settings without OPAT or culture (P_class = 60).",
+        "citation": "IDSA OPAT Guidelines & ICMR Stewardship Standards"
     },
     {
         "id": "TIER4_CAP_DURATION_CAP",
@@ -131,6 +162,10 @@ def evaluate_all_rules(
         if v_renal:
             violations.append(v_renal)
 
+        v_nephro = check_nephrotoxic_renal_safety(patient, line)
+        if v_nephro:
+            violations.append(v_nephro)
+
         # Tier 2: Indication & Diagnosis Legitimacy
         v_viral = check_viral_self_limiting_indication(active_syndrome, line)
         if v_viral:
@@ -140,6 +175,10 @@ def evaluate_all_rules(
         if v_fdc:
             violations.append(v_fdc)
 
+        v_unmapped = check_unmapped_syndrome_advisory(active_syndrome, line, has_culture_report)
+        if v_unmapped:
+            violations.append(v_unmapped)
+
         # Tier 3: WHO AWaRe Spectrum
         v_watch = check_watch_escalation(active_syndrome, line, has_culture_report)
         if v_watch:
@@ -148,6 +187,10 @@ def evaluate_all_rules(
         v_reserve = check_reserve_airgap(line, is_outpatient, has_positive_microbiology)
         if v_reserve:
             violations.append(v_reserve)
+
+        v_outpatient_iv = check_outpatient_iv_safeguard(line, is_outpatient, has_culture_report)
+        if v_outpatient_iv:
+            violations.append(v_outpatient_iv)
 
         # Tier 4: Therapeutic Course & Duration Limits
         v_cap_dur = check_cap_duration(active_syndrome, line)

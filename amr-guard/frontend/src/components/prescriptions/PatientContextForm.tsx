@@ -365,21 +365,67 @@ export function PatientContextForm({
             </label>
             <Input
               type="text"
+              list="icmr-syndromes-datalist"
               value={patient.suspectedDiagnosis || ""}
               onChange={(e) => {
                 const val = e.target.value;
-                updateFields({
-                  suspectedDiagnosis: val,
-                  canonical_syndrome: val,
-                });
+                updateField("suspectedDiagnosis", val);
+                const matched = ICMR_CANONICAL_SYNDROMES.find(
+                  (s) => s.code.toLowerCase() === val.toLowerCase() || s.label.toLowerCase() === val.toLowerCase()
+                );
+                if (matched) {
+                  updateField("canonical_syndrome", matched.code);
+                } else if (val.trim().length > 1) {
+                  updateField("canonical_syndrome", val);
+                } else {
+                  updateField("canonical_syndrome", "");
+                }
               }}
               disabled={disabled}
-              placeholder="e.g. Community-Acquired Pneumonia, Viral URTI, or Acute Cystitis"
+              placeholder="Select or type: e.g. Community-Acquired Pneumonia (Mild Outpatient)"
               className="h-9 text-xs bg-white border-slate-300 focus-visible:ring-1 focus-visible:ring-[#169781]"
             />
+            <datalist id="icmr-syndromes-datalist">
+              {ICMR_CANONICAL_SYNDROMES.map((syn) => (
+                <option key={syn.code} value={syn.label}>
+                  {syn.code}
+                </option>
+              ))}
+            </datalist>
+            {patient.canonical_syndrome && patient.canonical_syndrome.length > 1 && (
+              <div className="mt-1 flex items-center gap-1 text-[11px] text-slate-500">
+                <span className="text-slate-400 text-[10px]">Mapped:</span>
+                <span className="font-semibold text-[#0D607B] bg-[#F1F8FC] border border-[#C9E9EB] px-1.5 py-0.5 rounded text-[10px]">
+                  {patient.canonical_syndrome}
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </CardContent>
     </Card>
   );
 }
+
+const ICMR_CANONICAL_SYNDROMES = [
+  { code: "SYN_CAP_MILD", label: "Community-Acquired Pneumonia (Mild Outpatient)" },
+  { code: "SYN_UNCOMPLICATED_UTI", label: "Uncomplicated Acute Cystitis / Lower UTI" },
+  { code: "SYN_ACUTE_BRONCHITIS", label: "Acute Bronchitis (Self-Limiting Viral)" },
+  { code: "SYN_COMMON_COLD", label: "Common Cold / Rhinopharyngitis (Viral)" },
+  { code: "SYN_VIRAL_URTI", label: "Viral Upper Respiratory Tract Infection" },
+  { code: "SYN_PHARYNGITIS_NON_STREP", label: "Non-Streptococcal Pharyngitis (Viral Sore Throat)" },
+  { code: "SYN_WATERY_DIARRHEA", label: "Acute Watery Diarrhea (Non-Cholera)" },
+  { code: "SYN_PHARYNGITIS_STREP", label: "Streptococcal Pharyngitis (Group A Strep)" },
+  { code: "SYN_AOM", label: "Acute Otitis Media" },
+  { code: "SYN_SSTI_UNCOMPLICATED", label: "Uncomplicated Skin and Soft Tissue Infection (Cellulitis / Impetigo)" },
+  { code: "SYN_CAP_MODERATE", label: "Community-Acquired Pneumonia (Moderate Inpatient Ward)" },
+  { code: "SYN_CAP_SEVERE", label: "Community-Acquired Pneumonia (Severe ICU)" },
+  { code: "SYN_HAP", label: "Hospital-Acquired Pneumonia (Non-Ventilated)" },
+  { code: "SYN_VAP", label: "Ventilator-Associated Pneumonia" },
+  { code: "SYN_AECB", label: "Acute Exacerbation of Chronic Bronchitis / COPD" },
+  { code: "SYN_ACUTE_RHINOSINUSITIS", label: "Acute Bacterial Rhinosinusitis (Persistent >10 Days)" },
+  { code: "SYN_DENTAL_ABSCESS", label: "Odontogenic / Periapical Dental Abscess" },
+  { code: "SYN_PYELONEPHRITIS_UNCOMPLICATED", label: "Acute Uncomplicated Pyelonephritis (Outpatient)" },
+  { code: "SYN_ENTERIC_FEVER", label: "Enteric Fever / Typhoid (Salmonella enterica)" },
+  { code: "SYN_DIABETIC_FOOT_MILD", label: "Diabetic Foot Infection (Mild Outpatient)" },
+];

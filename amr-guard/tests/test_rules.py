@@ -9,10 +9,13 @@ from app.engine.rules import (
     check_pediatric_contraindications,
     check_pregnancy_contraindications,
     check_nitrofurantoin_renal_age,
+    check_nephrotoxic_renal_safety,
     check_viral_self_limiting_indication,
     check_unapproved_fdc,
     check_watch_escalation,
     check_reserve_airgap,
+    check_outpatient_iv_safeguard,
+    check_unmapped_syndrome_advisory,
     check_cap_duration,
     check_uti_duration,
     check_uti_fluoroquinolone_resistance,
@@ -96,6 +99,37 @@ def test_tier1_nitrofurantoin_young_normal_egfr_allowed():
     line = PrescriptionLine(drug_name="Nitrofurantoin", duration_days=5)
     violation = check_nitrofurantoin_renal_age(pt, line)
     assert violation is None
+
+def test_tier1_vancomycin_missing_egfr_blocked():
+    """In an elderly patient (69yo) or any patient with missing eGFR, IV Vancomycin must be BLOCKED."""
+    patient = PatientContext(age_years=69, sex="M", egfr=None)
+    line = PrescriptionLine(
+        drug_name="Vancomycin",
+        is_nephrotoxic=True,
+        requires_egfr=True,
+        duration_days=5
+    )
+    violation = check_nephrotoxic_renal_safety(patient, line)
+    assert violation is not None
+    assert violation.tier == 1
+    assert violation.severity == "BLOCKED"
+    assert violation.penalty_score == 100.0
+    assert "renal" in violation.remediation.lower() or "egfr" in violation.rationale.lower()
+
+def test_tier1_vancomycin_low_egfr_blocked():
+    """eGFR < 30 mL/min with nephrotoxic drug must trigger BLOCKED status."""
+    patient = PatientContext(age_years=45, sex="F", egfr=22.0)
+    line = PrescriptionLine(
+        drug_name="Vancomycin",
+        is_nephrotoxic=True,
+        requires_egfr=True,
+        duration_days=5
+    )
+    violation = check_nephrotoxic_renal_safety(patient, line)
+    assert violation is not None
+    assert violation.tier == 1
+    assert violation.severity == "BLOCKED"
+
 
 # ---------------------------------------------------------------------------
 # Tier 2 Tests: Indication & Diagnosis Legitimacy
@@ -216,3 +250,25 @@ def test_tier5_uti_fluoroquinolone_resistance_flagged():
     assert violation.tier == 5
     assert ">75% resistance" in violation.rationale
     assert "switch empirical therapy to nitrofurantoin" in violation.remediation.lower()
+
+def test_outpatient_iv_glycopeptide_flagged():
+    """IV Vancomycin in outpatient setting without culture must trigger Outpatient Parenteral Safeguard."""
+    line = PrescriptionLine(
+        drug_name="Vancomycin",
+        route="Intravenous",
+        outpatient_iv_restricted=True,
+        duration_days=5
+    )
+    violation = check_outpatient_iv_safeguard(line, is_outpatient=True, has_culture_report=False)
+    assert violation is not None
+    assert violation.severity == "HIGH"
+    assert violation.penalty_score == 60.0
+
+def test_unmapped_syndrome_watch_drug_advisory_flag():
+    """Prescribing Watch/Reserve drug for vague 'Fever and cough' with no culture triggers soft advisory."""
+    line = PrescriptionLine(drug_name="Vancomycin", aware_tier="Watch")
+    violation = check_unmapped_syndrome_advisory(canonical_syndrome="Fever and cough since 3 days", line=line, has_culture_report=False)
+    assert violation is not None
+    assert violation.penalty_score == 30.0
+    assert violation.penalty_type == "indication"
+

@@ -256,9 +256,30 @@ export function mergeParsedPatientContext(
   if (parsed.egfr !== undefined) {
     updated.egfr = parsed.egfr;
   }
-  if (parsed.suspectedDiagnosis) {
-    updated.suspectedDiagnosis = parsed.suspectedDiagnosis;
-    updated.canonical_syndrome = parsed.suspectedDiagnosis;
+  if (parsed.suspectedDiagnosis && parsed.suspectedDiagnosis.trim().length > 1) {
+    const raw = parsed.suspectedDiagnosis.trim();
+    updated.suspectedDiagnosis = raw;
+    const lower = raw.toLowerCase();
+    if (raw.startsWith("SYN_")) {
+      updated.canonical_syndrome = raw;
+    } else if (lower.includes("pneumonia") || lower.includes("cap")) {
+      updated.canonical_syndrome = "SYN_CAP_MILD";
+    } else if (lower.includes("uti") || lower.includes("cystitis") || lower.includes("dysuria")) {
+      updated.canonical_syndrome = "SYN_UNCOMPLICATED_UTI";
+    } else if (lower.includes("bronchitis")) {
+      updated.canonical_syndrome = "SYN_ACUTE_BRONCHITIS";
+    } else if (lower.includes("cold") || lower.includes("rhinopharyngitis")) {
+      updated.canonical_syndrome = "SYN_COMMON_COLD";
+    } else if (lower.includes("urti") || lower.includes("upper respiratory")) {
+      updated.canonical_syndrome = "SYN_VIRAL_URTI";
+    } else if (lower.includes("diarrhea")) {
+      updated.canonical_syndrome = "SYN_WATERY_DIARRHEA";
+    } else {
+      updated.canonical_syndrome = raw;
+    }
+  } else if (updated.canonical_syndrome && updated.canonical_syndrome.trim().length <= 1) {
+    // Prevent single-letter truncation (e.g. 'F') from displaying as canonical syndrome
+    updated.canonical_syndrome = "";
   }
   if (parsed.symptoms) {
     updated.symptoms = parsed.symptoms;

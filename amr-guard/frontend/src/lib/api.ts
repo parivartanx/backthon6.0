@@ -266,8 +266,10 @@ const FLUOROQUINOLONES = ["ciprofloxacin", "levofloxacin", "moxifloxacin", "oflo
 const TETRACYCLINES = ["doxycycline", "tetracycline", "minocycline", "dox-100"];
 const MACROLIDES = ["azithromycin", "clarithromycin", "erythromycin", "azithral"];
 const CEPHALOSPORINS_3RD = ["cefixime", "ceftriaxone", "cefotaxime", "taxim-o", "monocef"];
-const AMINOGLYCOSIDES = ["amikacin", "gentamicin", "tobramycin"];
-const RESERVE_DRUGS = ["colistin", "linezolid", "tigecycline", "meropenem", "imipenem", "polymyxin b"];
+const AMINOGLYCOSIDES = ["amikacin", "gentamicin", "tobramycin", "streptomycin", "kanamycin"];
+const GLYCOPEPTIDES = ["vancomycin", "teicoplanin", "vancocin", "targocid"];
+const RESERVE_DRUGS = ["colistin", "linezolid", "tigecycline", "meropenem", "imipenem", "polymyxin b", "ceftazidime-avibactam", "aztreonam"];
+const NEPHROTOXIC_DRUGS = ["vancomycin", "teicoplanin", "amikacin", "gentamicin", "tobramycin", "colistin", "polymyxin b", "nitrofurantoin"];
 
 function isFQ(drug: string): boolean {
   const norm = normalize(drug);
@@ -286,7 +288,18 @@ function isReserve(drug: string): boolean {
 
 function isWatch(drug: string): boolean {
   const norm = normalize(drug);
-  return isFQ(drug) || MACROLIDES.some((m) => norm.includes(m)) || CEPHALOSPORINS_3RD.some((c) => norm.includes(c));
+  return (
+    isFQ(drug) ||
+    MACROLIDES.some((m) => norm.includes(m)) ||
+    CEPHALOSPORINS_3RD.some((c) => norm.includes(c)) ||
+    GLYCOPEPTIDES.some((g) => norm.includes(g)) ||
+    ["cefuroxime", "piperacillin", "tazobactam"].some((w) => norm.includes(w))
+  );
+}
+
+function isNephrotoxic(drug: string): boolean {
+  const norm = normalize(drug);
+  return NEPHROTOXIC_DRUGS.some((nd) => norm.includes(nd));
 }
 
 function classifyAwareTier(drug: string): "Access" | "Watch" | "Reserve" {
@@ -298,6 +311,7 @@ function classifyAwareTier(drug: string): "Access" | "Watch" | "Reserve" {
 function detectDrugClass(drug: string): string {
   if (isFQ(drug)) return "Fluoroquinolone";
   if (isTC(drug)) return "Tetracycline";
+  if (GLYCOPEPTIDES.some((g) => normalize(drug).includes(g))) return "Glycopeptide (Watch)";
   if (MACROLIDES.some((m) => normalize(drug).includes(m))) return "Macrolide";
   if (CEPHALOSPORINS_3RD.some((c) => normalize(drug).includes(c))) return "3rd Gen Cephalosporin";
   if (AMINOGLYCOSIDES.some((a) => normalize(drug).includes(a))) return "Aminoglycoside";
@@ -382,20 +396,67 @@ function evaluateDeterministicRules(caseData: PrescriptionCase, startTime: numbe
       });
     }
 
-    // Tier 1.3: Severe Renal Impairment
-    if (egfr !== null && egfr < 30 && (normalize(drugName).includes("nitrofurantoin") || AMINOGLYCOSIDES.some((a) => normalize(drugName).includes(a)))) {
-      violations.push({
-        tier: 1,
-        rule_id: "TIER1_RENAL_CONTRAINDICATION",
-        rule_name: "Severe Renal Toxicity Contraindication",
-        severity: "BLOCKED",
-        drug: drugName,
-        penalty_type: "contraindication",
-        penalty_score: 100.0,
-        rationale: `Patient eGFR ${egfr} mL/min < 30. High risk of drug accumulation and nephrotoxicity.`,
-        remediation: `Halt ${drugName}. Use renal-adjusted antimicrobial.`,
-        citation: "KDIGO Clinical Practice Guideline",
-      });
+    // Tier 1.3: Mandatory Nephrotoxic Drug & Baseline Renal Safety Gate
+    const isNephro = isNephrotoxic(drugName) || Boolean(med.is_nephrotoxic) || Boolean(med.requires_egfr);
+    const normDrug = normalize(drugName);
+
+    if (normDrug.includes("nitrofurantoin")) {
+      if (age >= 65 || (egfr !== null && egfr < 30.0)) {
+        violations.push({
+          tier: 1,
+          rule_id: "TIER1_NITROFURANTOIN_RENAL_AGE",
+          rule_name: "Nitrofurantoin Geriatric / Renal Restriction",
+          severity: "BLOCKED",
+          drug: drugName,
+          penalty_type: "contraindication",
+          penalty_score: 100.0,
+          rationale: `Prescribed Nitrofurantoin in high-risk patient (Age ${age}y, eGFR ${egfr ?? "missing"} mL/min). Risk of toxic pulmonary fibrosis/neuropathy and therapeutic failure.`,
+          remediation: "Discontinue Nitrofurantoin. Substitute with Fosfomycin single sachet or culture-guided beta-lactam.",
+          citation: "Beers Criteria & ICMR Geriatric Stewardship",
+        });
+        remediations.push({
+          recommendation_type: "CONTRAINDICATION_BLOCK",
+          suggested_drug: "Fosfomycin 3g oral sachet",
+          suggested_duration_days: 1,
+          guidance: "Switch to age-safe alternative for cystitis.",
+          source_citation: "ICMR STG 2022",
+        });
+      }
+    } else if (isNephro) {
+      if (egfr === null) {
+        if (age >= 65 || isNephro) {
+          violations.push({
+            tier: 1,
+            rule_id: "TIER1_NEPHROTOXIC_MISSING_EGFR",
+            rule_name: "Mandatory Baseline Renal Function Hold",
+            severity: "BLOCKED",
+            drug: drugName,
+            penalty_type: "contraindication",
+            penalty_score: 100.0,
+            rationale: `Administering narrow-therapeutic-index nephrotoxic agent '${drugName}' to patient (Age ${age}y) without baseline Glomerular Filtration Rate (eGFR) or Serum Creatinine creates acute risk of kidney injury, accumulation toxicity, and ototoxicity.`,
+            remediation: `Place prescription on safety hold. Order an urgent Serum Creatinine / eGFR panel and establish Therapeutic Drug Monitoring (TDM) before initiating ${drugName}.`,
+            citation: "KDIGO Acute Kidney Injury Guidelines & FDA Black Box / TDM Safety Guidance",
+          });
+          remediations.push({
+            recommendation_type: "HOLD_SAFETY",
+            guidance: `Order urgent Renal Function Test (RFT) / eGFR before dispensing ${drugName}.`,
+            source_citation: "KDIGO AKI Clinical Practice Guideline",
+          });
+        }
+      } else if (egfr < 30.0) {
+        violations.push({
+          tier: 1,
+          rule_id: "TIER1_NEPHROTOXIC_RENAL_IMPAIRMENT",
+          rule_name: "Severe Renal Impairment Contraindication",
+          severity: "BLOCKED",
+          drug: drugName,
+          penalty_type: "contraindication",
+          penalty_score: 100.0,
+          rationale: `Patient eGFR is ${egfr} mL/min (< 30 mL/min). Administering full-dose '${drugName}' carries severe risk of acute tubular necrosis, nephrotoxic failure, and ototoxicity.`,
+          remediation: "Dose adjustment or alternative non-nephrotoxic agent required. Consult clinical pharmacokinetics for renal dose recalculation.",
+          citation: "KDIGO Guidelines & Clinical Pharmacokinetics Prescribing Standards",
+        });
+      }
     }
 
     // Tier 1.4: Banned Irrational FDCs
@@ -450,9 +511,62 @@ function evaluateDeterministicRules(caseData: PrescriptionCase, startTime: numbe
     }
   }
 
+  // Tier 2.2: Unconfirmed Indication / Vague Symptom Advisory Gate
+  const rawSyndrome = normalize(caseData.patient.canonical_syndrome || caseData.patient.suspectedDiagnosis);
+  const isCanonicalSyndrome =
+    rawSyndrome.startsWith("syn_") ||
+    [
+      "pneumonia", "cap", "hap", "vap", "urinary tract", "uti", "cystitis", "pyelonephritis",
+      "meningitis", "sepsis", "cellulitis", "osteomyelitis", "abscess", "peritonitis", "bronchitis"
+    ].some((s) => rawSyndrome.includes(s));
+
+  if (!caseData.patient.has_culture_report && (!rawSyndrome || !isCanonicalSyndrome)) {
+    const broadDrugs = caseData.medicines.filter((m) => {
+      const d = m.genericName || m.brandName;
+      return isWatch(d) || isReserve(d);
+    });
+
+    for (const med of broadDrugs) {
+      const dName = med.genericName || med.brandName;
+      violations.push({
+        tier: 2,
+        rule_id: "TIER2_UNMAPPED_SYNDROME_ADVISORY",
+        rule_name: "Unconfirmed Indication / Vague Symptom Advisory",
+        severity: "MEDIUM",
+        drug: dName,
+        penalty_type: "indication",
+        penalty_score: 30.0,
+        rationale: `WHO '${classifyAwareTier(dName)}' antimicrobial '${dName}' prescribed for non-canonical symptom presentation ('${caseData.patient.canonical_syndrome || caseData.patient.symptoms || "Unspecified"}') without microbiological confirmation.`,
+        remediation: "Specify a confirmed ICMR diagnostic syndrome or obtain culture before initiating broad-spectrum Watch/Reserve therapy.",
+        citation: "ICMR Standard Treatment Guidelines 2022 & WHO AWaRe Policy",
+      });
+    }
+  }
+
   // --- TIER 3: WHO AWaRe Classification ---
   for (const med of caseData.medicines) {
     const drugName = med.genericName || med.brandName;
+    const route = normalize(med.route);
+    const isIv = route.includes("iv") || route.includes("intravenous") || route.includes("infusion") || route.includes("inj") || Boolean(med.outpatient_iv_restricted);
+
+    // Tier 3.3: Outpatient Parenteral Antimicrobial Safeguard
+    if (caseData.patient.is_outpatient !== false && !caseData.patient.has_culture_report && isIv) {
+      if (isNephrotoxic(drugName) || isWatch(drugName) || isReserve(drugName) || med.outpatient_iv_restricted) {
+        violations.push({
+          tier: 3,
+          rule_id: "TIER3_OUTPATIENT_IV_SAFEGUARD",
+          rule_name: "Outpatient Parenteral Antimicrobial Safeguard",
+          severity: "HIGH",
+          drug: drugName,
+          penalty_type: "class",
+          penalty_score: 60.0,
+          rationale: `'${drugName}' prescribed via intravenous route in an outpatient setting without documented OPAT monitoring or microbiologic confirmation carries high risk of catheter complications, nephrotoxicity, and unwarranted broad-spectrum exposure.`,
+          remediation: "Re-evaluate for hospital admission/OPAT protocol or switch to an evidence-based oral first-line antimicrobial regimen based on patient clinical stability.",
+          citation: "IDSA Outpatient Parenteral Antimicrobial Therapy (OPAT) Guidelines & ICMR Stewardship Standards",
+        });
+      }
+    }
+
     if (isReserve(drugName) && !caseData.patient.has_positive_microbiology) {
       violations.push({
         tier: 3,

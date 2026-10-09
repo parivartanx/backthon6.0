@@ -14,6 +14,12 @@ class PrescriptionLine(BaseModel):
     aware_tier: Optional[str] = Field(None, description="WHO AWaRe tier: Access, Watch, Reserve")
     drug_class: Optional[str] = Field(None, description="Pharmacological class")
     is_fdc: Optional[bool] = Field(None, description="Whether the drug is a fixed-dose combination")
+    route: Optional[str] = Field("Oral", description="Route of administration (e.g. Oral, Intravenous)")
+    is_nephrotoxic: Optional[bool] = Field(False, description="Nephrotoxic potential")
+    requires_egfr: Optional[bool] = Field(False, description="Requires baseline eGFR monitoring")
+    min_egfr_safe: Optional[float] = Field(30.0, description="Minimum safe eGFR cut-off")
+    requires_tdm: Optional[bool] = Field(False, description="Requires therapeutic drug monitoring")
+    outpatient_iv_restricted: Optional[bool] = Field(False, description="Restricted for unmonitored outpatient IV infusion")
 
     @property
     def canonical_drug(self) -> str:
@@ -36,6 +42,10 @@ class MedicineEntry(BaseModel):
     is_fdc: Optional[bool] = Field(False, description="Whether drug is fixed-dose combination")
     confidence: Optional[float] = Field(1.0, description="Extraction confidence score")
     verificationStatus: str = Field("Verified", description="Verification status: Verified, Needs Verification, Missing")
+    is_nephrotoxic: Optional[bool] = Field(False, description="Nephrotoxicity potential")
+    requires_egfr: Optional[bool] = Field(False, description="Requires baseline renal panel")
+    requires_tdm: Optional[bool] = Field(False, description="Requires therapeutic drug monitoring")
+    outpatient_iv_restricted: Optional[bool] = Field(False, description="Restricted outpatient IV infusion")
 
 
 class PatientCaseContext(BaseModel):

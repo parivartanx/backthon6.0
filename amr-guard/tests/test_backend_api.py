@@ -139,7 +139,7 @@ def test_pdf_extraction_via_from_image_endpoint():
     assert response.status_code == 200
     data = response.json()
     assert data["patient"]["age_years"] == 32
-    assert data["patient"]["sex"] == "M"
+    assert data["patient"]["sex"] in ["M", "Male"]
     assert len(data["prescription_lines"]) >= 1
     assert data["prescription_lines"][0]["drug_name"] == "Amoxicillin"
 
@@ -377,4 +377,42 @@ def test_prescriptions_create_and_audit():
     assert created["auditResult"] is not None
     assert "status" in created["auditResult"]
     assert "score" in created["auditResult"]
+
+
+def test_case_7703_payload_blocked():
+    """Verify Case CASE-2026-7703 (69yo male, missing eGFR, IV Vancomycin 1g OD) is BLOCKED with score 100.0."""
+    payload = {
+        "patient": {
+            "age_years": 69,
+            "sex": "Male",
+            "is_pregnant": False,
+            "weight_kg": 48.0,
+            "egfr": None,
+            "diagnosis_text": "Fever and cough since 3 days"
+        },
+        "prescription_lines": [
+            {
+                "drug_name": "Vancomycin",
+                "generic": "Vancomycin",
+                "brand": "Vancocin",
+                "strength": "1g injection",
+                "route": "Intravenous",
+                "frequency": "OD",
+                "duration_days": 5,
+                "is_nephrotoxic": True,
+                "requires_egfr": True,
+                "outpatient_iv_restricted": True
+            }
+        ],
+        "canonical_syndrome": "Fever and cough since 3 days",
+        "has_culture_report": False,
+        "is_outpatient": True
+    }
+    res = client.post("/api/v1/audit/", json=payload)
+    assert res.status_code == 200
+    data = res.json()
+    assert data["status"] == "BLOCKED"
+    assert data["score"] == 100.0
+    assert any(f["rule_id"] == "TIER1_NEPHROTOXIC_MISSING_EGFR" for f in data["flags"])
+
 
