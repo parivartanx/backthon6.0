@@ -6,7 +6,8 @@ import {
   AuditResult, 
   RuleViolation, 
   RemediationOption, 
-  PenaltiesBreakdown 
+  PenaltiesBreakdown,
+  AwareTier
 } from "@/types/prescription";
 import { prescriptionStore } from "./prescriptionStore";
 
@@ -156,7 +157,7 @@ export async function extractPrescription(input: {
         frequency: line.frequency || "BD",
         duration: line.duration_days ? `${line.duration_days} days` : "5 days",
         duration_days: line.duration_days || 5,
-        aware_tier: (line.aware_tier as any) || "Unclassified",
+        aware_tier: (line.aware_tier as AwareTier) || "Unclassified",
         drug_class: line.drug_class,
         is_fdc: line.is_fdc ?? false,
         confidence: line.confidence ?? data.confidence_score ?? 0.9,
