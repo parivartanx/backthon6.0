@@ -201,7 +201,7 @@ def audit_prescription_rag_first(
         status = str(llm_data.get("status", "APPROVED")).upper()
         band = str(llm_data.get("band", "GREEN")).upper()
 
-        # 5. Deterministic Safety Net Verification (Guarantees zero missed fatal contraindications)
+        # 5. Deterministic Safety Net Verification & Mathematical Calibration
         safety_violations = evaluate_all_rules(
             patient=patient,
             prescription_lines=prescription_lines,
@@ -210,17 +210,52 @@ def audit_prescription_rag_first(
             has_positive_microbiology=has_positive_microbiology,
             is_outpatient=is_outpatient,
         )
-        tier_1_safety_blocks = [v for v in safety_violations if v.tier == 1 or v.severity == "BLOCKED"]
-        if tier_1_safety_blocks:
+
+        existing_rule_ids = {f.rule_id for f in flags}
+        for sv in safety_violations:
+            if sv.rule_id not in existing_rule_ids:
+                flags.append(sv)
+
+        has_tier_1 = any(v.tier == 1 or v.severity == "BLOCKED" for v in flags)
+
+        # Calculate mathematical penalty components
+        class_penalties = [f.penalty_score for f in flags if f.penalty_type == "class"]
+        dur_penalties = [f.penalty_score for f in flags if f.penalty_type == "duration"]
+        ind_penalties = [f.penalty_score for f in flags if f.penalty_type == "indication"]
+
+        p_class = min(100.0, sum(class_penalties)) if class_penalties else penalties.p_class
+        p_duration = min(100.0, sum(dur_penalties)) if dur_penalties else penalties.p_duration
+        p_indication = min(100.0, sum(ind_penalties)) if ind_penalties else penalties.p_indication
+
+        penalties = PenaltiesBreakdown(
+            p_class=p_class,
+            p_duration=p_duration,
+            p_indication=p_indication,
+        )
+
+        if has_tier_1:
             status = "BLOCKED"
             score = 100.0
             band = "RED"
-            existing_rule_ids = {f.rule_id for f in flags}
-            for sb in tier_1_safety_blocks:
-                if sb.rule_id not in existing_rule_ids:
-                    flags.append(sb)
+        else:
+            raw_math_score = (0.4 * p_class) + (0.2 * p_duration) + (0.4 * p_indication)
+            calc_score = round(min(100.0, raw_math_score), 1)
+            score = max(calc_score, score)
+
+            if len(flags) > 0:
+                status = "FLAGGED"
+                if score >= 75.0:
+                    band = "RED"
+                elif score >= 35.0:
+                    band = "AMBER"
+                else:
+                    band = "GREEN"
+            else:
+                status = "APPROVED"
+                band = "GREEN"
 
         elapsed_ms = int((time.perf_counter() - start_time) * 1000)
+
 
         return AuditResult(
             status=status,
