@@ -13,7 +13,6 @@ import { usePrescriptionStore } from "@/store/usePrescriptionStore";
 import { CLINICAL_SAMPLE_PRESETS, ClinicalSamplePreset } from "@/lib/clinicalSamples";
 import {
   UploadCloud,
-  FlaskConical,
   ArrowRight,
   AlertCircle,
   Info,
@@ -23,13 +22,6 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 function NewPrescriptionContent() {
   const router = useRouter();
@@ -51,7 +43,7 @@ function NewPrescriptionContent() {
   } = usePrescriptionStore();
 
   const [validationError, setValidationError] = useState<string | null>(null);
-  const [selectedPresetId, setSelectedPresetId] = useState<string>("");
+
 
   // Sync query params (e.g. /prescriptions/new?tab=manual)
   useEffect(() => {
@@ -116,45 +108,6 @@ function NewPrescriptionContent() {
       {/* Stepper: Step 1 active */}
       <WorkflowStepper currentStep={1} />
 
-      {/* Sample Loader Row */}
-      <div className="flex items-center gap-2.5 bg-[#F1F8FC] border border-[#C9E9EB] px-3 py-2 rounded-xl w-full sm:w-auto">
-        <FlaskConical className="w-4 h-4 text-[#169781] shrink-0" />
-        <span className="text-xs font-semibold text-[#0D607B] shrink-0 hidden sm:inline">
-          Load Sample:
-        </span>
-        <div className="w-full sm:w-80 md:w-96">
-          <Select
-            value={selectedPresetId}
-            onValueChange={(val: string | null) => {
-              if (val) {
-                const p = CLINICAL_SAMPLE_PRESETS.find((x) => x.id === val);
-                if (p) handleSelectPreset(p);
-              }
-            }}
-          >
-            <SelectTrigger className="h-8.5 text-xs bg-white border-slate-200/90 text-slate-700 shadow-2xs">
-              <SelectValue placeholder="Choose a clinical OPD scenario to pre-fill..." />
-            </SelectTrigger>
-            <SelectContent align="end" className="w-[360px] sm:w-[440px]">
-              {CLINICAL_SAMPLE_PRESETS.map((p) => (
-                <SelectItem key={p.id} value={p.id} className="text-xs py-2 px-3">
-                  <div className="flex flex-col gap-0.5 text-left w-full pr-2">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="font-semibold text-slate-800">{p.title}</span>
-                      <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200 shrink-0">
-                        {p.category}
-                      </span>
-                    </div>
-                    <span className="text-[11px] text-slate-500 font-normal line-clamp-1">
-                      {p.description}
-                    </span>
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
 
       {/* Validation Error Banner */}
       {validationError && (
