@@ -37,7 +37,7 @@ export function PrescriptionDataTable({ data }: PrescriptionDataTableProps) {
           <FileText className="w-7 h-7 text-[#169781]" />
         </div>
         <div className="space-y-1 max-w-sm mx-auto">
-          <h3 className="text-sm font-bold text-slate-800">No Prescriptions Audited Yet Today</h3>
+          <h3 className="text-sm font-bold text-slate-800">No Prescriptions Checked Yet Today</h3>
           <p className="text-xs text-slate-500 leading-relaxed">
             Prescriptions you create and evaluate with the clinical safety engine will appear here in real-time.
           </p>
@@ -168,7 +168,7 @@ export function PrescriptionDataTable({ data }: PrescriptionDataTableProps) {
               return (
                 <Badge variant="outline" className={`gap-1 font-semibold text-[10px] ${bandStyles}`}>
                   <ShieldCheck className="w-3 h-3" />
-                  <span>Audited • {score.toFixed(0)} Risk</span>
+                  <span>Checked • {score.toFixed(0)} Risk</span>
                 </Badge>
               );
             }
@@ -176,7 +176,7 @@ export function PrescriptionDataTable({ data }: PrescriptionDataTableProps) {
               return (
                 <Badge variant="outline" className="gap-1 bg-[#E2FAD9] text-[#0d5c36] border-[#169781]/20">
                   <ShieldCheck className="w-3 h-3 text-[#169781]" />
-                  <span>Ready for Audit</span>
+                  <span>Ready for Safety Check</span>
                 </Badge>
               );
             case "Needs Verification":
@@ -249,12 +249,12 @@ export function PrescriptionDataTable({ data }: PrescriptionDataTableProps) {
       count: data.filter((d) => d.workflowStatus === "Extraction Complete").length,
     },
     {
-      label: "Ready for Audit",
+      label: "Ready for Safety Check",
       value: "Ready for Audit",
       count: data.filter((d) => d.workflowStatus === "Ready for Audit").length,
     },
     {
-      label: "Audited",
+      label: "Prescriptions Checked",
       value: "Audited",
       count: data.filter((d) => d.workflowStatus === "Audited").length,
     },

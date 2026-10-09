@@ -423,7 +423,7 @@ export function MedicineTable({
         <div className="flex items-center gap-1.5">
           <HelpCircle className="w-3.5 h-3.5 text-slate-400" />
           <span>
-            <strong>Note on data completeness:</strong> &quot;Verified&quot; confirms all dosage parameters exist; it does not endorse clinical antimicrobial efficacy or safety before audit.
+            <strong>Note on data completeness:</strong> &quot;Verified&quot; confirms all dosage parameters exist; it does not endorse clinical efficacy or safety before the prescription safety check.
           </span>
         </div>
         <span className="text-slate-400 hidden sm:inline">Press Enter to save inline edits</span>
