@@ -22,7 +22,6 @@ import {
   User, 
   AlertTriangle,
   RotateCcw,
-  Sparkles,
   Printer
 } from "lucide-react";
 
@@ -236,7 +235,7 @@ export default function VerifyPrescriptionPage() {
                 size="sm"
                 className="gap-1.5 text-xs font-semibold text-white bg-[#169781] hover:bg-[#117866] shadow-xs"
               >
-                <Sparkles className="w-4 h-4 stroke-[2.5]" />
+                <ShieldCheck className="w-4 h-4 stroke-[2.5]" />
                 <span>{isAuditing ? "Auditing 5-Tiers..." : "Run AMR Sentinel Audit"}</span>
               </Button>
             )}
