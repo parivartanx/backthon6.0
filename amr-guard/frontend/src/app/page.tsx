@@ -1,5 +1,6 @@
-import { redirect } from "next/navigation";
+"use client";
 
+import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
 import { fetchApi } from "@/lib/api";
 
