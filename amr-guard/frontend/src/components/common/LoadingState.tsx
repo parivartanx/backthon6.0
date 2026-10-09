@@ -1,18 +1,25 @@
-"use client";
-
+import * as React from "react";
 import { Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface LoadingStateProps {
   message?: string;
   subMessage?: string;
+  className?: string;
 }
 
 export function LoadingState({
   message = "Extracting prescription data...",
   subMessage = "Parsing clinical entities, dosages and schedules",
+  className,
 }: LoadingStateProps) {
   return (
-    <div className="bg-white rounded-xl border border-slate-200/80 p-8 text-center flex flex-col items-center justify-center my-4 space-y-3">
+    <div
+      className={cn(
+        "bg-white rounded-xl border border-slate-200/80 p-8 text-center flex flex-col items-center justify-center my-4 space-y-3",
+        className
+      )}
+    >
       <div className="w-12 h-12 rounded-full bg-[#F1F8FC] flex items-center justify-center text-[#169781]">
         <Loader2 className="w-6 h-6 animate-spin text-[#169781]" />
       </div>

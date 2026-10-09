@@ -55,7 +55,16 @@ export function MedicineTable({
   const startEditing = (med: MedicineEntry) => {
     if (disabled) return;
     setEditingId(med.id);
-    setEditFormData({ ...med });
+    setEditFormData({
+      ...med,
+      brandName: med.brandName || "",
+      genericName: med.genericName || "",
+      strength: med.strength || "",
+      dose: med.dose || "",
+      route: med.route || "Oral",
+      frequency: med.frequency || "",
+      duration: med.duration || "",
+    });
   };
 
   // Cancel editing row
@@ -68,14 +77,16 @@ export function MedicineTable({
   const saveEditing = () => {
     if (!editFormData) return;
     const isComplete =
-      Boolean(editFormData.brandName.trim()) &&
-      Boolean(editFormData.dose.trim()) &&
-      Boolean(editFormData.route.trim()) &&
-      Boolean(editFormData.frequency.trim()) &&
-      Boolean(editFormData.duration.trim());
+      Boolean(editFormData.brandName?.trim()) &&
+      Boolean(editFormData.dose?.trim()) &&
+      Boolean(editFormData.route?.trim()) &&
+      Boolean(editFormData.frequency?.trim()) &&
+      Boolean(editFormData.duration?.trim());
 
     const updatedMed: MedicineEntry = {
       ...editFormData,
+      brandName: editFormData.brandName.trim() || "Unnamed Medication",
+      dose: editFormData.dose.trim() || "Unspecified",
       verificationStatus: isComplete ? "Verified" : "Needs Verification",
     };
 
@@ -176,7 +187,7 @@ export function MedicineTable({
                       <TableCell className="py-2.5 px-3">
                         <Input
                           type="text"
-                          value={editFormData.brandName}
+                          value={editFormData.brandName || ""}
                           onChange={(e) =>
                             setEditFormData({ ...editFormData, brandName: e.target.value })
                           }
@@ -190,7 +201,7 @@ export function MedicineTable({
                       <TableCell className="py-2.5 px-3">
                         <Input
                           type="text"
-                          value={editFormData.genericName}
+                          value={editFormData.genericName || ""}
                           onChange={(e) =>
                             setEditFormData({ ...editFormData, genericName: e.target.value })
                           }
@@ -204,7 +215,7 @@ export function MedicineTable({
                         <div className="space-y-1">
                           <Input
                             type="text"
-                            value={editFormData.strength}
+                            value={editFormData.strength || ""}
                             onChange={(e) =>
                               setEditFormData({ ...editFormData, strength: e.target.value })
                             }
@@ -213,7 +224,7 @@ export function MedicineTable({
                           />
                           <Input
                             type="text"
-                            value={editFormData.dose}
+                            value={editFormData.dose || ""}
                             onChange={(e) =>
                               setEditFormData({ ...editFormData, dose: e.target.value })
                             }
@@ -227,7 +238,7 @@ export function MedicineTable({
                       <TableCell className="py-2.5 px-2">
                         <div className="space-y-1">
                           <select
-                            value={editFormData.route}
+                            value={editFormData.route || "Oral"}
                             onChange={(e) =>
                               setEditFormData({ ...editFormData, route: e.target.value })
                             }
@@ -241,7 +252,7 @@ export function MedicineTable({
                           </select>
                           <Input
                             type="text"
-                            value={editFormData.frequency}
+                            value={editFormData.frequency || ""}
                             onChange={(e) =>
                               setEditFormData({ ...editFormData, frequency: e.target.value })
                             }
@@ -255,7 +266,7 @@ export function MedicineTable({
                       <TableCell className="py-2.5 px-2">
                         <Input
                           type="text"
-                          value={editFormData.duration}
+                          value={editFormData.duration || ""}
                           onChange={(e) =>
                             setEditFormData({ ...editFormData, duration: e.target.value })
                           }
@@ -453,9 +464,6 @@ export function MedicineTable({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
-  );
-}
     </div>
   );
 }
