@@ -1,0 +1,71 @@
+﻿antibiotic_name,usage,symptoms
+Amoxicillin,Community-Acquired Pneumonia (Mild Outpatient); Streptococcal Pharyngitis (Group A Strep); Acute Otitis Media; Odontogenic / Periapical Dental Abscess; Helicobacter pylori Gastritis / Peptic Ulcer Disease; Community-Acquired Pneumonia (Moderate Inpatient Ward); Acute Exacerbation of Chronic Bronchitis / COPD (Purulent Anthonisen Type 1); Acute Bacterial Rhinosinusitis (Persistent >10 Days); Diabetic Foot Infection (Mild Outpatient),"Diarrhoea, nausea, vomiting, rash; serious risks include severe allergic reactions and Clostridioides difficile-associated diarrhoea."
+Amoxicillin-Clavulanate,Community-Acquired Pneumonia (Moderate Inpatient Ward); Acute Exacerbation of Chronic Bronchitis / COPD (Purulent Anthonisen Type 1); Acute Bacterial Rhinosinusitis (Persistent >10 Days); Diabetic Foot Infection (Mild Outpatient),"Diarrhoea, nausea, vomiting, rash; serious risks include allergic reactions, C. difficile-associated diarrhoea and liver injury."
+Nitrofurantoin,Uncomplicated Acute Cystitis / Lower UTI; Recurrent Uncomplicated Cystitis in Females; Asymptomatic Bacteriuria in Pregnancy,"Nausea, reduced appetite, headache; urine may darken. Serious risks include lung reactions, liver injury, peripheral neuropathy and haemolysis in susceptible patients."
+Fosfomycin,Uncomplicated Acute Cystitis / Lower UTI; Asymptomatic Bacteriuria in Pregnancy,"Diarrhoea, nausea, headache, vaginitis; serious allergic reactions and C. difficile-associated diarrhoea are possible."
+Cefalexin,Uncomplicated Skin and Soft Tissue Infection (Cellulitis / Impetigo); Asymptomatic Bacteriuria in Pregnancy,"Diarrhoea, nausea, vomiting, abdominal discomfort, rash; serious risks include allergic reactions and C. difficile-associated diarrhoea."
+Cefixime,,"Diarrhoea, abdominal discomfort, nausea, loose stools; serious risks include allergic reactions and C. difficile-associated diarrhoea."
+Azithromycin,Community-Acquired Pneumonia (Severe ICU); Acute Bacillary Dysentery (Shigellosis / Blood in Stool); Enteric Fever / Typhoid (Salmonella enterica),"Diarrhoea, nausea, abdominal pain; serious risks include QT prolongation/abnormal heart rhythm, liver injury and severe allergic or skin reactions."
+Ciprofloxacin,Chronic Suppurative Otitis Media; Acute Bacillary Dysentery (Shigellosis / Blood in Stool),"Nausea, diarrhoea, abdominal discomfort, headache; serious risks include tendon injury/rupture, peripheral neuropathy, CNS effects, QT prolongation and worsening of myasthenia gravis."
+Levofloxacin,,"Nausea, diarrhoea, headache, insomnia; serious risks include tendon injury, peripheral neuropathy, CNS effects, QT prolongation and worsening of myasthenia gravis."
+Ofloxacin,Chronic Suppurative Otitis Media,
+Norfloxacin,,
+Doxycycline,Acute Exacerbation of Chronic Bronchitis / COPD (Purulent Anthonisen Type 1); Purulent Skin Infection (Cutaneous Abscess / Carbuncle); Community-Acquired Pneumonia (Mild Outpatient),"Nausea, diarrhoea, photosensitivity, oesophageal irritation; serious risks include severe allergic/skin reactions and C. difficile-associated diarrhoea."
+Meropenem,Ventilator-Associated Pneumonia; High-Risk Febrile Neutropenia,"Diarrhoea, nausea, vomiting, headache, rash or infusion-site reactions; serious risks include seizures (risk increased in some patients), allergic reactions and C. difficile-associated diarrhoea."
+Linezolid,,"Diarrhoea, nausea, headache, vomiting; serious risks include low blood counts, serotonin syndrome with interacting medicines, optic/peripheral neuropathy with prolonged use and lactic acidosis."
+Colistin,,"Numbness/tingling, dizziness or gastrointestinal effects may occur; serious risks include kidney injury and neuromuscular toxicity."
+Amikacin,Community-Acquired Sepsis / Septic Shock,"Nausea or injection-site effects may occur; serious risks include kidney injury, hearing/balance damage and neuromuscular effects."
+Gentamicin,,"Nausea or injection-site effects may occur; serious risks include kidney injury, hearing/balance damage and neuromuscular effects."
+Ampicillin,,"Diarrhoea, nausea, rash; serious risks include allergic reactions, severe skin reactions and C. difficile-associated diarrhoea."
+Benzylpenicillin,,
+Benzathine Benzylpenicillin,Streptococcal Pharyngitis (Group A Strep),
+Cloxacillin,Uncomplicated Skin and Soft Tissue Infection (Cellulitis / Impetigo); Acute Hematogenous Osteomyelitis,
+Cefazolin,Acute Bacterial Septic Arthritis; Acute Hematogenous Osteomyelitis,"Nausea, vomiting, diarrhoea, rash or injection-site reactions; serious risks include allergic reactions and C. difficile-associated diarrhoea."
+Cefadroxil,Uncomplicated Skin and Soft Tissue Infection (Cellulitis / Impetigo),"Diarrhoea, nausea, vomiting, rash; serious risks include allergic reactions and C. difficile-associated diarrhoea."
+Co-trimoxazole,Acute Bacterial Prostatitis,"Nausea, vomiting, loss of appetite, rash; serious risks include severe skin reactions, blood disorders, kidney effects, high potassium and allergic reactions."
+Metronidazole,Odontogenic / Periapical Dental Abscess; Mild-to-Moderate Intra-Abdominal Infection (Secondary Peritonitis),"Nausea, metallic taste, abdominal discomfort, headache; serious risks include peripheral neuropathy with certain exposure patterns, seizures/encephalopathy rarely and severe skin reactions."
+Clindamycin,Diabetic Foot Infection (Moderate-Severe Inpatient),"Diarrhoea, nausea, abdominal pain, rash; major serious risk is C. difficile-associated colitis, which can be severe."
+Chloramphenicol,,"Nausea, vomiting, diarrhoea; serious risks include bone-marrow suppression and rare, potentially fatal aplastic anaemia."
+Tetracycline,,"Nausea, diarrhoea, photosensitivity; serious risks include severe allergic reactions and effects on developing teeth/bone in certain age groups."
+Minocycline,,"Dizziness/vertigo, nausea, diarrhoea, skin or tooth pigmentation; serious risks include liver injury, severe skin reactions and drug-induced autoimmune reactions."
+Ceftriaxone,Community-Acquired Pneumonia (Severe ICU); Acute Uncomplicated Pyelonephritis (Outpatient); Complicated Pyelonephritis / Urosepsis (Inpatient); Enteric Fever / Typhoid (Salmonella enterica); Acute Bacterial Septic Arthritis; Community-Acquired Acute Bacterial Meningitis,"Injection-site pain, diarrhoea, rash, changes in blood counts; serious risks include allergic reactions, biliary complications and C. difficile-associated diarrhoea."
+Cefotaxime,Mild-to-Moderate Intra-Abdominal Infection (Secondary Peritonitis),
+Cefuroxime,,"Diarrhoea, nausea, vomiting, rash; serious risks include allergic reactions and C. difficile-associated diarrhoea."
+Cefuroxime Axetil,,
+Cefpodoxime,Acute Uncomplicated Pyelonephritis (Outpatient),"Diarrhoea, nausea, vomiting, abdominal pain, rash; serious risks include allergic reactions and C. difficile-associated diarrhoea."
+Ceftazidime,,
+Cefoperazone-Sulbactam,,
+Piperacillin-Tazobactam,Hospital-Acquired Pneumonia (Non-Ventilated); Complicated Pyelonephritis / Urosepsis (Inpatient); Severe / Healthcare-Associated Intra-Abdominal Sepsis; Diabetic Foot Infection (Moderate-Severe Inpatient); High-Risk Febrile Neutropenia; Community-Acquired Sepsis / Septic Shock,"Diarrhoea, nausea, rash, headache; serious risks include allergic reactions, kidney-related concerns in some combinations, blood-count changes and C. difficile-associated diarrhoea."
+Clarithromycin,Community-Acquired Pneumonia (Moderate Inpatient Ward); Helicobacter pylori Gastritis / Peptic Ulcer Disease,"Diarrhoea, nausea, abdominal pain, altered taste; serious risks include QT prolongation, liver injury, severe allergic reactions and important drug interactions."
+Erythromycin,,"Nausea, abdominal cramps, vomiting, diarrhoea; serious risks include QT prolongation/arrhythmias, liver injury and allergic reactions."
+Roxithromycin,,
+Moxifloxacin,,"Nausea, diarrhoea, dizziness; serious risks include QT prolongation, tendon injury, peripheral neuropathy, CNS effects and worsening of myasthenia gravis."
+Gemifloxacin,,
+Vancomycin,Community-Acquired Acute Bacterial Meningitis,"Oral use may cause nausea or abdominal discomfort; IV use may cause infusion reactions. Serious risks include kidney injury, hearing-related toxicity in some circumstances and severe hypersensitivity."
+Teicoplanin,,
+Imipenem-Cilastatin,,"Nausea, vomiting, diarrhoea, rash; serious risks include seizures, allergic reactions and C. difficile-associated diarrhoea."
+Ertapenem,,
+Cefdinir,,"Diarrhoea, nausea, headache, rash; serious risks include allergic reactions and C. difficile-associated diarrhoea."
+Cefprozil,,
+Polymyxin B,,
+Tigecycline,,"Nausea, vomiting, diarrhoea; serious risks include liver/pancreatic effects, pancreatitis and an FDA boxed warning regarding increased all-cause mortality in pooled trials."
+Daptomycin,,"Nausea, diarrhoea, headache, injection-site reactions; serious risks include muscle injury/rhabdomyolysis and eosinophilic pneumonia."
+Ceftazidime-Avibactam,,
+Ceftolozane-Tazobactam,,
+Cefiderocol,,
+Meropenem-Vaborbactam,,
+Plazomicin,,
+Tedizolid,,
+Aztreonam,,
+Tobramycin,,"Depending on route, cough or airway irritation, nausea, or eye irritation may occur; systemic exposure can cause kidney injury and hearing/balance damage."
+Streptomycin,,
+Kanamycin,,
+Tinidazole,,
+Ornidazole,,
+Ofloxacin + Ornidazole,,
+Cefixime + Azithromycin,,
+Ciprofloxacin + Tinidazole,,
+Norfloxacin + Tinidazole,,
+Cefpodoxime + Azithromycin,,
+Amoxicillin + Bromhexine,,"Diarrhoea, nausea, vomiting, rash; serious risks include severe allergic reactions and Clostridioides difficile-associated diarrhoea."
+Ampicillin-Cloxacillin,,"Diarrhoea, nausea, rash; serious risks include allergic reactions, severe skin reactions and C. difficile-associated diarrhoea."

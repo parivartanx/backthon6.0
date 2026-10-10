@@ -1,0 +1,406 @@
+brand_alias,full_brand_display,generic_antibiotic_name
+Pfizerpen,Pfizerpen,Penicillin G
+Crystapen,Crystapen,Penicillin G
+Benzylpenicillin,Benzylpenicillin,Penicillin G
+Pen-VK,Pen-VK,Penicillin V
+Veetids,Veetids,Penicillin V
+Kaypen,Kaypen,Penicillin V
+V-Cillin K,V-Cillin K,Penicillin V
+Bicillin L-A,Bicillin L-A,Benzathine penicillin G
+Penidure,Penidure,Benzathine penicillin G
+Retarpen,Retarpen,Benzathine penicillin G
+Extencilline,Extencilline,Benzathine penicillin G
+Bicillin C-R,Bicillin C-R,Procaine penicillin G
+Wycillin,Wycillin,Procaine penicillin G
+Procaine Penicillin,Procaine Penicillin,Procaine penicillin G
+Mox,Mox,Amoxicillin
+Almox,Almox,Amoxicillin
+Cipmox,Cipmox,Amoxicillin
+Novamox,Novamox,Amoxicillin
+Amoxil,Amoxil,Amoxicillin
+Campicillin,Campicillin,Ampicillin
+Ampisyn,Ampisyn,Ampicillin
+Omnipen,Omnipen,Ampicillin
+Principen,Principen,Ampicillin
+Spectrobid,Spectrobid,Bacampicillin
+Penglobe,Penglobe,Bacampicillin
+Pondocillin,Pondocillin,Pivampicillin
+Miraxid,Miraxid,Pivampicillin
+Talpen,Talpen,Talampicillin
+Dexacillin,Dexacillin,Epicillin
+Versapen,Versapen,Hetacillin
+Hetacin-K,Hetacin-K (vet),Hetacillin
+Staphcillin,Staphcillin,Methicillin
+Celbenin,Celbenin (historical),Methicillin
+Nallpen,Nallpen,Nafcillin
+Unipen,Unipen,Nafcillin
+Bactocill,Bactocill,Oxacillin
+Prostaphlin,Prostaphlin,Oxacillin
+Klox,Klox,Cloxacillin
+Cloxin,Cloxin,Cloxacillin
+Tegopen,Tegopen,Cloxacillin
+Orbenin,Orbenin,Cloxacillin
+Dynapen,Dynapen,Dicloxacillin
+Dycill,Dycill,Dicloxacillin
+Pathocil,Pathocil,Dicloxacillin
+Floxapen,Floxapen,Flucloxacillin
+Flopen,Flopen,Flucloxacillin
+Staphylex,Staphylex,Flucloxacillin
+Negaban,Negaban,Temocillin
+Geopen,Geopen,Carbenicillin
+Pyopen,Pyopen,Carbenicillin
+Geocillin,Geocillin,Carbenicillin
+Ticar,Ticar,Ticarcillin
+Pipracil,Pipracil,Piperacillin
+Pipra,Pipra,Piperacillin
+Mezlin,Mezlin,Mezlocillin
+Securopen,Securopen,Azlocillin
+Azlin,Azlin,Azlocillin
+Kedacillin,Kedacillin,Sulbenicillin
+Augmentin,Augmentin,Amoxicillin-clavulanate (Co-amoxiclav)
+Clavam,Clavam,Amoxicillin-clavulanate (Co-amoxiclav)
+Moxikind-CV,Moxikind-CV,Amoxicillin-clavulanate (Co-amoxiclav)
+Moxclav,Moxclav,Amoxicillin-clavulanate (Co-amoxiclav)
+Advent,Advent,Amoxicillin-clavulanate (Co-amoxiclav)
+Unasyn,Unasyn,Ampicillin-sulbactam
+Sulbacin,Sulbacin,Ampicillin-sulbactam
+Ampitum,Ampitum,Ampicillin-sulbactam
+Zosyn,Zosyn,Piperacillin-tazobactam
+Tazocin,Tazocin,Piperacillin-tazobactam
+Pipzo,Pipzo,Piperacillin-tazobactam
+Piptaz,Piptaz,Piperacillin-tazobactam
+Timentin,Timentin,Ticarcillin-clavulanate
+Trifamox IBL,Trifamox IBL,Amoxicillin-sulbactam
+Sultamicillin,Sultamicillin,Amoxicillin-sulbactam
+Duricef,Duricef,Cefadroxil
+Cefadrox,Cefadrox,Cefadroxil
+Droxyl,Droxyl,Cefadroxil
+Odoxil,Odoxil,Cefadroxil
+Ancef,Ancef,Cefazolin
+Kefzol,Kefzol,Cefazolin
+Cefacillin,Cefacillin,Cefazolin
+Keflex,Keflex,Cephalexin (INN: cefalexin)
+Phexin,Phexin,Cephalexin (INN: cefalexin)
+Sporidex,Sporidex,Cephalexin (INN: cefalexin)
+Ceff,Ceff,Cephalexin (INN: cefalexin)
+Velosef,Velosef,Cephradine (INN: cefradine)
+Eskacef,Eskacef,Cephradine (INN: cefradine)
+Cefadyl,Cefadyl,Cephapirin
+ToDAY,ToDAY (vet),Cephapirin
+ToMORROW,ToMORROW (vet),Cephapirin
+Keflin,Keflin,Cephalothin (INN: cefalotin)
+Cefazaflur,Cefazaflur (investigational/historical),Cefazaflur
+Oraspor,Oraspor,Cefroxadine
+Ceclor,Ceclor,Cefaclor
+Distaclor,Distaclor,Cefaclor
+Keflor,Keflor,Cefaclor
+Mandol,Mandol,Cefamandole
+Mefoxin,Mefoxin,Cefoxitin
+Cefzil,Cefzil,Cefprozil
+ProExecution,ProExecution,Cefprozil
+Ceftin,Ceftin,Cefuroxime
+Zinacef,Zinacef,Cefuroxime
+Zefu,Zefu,Cefuroxime
+Altacef,Altacef,Cefuroxime
+Cetil,Cetil,Cefuroxime
+Precef,Precef,Ceforanide
+Cefotan,Cefotan,Cefotetan
+Monocid,Monocid,Cefonicid
+Zefazone,Zefazone,Cefmetazole
+Tomiporan,Tomiporan,Cefbuperazone
+Flomox,Flomox,Cefcapene
+Cefdaloxime,Cefdaloxime (investigational),Cefdaloxime
+Omnicef,Omnicef,Cefdinir
+Aldir,Aldir,Cefdinir
+RT-Cef,RT-Cef,Cefdinir
+Adcef,Adcef,Cefdinir
+Spectracef,Spectracef,Cefditoren
+Meiact,Meiact,Cefditoren
+Globocef,Globocef,Cefetamet
+Taxim-O,Taxim-O,Cefixime
+Zifi,Zifi,Cefixime
+Cef-O,Cef-O,Cefixime
+Mahacef,Mahacef,Cefixime
+Suprax,Suprax,Cefixime
+Cefmax,Cefmax,Cefmenoxime
+Tacef,Tacef,Cefmenoxime
+Kenicef,Kenicef,Cefodizime
+Timecef,Timecef,Cefodizime
+Cefobid,Cefobid,Cefoperazone
+Magnamycin,Magnamycin,Cefoperazone
+Claforan,Claforan,Cefotaxime
+Taxim,Taxim,Cefotaxime
+Omnatax,Omnatax,Cefotaxime
+Ajicef,Ajicef,Cefpimizole
+Gudcef,Gudcef,Cefpodoxime
+Doxcef,Doxcef,Cefpodoxime
+Monocef-O,Monocef-O,Cefpodoxime
+Macpod,Macpod,Cefpodoxime
+Vantin,Vantin,Cefpodoxime
+Tomiron,Tomiron,Cefteram
+Cedax,Cedax,Ceftibuten
+Excenel,Excenel (vet),Ceftiofur
+Naxcel,Naxcel (vet),Ceftiofur
+Excede,Excede (vet),Ceftiofur
+Cefizox,Cefizox,Ceftizoxime
+Epocelin,Epocelin,Ceftizoxime
+Monocef,Monocef,Ceftriaxone
+Rocephin,Rocephin,Ceftriaxone
+Oframax,Oframax,Ceftriaxone
+Xone,Xone,Ceftriaxone
+Fortaz,Fortaz,Ceftazidime
+Tazicef,Tazicef,Ceftazidime
+Fortum,Fortum,Ceftazidime
+Ceftaz,Ceftaz,Ceftazidime
+Moxam,Moxam,Latamoxef (moxalactam)
+Shiomarin,Shiomarin,Latamoxef (moxalactam)
+Maxipime,Maxipime,Cefepime
+Cepime,Cepime,Cefepime
+Novapime,Novapime,Cefepime
+Firstcin,Firstcin,Cefozopran
+Cefrom,Cefrom,Cefpirome
+Bacirom,Bacirom,Cefpirome
+Cobactan,Cobactan (vet),Cefquinome
+Cephaguard,Cephaguard (vet),Cefquinome
+Zevtera,Zevtera,Ceftobiprole
+Zeftera,Zeftera,Ceftobiprole
+Teflaro,Teflaro,Ceftaroline
+Zinforo,Zinforo,Ceftaroline
+Zerbaxa,Zerbaxa,Ceftolozane-tazobactam
+Fetroja,Fetroja,Cefiderocol
+Fetcroja,Fetcroja,Cefiderocol
+Avycaz,Avycaz,Ceftazidime-avibactam
+Zavicefta,Zavicefta,Ceftazidime-avibactam
+Primaxin,Primaxin,Imipenem
+Tienam,Tienam,Imipenem
+Merrem,Merrem,Meropenem
+Meronem,Meronem,Meropenem
+Meromac,Meromac,Meropenem
+Mero,Mero,Meropenem
+Invanz,Invanz,Ertapenem
+Doribax,Doribax,Doripenem
+Finibax,Finibax,Doripenem
+Carベニン,Carベニン (Carbenin),Panipenem
+Omegacin,Omegacin,Biapenem
+Orapenem,Orapenem,Tebipenem
+CS-023,CS-023 (investigational),Tomopenem
+Azactam,Azactam,Aztreonam
+Cayston,Cayston (inhaled),Aztreonam
+Trezora,Trezora,Aztreonam
+Tigemonam,Tigemonam (investigational),Tigemonam
+Amasulin,Amasulin,Carumonam
+Mobilan,Mobilan,Carumonam
+Azithral,Azithral,Azithromycin
+Azee,Azee,Azithromycin
+Zithromax,Zithromax,Azithromycin
+Azimax,Azimax,Azithromycin
+Zady,Zady,Azithromycin
+Biaxin,Biaxin,Clarithromycin
+Klacid,Klacid,Clarithromycin
+Claribid,Claribid,Clarithromycin
+Synclar,Synclar,Clarithromycin
+Althrocin,Althrocin,Erythromycin
+Erythrocin,Erythrocin,Erythromycin
+EES,EES,Erythromycin
+Ery-Tab,Ery-Tab,Erythromycin
+Roxid,Roxid,Roxithromycin
+Rulide,Rulide,Roxithromycin
+Roxee,Roxee,Roxithromycin
+Ketek,Ketek,Telithromycin
+Dynabac,Dynabac,Dirithromycin
+Josalid,Josalid,Josamycin
+Josacine,Josacine,Josamycin
+Wilprafen,Wilprafen,Josamycin
+Leucomycin,Leucomycin,Kitasamycin
+Ayermicina,Ayermicina,Kitasamycin
+Midecacin,Midecacin,Midecamycin
+Rubupen,Rubupen,Midecamycin
+Matromycin,Matromycin,Oleandomycin
+Romicil,Romicil,Oleandomycin
+Rovamycine,Rovamycine,Spiramycin
+TAO,TAO,Troleandomycin
+Tylan,Tylan (vet),Tylosin
+Tyluvet,Tyluvet (vet),Tylosin
+Pharmasin,Pharmasin (vet),Tylosin
+Dificid,Dificid,Fidaxomicin
+Dificlir,Dificlir,Fidaxomicin
+Solithera,Solithera (investigational),Solithromycin
+Restanza,Restanza (investigational),Cethromycin
+Ciplox,Ciplox,Ciprofloxacin
+Cipro,Cipro,Ciprofloxacin
+Cifran,Cifran,Ciprofloxacin
+Ciprobid,Ciprobid,Ciprofloxacin
+Levomac,Levomac,Levofloxacin
+Loxof,Loxof,Levofloxacin
+Levaquin,Levaquin,Levofloxacin
+Glevo,Glevo,Levofloxacin
+Tavanic,Tavanic,Levofloxacin
+Avelox,Avelox,Moxifloxacin
+Moxicip,Moxicip,Moxifloxacin
+Mahaflox,Mahaflox,Moxifloxacin
+Vigamox,Vigamox (eye drops),Moxifloxacin
+Factive,Factive,Gemifloxacin
+Gemiflox,Gemiflox,Gemifloxacin
+Oflox,Oflox,Ofloxacin
+Zenflox,Zenflox,Ofloxacin
+Floxin,Floxin,Ofloxacin
+Oflotas,Oflotas,Ofloxacin
+Norflox,Norflox,Norfloxacin
+Norbactin,Norbactin,Norfloxacin
+Noroxin,Noroxin,Norfloxacin
+Enoxor,Enoxor,Enoxacin
+Penetrex,Penetrex,Enoxacin
+Zymar,Zymar (eye drops),Gatifloxacin
+Tequin,Tequin (systemic discontinued),Gatifloxacin
+Zymaxid,Zymaxid,Gatifloxacin
+Maxaquin,Maxaquin,Lomefloxacin
+Lomitas,Lomitas,Lomefloxacin
+Okacin,Okacin,Lomefloxacin
+NegGram,NegGram,Nalidixic acid
+Gramoneg,Gramoneg,Nalidixic acid
+Cinobac,Cinobac,Cinoxacin
+Deblaston,Deblaston,Pipemidic acid
+Urotractin,Urotractin,Pipemidic acid
+Uroxin,Uroxin (vet/horticulture),Oxolinic acid
+Flumequine,Flumequine (vet/Flumiquil),Flumequine
+Peflacine,Peflacine,Pefloxacin
+Pelox,Pelox,Pefloxacin
+Quinodis,Quinodis,Fleroxacin
+Megalone,Megalone,Fleroxacin
+Zagam,Zagam,Sparfloxacin
+Sparx,Sparx,Sparfloxacin
+Ozex,Ozex,Tosufloxacin
+Tosuacin,Tosuacin,Tosufloxacin
+Baloxin,Baloxin,Balofloxacin
+BaloForce,BaloForce,Balofloxacin
+Baxdela,Baxdela,Delafloxacin
+Quofenix,Quofenix,Delafloxacin
+Xepi,Xepi,Ozenoxacin
+Ozanex,Ozanex,Ozenoxacin
+Besivance,Besivance (eye drops),Besifloxacin
+Unidrox,Unidrox,Prulifloxacin
+Quisnon,Quisnon,Prulifloxacin
+Pasil,Pasil,Pazufloxacin
+Pazucross,Pazucross,Pazufloxacin
+Achromycin,Achromycin,Tetracycline
+Hostacycline,Hostacycline,Tetracycline
+Terramycin,Terramycin,Tetracycline
+Dox-1-SL,Dox-1-SL,Doxycycline
+Doxy-100,Doxy-100,Doxycycline
+Vibramycin,Vibramycin,Doxycycline
+Doryx,Doryx,Doxycycline
+Monodox,Monodox,Doxycycline
+Minoz,Minoz,Minocycline
+Cynomycin,Cynomycin,Minocycline
+Minocin,Minocin,Minocycline
+Solodyn,Solodyn,Minocycline
+Dynacin,Dynacin,Minocycline
+Declomycin,Declomycin,Demeclocycline
+Ledermycin,Ledermycin,Demeclocycline
+Terramycin,Terramycin,Oxytetracycline
+Oxyvet,Oxyvet (vet),Oxytetracycline
+Aureomycin,Aureomycin,Chlortetracycline
+Rondomycin,Rondomycin,Methacycline
+Reverin,Reverin,Rolitetracycline
+Syntetrin,Syntetrin,Rolitetracycline
+Tetralysal,Tetralysal,Lymecycline
+Meclan,Meclan (topical),Meclocycline
+Tygacil,Tygacil,Tigecycline
+Tigebax,Tigebax,Tigecycline
+Critig,Critig,Tigecycline
+Xerava,Xerava,Eravacycline
+Nuzyra,Nuzyra,Omadacycline
+Seysara,Seysara,Sarecycline
+Amikin,Amikin,Amikacin
+Mikacin,Mikacin,Amikacin
+Amikamac,Amikamac,Amikacin
+Garamycin,Garamycin,Gentamicin
+Genticyn,Genticyn,Gentamicin
+Gentaspor,Gentaspor,Gentamicin
+Kantrex,Kantrex,Kanamycin
+Kancin,Kancin,Kanamycin
+Neosporin,Neosporin (combination),Neomycin
+Mycifradin,Mycifradin,Neomycin
+Neopeptine,Neopeptine,Neomycin
+Netromycin,Netromycin,Netilmicin
+Netspan,Netspan,Netilmicin
+Tobrex,Tobrex (eye drops),Tobramycin
+TOBI,TOBI (inhalation),Tobramycin
+Nebcin,Nebcin,Tobramycin
+Ambistryn-S,Ambistryn-S,Streptomycin
+Streptomycin Sulfate,Streptomycin Sulfate,Streptomycin
+Humatin,Humatin,Paromomycin
+Trobicin,Trobicin,Spectinomycin
+Zemdri,Zemdri,Plazomicin
+Extramycin,Extramycin,Sisomicin
+Siseptin,Siseptin,Sisomicin
+Panimycin,Panimycin,Dibekacin
+Vistamycin,Vistamycin,Ribostamycin
+Soframycin,Soframycin,Framycetin
+Isepacin,Isepacin,Isepamicin
+Exacin,Exacin,Isepamicin
+Habekacin,Habekacin,Arbekacin
+Vancocin,Vancocin,Vancomycin
+Vancogen,Vancogen,Vancomycin
+Vantox,Vantox,Vancomycin
+Firvanq,Firvanq,Vancomycin
+Targocid,Targocid,Teicoplanin
+Ticocin,Ticocin,Teicoplanin
+Teicotaz,Teicotaz,Teicoplanin
+Vibativ,Vibativ,Telavancin
+Dalvance,Dalvance,Dalbavancin
+Xydalba,Xydalba,Dalbavancin
+Orbactiv,Orbactiv,Oritavancin
+Kimyrsa,Kimyrsa,Oritavancin
+Ramoplanin,Ramoplanin (investigational),Ramoplanin
+Dalacin C,Dalacin C,Clindamycin
+Cleocin,Cleocin,Clindamycin
+Clindac A,Clindac A (topical),Clindamycin
+Evoclin,Evoclin,Clindamycin
+Lincocin,Lincocin,Lincomycin
+Lynx,Lynx,Lincomycin
+Pirsue,Pirsue (vet),Pirlimycin
+Zyvox,Zyvox,Linezolid
+Linospan,Linospan,Linezolid
+Lizomac,Lizomac,Linezolid
+Lizolid,Lizolid,Linezolid
+Sivextro,Sivextro,Tedizolid
+Radezolid,Radezolid (investigational),Radezolid
+Poly-Rx,Poly-Rx,Polymyxin B
+Polymyxin B Injectable,Polymyxin B Injectable,Polymyxin B
+Neosporin,Neosporin (combo),Polymyxin B
+Coly-Mycin M,Coly-Mycin M,Colistin (polymyxin E)
+Colistimethate,Colistimethate,Colistin (polymyxin E)
+Walamycin,Walamycin,Colistin (polymyxin E)
+Flagyl,Flagyl,Metronidazole
+Metrogyl,Metrogyl,Metronidazole
+Aristogyl,Aristogyl,Metronidazole
+Tindamax,Tindamax,Tinidazole
+Fasigyn,Fasigyn,Tinidazole
+Tiniba,Tiniba,Tinidazole
+Solosec,Solosec,Secnidazole
+Secnil,Secnil,Secnidazole
+Tagera,Tagera,Secnidazole
+Dazolic,Dazolic,Ornidazole
+Ornid,Ornid,Ornidazole
+Tiberal,Tiberal,Ornidazole
+Zenflox-OZ,Zenflox-OZ (combo),Ornidazole
+Macrobid,Macrobid,Nitrofurantoin
+Macrodantin,Macrodantin,Nitrofurantoin
+Furadantin,Furadantin,Nitrofurantoin
+Martifur,Martifur,Nitrofurantoin
+Monurol,Monurol,Fosfomycin
+Fosirol,Fosirol,Fosfomycin
+Crinofos,Crinofos,Fosfomycin
+Chloromycetin,Chloromycetin,Chloramphenicol
+Enteromycetin,Enteromycetin,Chloramphenicol
+Paraxin,Paraxin,Chloramphenicol
+Fucidin,Fucidin,Fusidic acid
+Fucibet,Fucibet,Fusidic acid
+Cubicin,Cubicin,Daptomycin
+Daptocel,Daptocel,Daptomycin
+Dapsun,Dapsun,Daptomycin
+Bactroban,Bactroban,Mupirocin
+T-Bact,T-Bact,Mupirocin
+Mupimet,Mupimet,Mupirocin
+Centany,Centany,Mupirocin

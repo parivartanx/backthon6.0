@@ -1,0 +1,377 @@
+aware_index,antibiotic,aware_group,recommendation_count,recommendations,source
+1,Acetylspiramycin + metronidazole,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+2,Amikacin,Access,5,Neutropaenia (high-risk); cefotaxime; Acute pyelonephritis (severe); Inflammatory or other diseases of prostate (severe); ceftriaxone,WHO AWaRe / Essential Medicines List export
+3,Amikacin + cefepime,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+4,Amoxicillin,Access,9,Acute pharyngitis; Periapical abscess without sinus; Acute sinusitis; Acute otitis media; Chronic obstructive pulmonary disease with acute exacerbation; Bacterial pneumonia (Community-acquired pneumonia - mild to moderate); gentamicin; Sepsis without septic shock; Bacterial meningitis,WHO AWaRe / Essential Medicines List export
+5,Amoxicillin + bacillus coagulans + cloxacillin,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+6,Amoxicillin + bacillus coagulans + dicloxacillin,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+7,Amoxicillin + clavulanic acid,Access,14,"Acute sinusitis; Other specified pneumonia (Hospital-acquired pneumonia); Chronic obstructive pulmonary disease with acute exacerbation; Neutropaenia (low-risk); Peritoneal abscess (mild-moderate); Peritonitis (mild-moderate); Infectious cystitis; Bacterial cellulitis, erysipelas or lymphangitis; Bacterial pneumonia (Community-acquired pneumonia - mild to moderate); Bacterial pneumonia (Community-acquired pneumonia - severe); Bacterial infection of joint; Acute otitis media; Other specified prophylactic measures; Osteomyelitis or osteitis",WHO AWaRe / Essential Medicines List export
+8,Amoxicillin + clavulanic acid + lactic ferments,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+9,Amoxicillin + clavulanic acid + lactobacillus acidophilus,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+10,Amoxicillin + clavulanic acid + nimesulide,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+11,Amoxicillin + cloxacillin,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+12,Amoxicillin + cloxacillin + lactic acid,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+13,Amoxicillin + cloxacillin + lactobacillus acidophilus + serrapeptase,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+14,Amoxicillin + cloxacillin + lactobacillus lactis,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+15,Amoxicillin + cloxacillin + serrapeptase,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+16,Amoxicillin + dicloxacillin,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+17,Amoxicillin + dicloxacillin + saccharomyces boulardii,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+18,Amoxicillin + flucloxacillin,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+19,Amoxicillin + flucloxacillin + lactobacillus acidophilus,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+20,Amoxicillin + metronidazole,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+21,Amoxicillin + pivsulbactam,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+22,Amoxicillin + sulbactam,Access,0,,WHO AWaRe / Essential Medicines List export
+23,Ampicillin,Access,7,gentamicin; Sepsis without septic shock; Peritoneal abscess (mild-moderate); Peritoneal abscess (severe); Peritonitis (mild-moderate); Peritonitis (severe); Bacterial meningitis,WHO AWaRe / Essential Medicines List export
+24,Ampicillin + cloxacillin,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+25,Ampicillin + cloxacillin+ lactobacillus acidophilus,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+26,Ampicillin + cloxacillin + saccharomyces boulardii,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+27,Ampicillin + dicloxacillin,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+28,Ampicillin + dicloxacillin + lactobacillus acidophilus,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+29,Ampicillin + flucloxacillin,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+30,Ampicillin + oxacillin,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+31,Ampicillin + sulbactam,Access,0,,WHO AWaRe / Essential Medicines List export
+32,Ampicillin + sultamicillin,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+33,Arbekacin,Watch,0,,WHO AWaRe / Essential Medicines List export
+34,Ascorbic acid + metamizole sodium + benzylpenicillin + streptomycin,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+35,Aspoxicillin,Watch,0,,WHO AWaRe / Essential Medicines List export
+36,Azanidazole,Access,0,,WHO AWaRe / Essential Medicines List export
+37,Azidocillin,Access,0,,WHO AWaRe / Essential Medicines List export
+38,Azithromycin,Watch,10,Cholera; Paratyphoid fever; Chlamydia trachomatis; Typhoid fever; Yaws; Trachoma; ceftriaxone; Gonococcal infection; Infectious gastroenteritis or colitis without specification of infectious agent; cefixime,WHO AWaRe / Essential Medicines List export
+39,Azithromycin + cefixime,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+40,Azithromycin + cefixime + lactobacillus acidophilus,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+41,Azithromycin + cefpodoxime proxetil,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+42,Azithromycin + fluconazole + secnidazole,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+43,Azithromycin + levofloxacin,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+44,Azithromycin + ofloxacin,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+45,Azlocillin,Watch,0,,WHO AWaRe / Essential Medicines List export
+46,Aztreonam,Reserve,1,Other specified bacterial diseases,WHO AWaRe / Essential Medicines List export
+47,Aztreonam + avibactam,Reserve,0,,WHO AWaRe / Essential Medicines List export
+48,Bacampicillin,Access,0,,WHO AWaRe / Essential Medicines List export
+49,Bekanamycin,Watch,0,,WHO AWaRe / Essential Medicines List export
+50,Benzathine benzylpenicillin,Access,1,Syphilis,WHO AWaRe / Essential Medicines List export
+51,Benzathine phenoxymethylpenicillin,Access,0,,WHO AWaRe / Essential Medicines List export
+52,Benzylpenicillin,Access,4,Syphilis; gentamicin; Sepsis without septic shock; Bacterial meningitis,WHO AWaRe / Essential Medicines List export
+53,Benzylpenicillin + procaine benzylpenicillin + benzathine benzylpenicillin,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+54,Benzylpenicillin + streptomycin,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+55,Biapenem,Watch,0,,WHO AWaRe / Essential Medicines List export
+56,Brodimoprim,Access,0,,WHO AWaRe / Essential Medicines List export
+57,Bromelains + doxycycline + lactobacillus reuteri + lactobacillus rhamnosus + ornidazole,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+58,Bromhexine + sulfamethoxazole + trimethoprim,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+59,Capreomycin,Access,1,Multi-drug resistant Mycobacterium tuberculosis,WHO AWaRe / Essential Medicines List export
+60,Carbenicillin,Watch,0,,WHO AWaRe / Essential Medicines List export
+61,Carindacillin,Watch,0,,WHO AWaRe / Essential Medicines List export
+62,Carumonam,Reserve,0,,WHO AWaRe / Essential Medicines List export
+63,Cefacetrile,Access,0,,WHO AWaRe / Essential Medicines List export
+64,Cefaclor,Watch,0,,WHO AWaRe / Essential Medicines List export
+65,Cefaclor + clavulanic acid,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+66,Cefadroxil,Access,0,,WHO AWaRe / Essential Medicines List export
+67,Cefadroxil + clavulanic acid,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+68,Cefadroxil + trimethoprim,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+69,Cefalexin,Access,3,"Bacterial cellulitis, erysipelas or lymphangitis; Chronic obstructive pulmonary disease with acute exacerbation; Acute pharyngitis",WHO AWaRe / Essential Medicines List export
+70,Cefalexin + trimethoprim,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+71,Cefaloridine,Access,0,,WHO AWaRe / Essential Medicines List export
+72,Cefalotin,Access,0,,WHO AWaRe / Essential Medicines List export
+73,Cefamandole,Watch,0,,WHO AWaRe / Essential Medicines List export
+74,Cefapirin,Access,0,,WHO AWaRe / Essential Medicines List export
+75,Cefatrizine,Access,0,,WHO AWaRe / Essential Medicines List export
+76,Cefazedone,Access,0,,WHO AWaRe / Essential Medicines List export
+77,Cefazolin,Access,4,Other specified prophylactic measures; metronidazole; Bacterial infection of joint; Osteomyelitis or osteitis,WHO AWaRe / Essential Medicines List export
+78,Cefbuperazone,Watch,0,,WHO AWaRe / Essential Medicines List export
+79,Cefcapene,Watch,0,,WHO AWaRe / Essential Medicines List export
+80,Cefdinir,Watch,0,,WHO AWaRe / Essential Medicines List export
+81,Cefdinir + clavulanic acid,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+82,Cefditoren,Watch,0,,WHO AWaRe / Essential Medicines List export
+83,Cefepime,Watch,1,Other specified bacterial diseases,WHO AWaRe / Essential Medicines List export
+84,Cefepime + sulbactam,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+85,Cefepime + tazobactam,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+86,Cefetamet,Watch,0,,WHO AWaRe / Essential Medicines List export
+87,Cefiderocol,Reserve,4,Carbapenem-resistant Pseudomonas aeruginosa; Other carbapenem resistant Enterobacterales; Carbapenem resistant Klebsiella pneumoniae; Carbapenem resistant Escherichia coli,WHO AWaRe / Essential Medicines List export
+88,Cefixime,Watch,3,Infectious gastroenteritis or colitis without specification of infectious agent; azithromycin; Gonococcal infection,WHO AWaRe / Essential Medicines List export
+89,Cefixime + cefpodoxime proxetil,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+90,Cefixime + clavulanic acid,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+91,Cefixime + clavulanic acid + lactobacillus acidophilus,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+92,Cefixime + cloxacillin,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+93,Cefixime + cloxacillin + lactobacillus acidophilus,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+94,Cefixime + dicloxacillin,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+95,Cefixime + lactobacillus acidophilus + ofloxacin,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+96,Cefixime + levofloxacin,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+97,Cefixime + linezolid,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+98,Cefixime + moxifloxacin,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+99,Cefixime + ofloxacin,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+100,Cefixime + ornidazole,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+101,Cefmenoxime,Watch,0,,WHO AWaRe / Essential Medicines List export
+102,Cefmetazole,Watch,0,,WHO AWaRe / Essential Medicines List export
+103,Cefminox,Watch,0,,WHO AWaRe / Essential Medicines List export
+104,Cefodizime,Watch,0,,WHO AWaRe / Essential Medicines List export
+105,Cefonicid,Watch,0,,WHO AWaRe / Essential Medicines List export
+106,Cefoperazone,Watch,0,,WHO AWaRe / Essential Medicines List export
+107,Cefoperazone + sulbactam,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+108,Cefoperazone + tazobactam,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+109,Ceforanide,Watch,0,,WHO AWaRe / Essential Medicines List export
+110,Cefoselis,Watch,0,,WHO AWaRe / Essential Medicines List export
+111,Cefotaxime,Watch,16,Acute pyelonephritis (severe); Bacterial pneumonia (Community-acquired pneumonia - severe); Other specified pneumonia (Hospital-acquired pneumonia); Bacterial meningitis; amikacin; Inflammatory or other diseases of prostate (severe); metronidazole; Peritoneal abscess (mild-moderate); Peritoneal abscess (severe); Peritonitis (mild-moderate); Peritonitis (severe); Acute pyelonephritis (mild to moderate); Sepsis without septic shock; Bacterial infection of joint; Inflammatory or other diseases of prostate (mild to moderate); Osteomyelitis or osteitis,WHO AWaRe / Essential Medicines List export
+112,Cefotaxime + sulbactam,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+113,Cefotetan,Watch,0,,WHO AWaRe / Essential Medicines List export
+114,Cefotiam,Watch,0,,WHO AWaRe / Essential Medicines List export
+115,Cefoxitin,Watch,0,,WHO AWaRe / Essential Medicines List export
+116,Cefozopran,Watch,0,,WHO AWaRe / Essential Medicines List export
+117,Cefpiramide,Watch,0,,WHO AWaRe / Essential Medicines List export
+118,Cefpirome,Watch,0,,WHO AWaRe / Essential Medicines List export
+119,Cefpodoxime,Watch,0,,WHO AWaRe / Essential Medicines List export
+120,Cefpodoxime proxetil + clavulanic acid,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+121,Cefpodoxime proxetil + cloxacillin + lactobacillus acidophilus,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+122,Cefpodoxime proxetil + dicloxacillin,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+123,Cefpodoxime proxetil + dicloxacillin + lactobacillus acidophilus,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+124,Cefpodoxime proxetil + levofloxacin,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+125,Cefpodoxime proxetil + ofloxacin,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+126,Cefpodoxime proxetil + sulbactam,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+127,Cefprozil,Watch,0,,WHO AWaRe / Essential Medicines List export
+128,Cefradine,Access,0,,WHO AWaRe / Essential Medicines List export
+129,Cefroxadine,Access,0,,WHO AWaRe / Essential Medicines List export
+130,Cefsulodin,Watch,0,,WHO AWaRe / Essential Medicines List export
+131,Ceftaroline,Reserve,1,Other specified bacterial diseases,WHO AWaRe / Essential Medicines List export
+132,Ceftazidime,Watch,1,Endophthalmitis,WHO AWaRe / Essential Medicines List export
+133,Ceftazidime + avibactam,Reserve,4,Carbapenem-resistant Pseudomonas aeruginosa; Other carbapenem resistant Enterobacterales; Carbapenem resistant Klebsiella pneumoniae; Carbapenem resistant Escherichia coli,WHO AWaRe / Essential Medicines List export
+134,Ceftazidime + sulbactam,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+135,Ceftazidime + tazobactam,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+136,Cefteram,Watch,0,,WHO AWaRe / Essential Medicines List export
+137,Ceftezole,Access,0,,WHO AWaRe / Essential Medicines List export
+138,Ceftibuten,Watch,0,,WHO AWaRe / Essential Medicines List export
+139,Ceftibuten + clavulanic acid,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+140,Ceftizoxime,Watch,0,,WHO AWaRe / Essential Medicines List export
+141,Ceftobiprole,Reserve,0,,WHO AWaRe / Essential Medicines List export
+142,Ceftolozane + tazobactam,Reserve,1,Carbapenem-resistant Pseudomonas aeruginosa,WHO AWaRe / Essential Medicines List export
+143,Ceftriaxone,Watch,23,Other specified pneumonia (Hospital-acquired pneumonia); Paratyphoid fever; Typhoid fever; Acute pyelonephritis (severe); Bacterial pneumonia (Community-acquired pneumonia - severe); Endophthalmitis; Bacterial meningitis; amikacin; Inflammatory or other diseases of prostate (severe); azithromycin; Gonococcal infection; metronidazole; Necrotising fasciitis; Peritoneal abscess (mild-moderate); Peritoneal abscess (severe); Peritonitis (mild-moderate); Peritonitis (severe); Acute pyelonephritis (mild to moderate); Bacterial infection of joint; Sepsis without septic shock; Infectious gastroenteritis or colitis without specification of infectious agent; Inflammatory or other diseases of prostate (mild to moderate); Osteomyelitis or osteitis,WHO AWaRe / Essential Medicines List export
+144,Ceftriaxone + sulbactam,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+145,Ceftriaxone + tazobactam,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+146,Ceftriaxone + vancomycin,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+147,Cefuroxime,Watch,1,Other specified prophylactic measures,WHO AWaRe / Essential Medicines List export
+148,Cefuroxime + clavulanic acid,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+149,Cefuroxime + metronidazole,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+150,Cefuroxime axetil + linezolid,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+151,Chloramphenicol,Access,1,Bacterial meningitis,WHO AWaRe / Essential Medicines List export
+152,Chloramphenicol + tetracycline,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+153,Chlortetracycline,Watch,0,,WHO AWaRe / Essential Medicines List export
+154,Cinoxacin,Watch,0,,WHO AWaRe / Essential Medicines List export
+155,Ciprofloxacin,Watch,10,Paratyphoid fever; Acute pyelonephritis (mild to moderate); Typhoid fever; Infectious gastroenteritis or colitis without specification of infectious agent; Neutropaenia (low-risk); Inflammatory or other diseases of prostate (mild to moderate); Cholera; metronidazole; Peritoneal abscess (mild-moderate); Peritonitis (mild-moderate),WHO AWaRe / Essential Medicines List export
+156,Ciprofloxacin + metronidazole,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+157,Ciprofloxacin + ornidazole,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+158,Ciprofloxacin + tinidazole,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+159,Clarithromycin,Watch,5,cefotaxime; Bacterial pneumonia (Community-acquired pneumonia - severe); ceftriaxone; Acute pharyngitis; amoxicillin + clavulanic acid,WHO AWaRe / Essential Medicines List export
+160,Clindamycin,Access,3,Necrotising fasciitis; Bacterial infection of joint; Osteomyelitis or osteitis,WHO AWaRe / Essential Medicines List export
+161,Clofoctol,Watch,0,,WHO AWaRe / Essential Medicines List export
+162,Clometocillin,Access,0,,WHO AWaRe / Essential Medicines List export
+163,Clomocycline,Watch,0,,WHO AWaRe / Essential Medicines List export
+164,Cloxacillin,Access,4,"Bacterial infection of joint; Osteomyelitis or osteitis; Bacterial cellulitis, erysipelas or lymphangitis; Sepsis without septic shock",WHO AWaRe / Essential Medicines List export
+165,Colistin (injection),Reserve,6,Other specified bacterial diseases; Carbapenem resistant Acinetobacter baumannii; Carbapenem-resistant Pseudomonas aeruginosa; Other carbapenem resistant Enterobacterales; Carbapenem resistant Escherichia coli; Carbapenem resistant Klebsiella pneumoniae,WHO AWaRe / Essential Medicines List export
+166,Colistin (oral),Reserve,0,,WHO AWaRe / Essential Medicines List export
+167,Dalbavancin,Reserve,0,,WHO AWaRe / Essential Medicines List export
+168,Dalfopristin + quinupristin,Reserve,0,,WHO AWaRe / Essential Medicines List export
+169,Daptomycin,Reserve,1,Other specified bacterial diseases,WHO AWaRe / Essential Medicines List export
+170,Delafloxacin,Watch,1,Methicillin resistant Staphylococcus aureus,WHO AWaRe / Essential Medicines List export
+171,Demeclocycline,Watch,0,,WHO AWaRe / Essential Medicines List export
+172,Dibekacin,Watch,0,,WHO AWaRe / Essential Medicines List export
+173,Dicloxacillin,Access,0,,WHO AWaRe / Essential Medicines List export
+174,Dirithromycin,Watch,0,,WHO AWaRe / Essential Medicines List export
+175,Doripenem,Watch,0,,WHO AWaRe / Essential Medicines List export
+176,Doxycycline,Access,4,Cholera; Chlamydia trachomatis; Chronic obstructive pulmonary disease with acute exacerbation; Bacterial pneumonia (Community-acquired pneumonia - mild to moderate),WHO AWaRe / Essential Medicines List export
+177,Doxycycline + tinidazole,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+178,Enoxacin,Watch,0,,WHO AWaRe / Essential Medicines List export
+179,Epicillin,Access,0,,WHO AWaRe / Essential Medicines List export
+180,Eravacycline,Reserve,1,Other carbapenem resistant Enterobacterales,WHO AWaRe / Essential Medicines List export
+181,Ertapenem,Watch,0,,WHO AWaRe / Essential Medicines List export
+182,Erythromycin,Watch,3,Chlamydial conjunctivitis; Bacterial infection of unspecified site; Gonococcal infection of eye,WHO AWaRe / Essential Medicines List export
+183,Erythromycin + sulfamethoxazole + trimethoprim,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+184,Erythromycin + trimethoprim,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+185,Faropenem,Reserve,0,,WHO AWaRe / Essential Medicines List export
+186,Fidaxomicin,Watch,0,,WHO AWaRe / Essential Medicines List export
+187,Fleroxacin,Watch,0,,WHO AWaRe / Essential Medicines List export
+188,Flomoxef,Watch,1,Other specified other antibiotic resistant Enterobacterales,WHO AWaRe / Essential Medicines List export
+189,Flucloxacillin,Access,0,,WHO AWaRe / Essential Medicines List export
+190,Flumequine,Watch,0,,WHO AWaRe / Essential Medicines List export
+191,Flurithromycin,Watch,0,,WHO AWaRe / Essential Medicines List export
+192,Fosfomycin (injection),Reserve,4,Other specified bacterial diseases; Carbapenem resistant Acinetobacter baumannii; Carbapenem-resistant Pseudomonas aeruginosa; Other carbapenem resistant Enterobacterales,WHO AWaRe / Essential Medicines List export
+193,Fosfomycin (oral),Watch,0,,WHO AWaRe / Essential Medicines List export
+194,Fosfomycin + trimethoprim,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+195,Furazidin,Access,0,,WHO AWaRe / Essential Medicines List export
+196,Fusidic acid,Watch,0,,WHO AWaRe / Essential Medicines List export
+197,Garenoxacin,Watch,0,,WHO AWaRe / Essential Medicines List export
+198,Gatifloxacin,Watch,1,Multi-drug resistant Mycobacterium tuberculosis,WHO AWaRe / Essential Medicines List export
+199,Gatifloxacin + ornidazole,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+200,Gemifloxacin,Watch,0,,WHO AWaRe / Essential Medicines List export
+201,Gentamicin,Access,11,Neonatal meningitis; Sepsis without septic shock; amoxicillin; ampicillin; Peritoneal abscess (mild-moderate); Peritoneal abscess (severe); Peritonitis (mild-moderate); Peritonitis (severe); benzylpenicillin; Other specified prophylactic measures; Gonococcal infection,WHO AWaRe / Essential Medicines List export
+202,Gepotidacin,Watch,0,,WHO AWaRe / Essential Medicines List export
+203,Grepafloxacin,Watch,0,,WHO AWaRe / Essential Medicines List export
+204,Hetacillin,Access,0,,WHO AWaRe / Essential Medicines List export
+205,Iclaprim,Reserve,0,,WHO AWaRe / Essential Medicines List export
+206,Imipenem + cilastatin,Watch,2,Pseudomonas aeruginosa resistant to other antibiotic; Antibiotic resistant Acinetobacter baumannii,WHO AWaRe / Essential Medicines List export
+207,Imipenem + cilastatin + relebactam,Reserve,3,Other specified other antibiotic resistant Enterobacterales; Carbapenem-resistant Pseudomonas aeruginosa; Other carbapenem resistant Enterobacterales,WHO AWaRe / Essential Medicines List export
+208,Isepamicin,Watch,0,,WHO AWaRe / Essential Medicines List export
+209,Josamycin,Watch,0,,WHO AWaRe / Essential Medicines List export
+210,Kanamycin,Watch,0,,WHO AWaRe / Essential Medicines List export
+211,Kanamycin (injection),Watch,1,Multi-drug resistant Mycobacterium tuberculosis,WHO AWaRe / Essential Medicines List export
+212,Kanamycin (oral),Watch,0,,WHO AWaRe / Essential Medicines List export
+213,Kanamycin + benzylpenicillin,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+214,Lascufloxacin,Watch,0,,WHO AWaRe / Essential Medicines List export
+215,Latamoxef,Watch,0,,WHO AWaRe / Essential Medicines List export
+216,Lefamulin,Reserve,0,,WHO AWaRe / Essential Medicines List export
+217,Levofloxacin,Watch,1,Multi-drug resistant Mycobacterium tuberculosis,WHO AWaRe / Essential Medicines List export
+218,Levofloxacin + metronidazole,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+219,Levofloxacin + ornidazole,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+220,Levonadifloxacin,Watch,0,,WHO AWaRe / Essential Medicines List export
+221,Lincomycin,Watch,0,,WHO AWaRe / Essential Medicines List export
+222,Linezolid,Reserve,5,Other specified bacterial diseases; Methicillin resistant Staphylococcus aureus; Vancomycin resistant Staphylococcus aureus; Vancomycin resistant Enterococcus; Multi-drug resistant Mycobacterium tuberculosis,WHO AWaRe / Essential Medicines List export
+223,Lomefloxacin,Watch,0,,WHO AWaRe / Essential Medicines List export
+224,Loracarbef,Watch,0,,WHO AWaRe / Essential Medicines List export
+225,Lymecycline,Watch,0,,WHO AWaRe / Essential Medicines List export
+226,Mecillinam,Access,0,,WHO AWaRe / Essential Medicines List export
+227,Meropenem,Watch,4,Neonatal meningitis; Neutropaenia (high-risk); Peritoneal abscess (severe); Peritonitis (severe),WHO AWaRe / Essential Medicines List export
+228,Meropenem + sulbactam,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+229,Meropenem + vaborbactam,Reserve,5,Carbapenem-resistant Pseudomonas aeruginosa; Carbapenem resistant Acinetobacter baumannii; Other carbapenem resistant Enterobacterales; Carbapenem resistant Escherichia coli; Carbapenem resistant Klebsiella pneumoniae,WHO AWaRe / Essential Medicines List export
+230,Metacycline,Watch,0,,WHO AWaRe / Essential Medicines List export
+231,Metampicillin,Access,0,,WHO AWaRe / Essential Medicines List export
+232,Meticillin,Access,0,,WHO AWaRe / Essential Medicines List export
+233,Metronidazole,Access,12,Intestinal infections due to Clostridioides difficile; Trichomoniasis; Necrotising fasciitis; cefazolin; Other specified prophylactic measures; cefotaxime; Peritoneal abscess (mild-moderate); Peritoneal abscess (severe); Peritonitis (mild-moderate); Peritonitis (severe); ceftriaxone; ciprofloxacin,WHO AWaRe / Essential Medicines List export
+234,Metronidazole + diloxanide,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+235,Metronidazole + furazolidone,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+236,Metronidazole + norfloxacin,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+237,Metronidazole + spiramycin,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+238,Metronidazole + tetracycline,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+239,Mezlocillin,Watch,0,,WHO AWaRe / Essential Medicines List export
+240,Mezlocillin + sulbactam,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+241,Micronomicin,Watch,0,,WHO AWaRe / Essential Medicines List export
+242,Midecamycin,Watch,0,,WHO AWaRe / Essential Medicines List export
+243,Minocycline (injection),Reserve,0,,WHO AWaRe / Essential Medicines List export
+244,Minocycline (oral),Watch,0,,WHO AWaRe / Essential Medicines List export
+245,Miocamycin,Watch,0,,WHO AWaRe / Essential Medicines List export
+246,Moxifloxacin,Watch,2,Multi-drug resistant Mycobacterium tuberculosis; Tuberculosis,WHO AWaRe / Essential Medicines List export
+247,Nafcillin,Access,0,,WHO AWaRe / Essential Medicines List export
+248,Nalidixic acid,Watch,1,Shigella resistant to unspecified antibiotic,WHO AWaRe / Essential Medicines List export
+249,Nemonoxacin,Watch,0,,WHO AWaRe / Essential Medicines List export
+250,Neomycin (injection),Watch,0,,WHO AWaRe / Essential Medicines List export
+251,Neomycin (oral),Watch,0,,WHO AWaRe / Essential Medicines List export
+252,Netilmicin,Watch,0,,WHO AWaRe / Essential Medicines List export
+253,Nifurtoinol,Access,0,,WHO AWaRe / Essential Medicines List export
+254,Nimorazole,Access,0,,WHO AWaRe / Essential Medicines List export
+255,Nitrofurantoin,Access,1,Infectious cystitis,WHO AWaRe / Essential Medicines List export
+256,Norfloxacin,Watch,0,,WHO AWaRe / Essential Medicines List export
+257,Norfloxacin + tinidazole,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+258,Ofloxacin,Watch,3,Other specified conjunctivitis; Infectious keratitis; Multi-drug resistant Mycobacterium tuberculosis,WHO AWaRe / Essential Medicines List export
+259,Ofloxacin + nitazoxanide,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+260,Ofloxacin + ornidazole,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+261,Ofloxacin + tinidazole,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+262,Oleandomycin,Watch,0,,WHO AWaRe / Essential Medicines List export
+263,Oleandomycin + tetracycline,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+264,Omadacycline,Reserve,1,Methicillin resistant Staphylococcus aureus,WHO AWaRe / Essential Medicines List export
+265,Oritavancin,Reserve,0,,WHO AWaRe / Essential Medicines List export
+266,Ornidazole (injection),Access,0,,WHO AWaRe / Essential Medicines List export
+267,Ornidazole (oral),Access,0,,WHO AWaRe / Essential Medicines List export
+268,Oxacillin,Access,0,,WHO AWaRe / Essential Medicines List export
+269,Oxolinic acid,Watch,0,,WHO AWaRe / Essential Medicines List export
+270,Oxytetracycline,Watch,0,,WHO AWaRe / Essential Medicines List export
+271,Panipenem,Watch,0,,WHO AWaRe / Essential Medicines List export
+272,Paromomycin,Watch,2,Visceral leishmaniasis; Amoebiasis,WHO AWaRe / Essential Medicines List export
+273,Pazufloxacin,Watch,0,,WHO AWaRe / Essential Medicines List export
+274,Pefloxacin,Watch,0,,WHO AWaRe / Essential Medicines List export
+275,Penamecillin,Access,0,,WHO AWaRe / Essential Medicines List export
+276,Penimepicycline,Watch,0,,WHO AWaRe / Essential Medicines List export
+277,Pheneticillin,Watch,0,,WHO AWaRe / Essential Medicines List export
+278,Phenoxymethylpenicillin,Access,3,Bacterial pneumonia (Community-acquired pneumonia - mild to moderate); Periapical abscess without sinus; Acute pharyngitis,WHO AWaRe / Essential Medicines List export
+279,Pipemidic acid,Watch,0,,WHO AWaRe / Essential Medicines List export
+280,Piperacillin,Watch,0,,WHO AWaRe / Essential Medicines List export
+281,Piperacillin + sulbactam,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+282,Piperacillin + tazobactam,Watch,6,Other specified pneumonia (Hospital-acquired pneumonia); Neutropaenia (high-risk); Peritoneal abscess (severe); Peritonitis (severe); clindamycin; Necrotising fasciitis,WHO AWaRe / Essential Medicines List export
+283,Piromidic acid,Watch,0,,WHO AWaRe / Essential Medicines List export
+284,Pivampicillin,Access,0,,WHO AWaRe / Essential Medicines List export
+285,Pivampicillin + pivmecillinam,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+286,Pivmecillinam,Access,0,,WHO AWaRe / Essential Medicines List export
+287,Plazomicin,Reserve,5,Carbapenem resistant Acinetobacter baumannii; Carbapenem-resistant Pseudomonas aeruginosa; Other carbapenem resistant Enterobacterales; Carbapenem resistant Escherichia coli; Carbapenem resistant Klebsiella pneumoniae,WHO AWaRe / Essential Medicines List export
+288,Polymyxin B (injection),Reserve,5,Carbapenem resistant Acinetobacter baumannii; Carbapenem-resistant Pseudomonas aeruginosa; Other carbapenem resistant Enterobacterales; Carbapenem resistant Escherichia coli; Carbapenem resistant Klebsiella pneumoniae,WHO AWaRe / Essential Medicines List export
+289,Polymyxin B (oral),Reserve,0,,WHO AWaRe / Essential Medicines List export
+290,Pristinamycin,Watch,0,,WHO AWaRe / Essential Medicines List export
+291,Procaine benzylpenicillin,Access,1,Syphilis,WHO AWaRe / Essential Medicines List export
+292,Propenidazole,Access,0,,WHO AWaRe / Essential Medicines List export
+293,Propicillin,Access,0,,WHO AWaRe / Essential Medicines List export
+294,Prulifloxacin,Watch,0,,WHO AWaRe / Essential Medicines List export
+295,Ribostamycin,Watch,0,,WHO AWaRe / Essential Medicines List export
+296,Rifabutin,Watch,1,Tuberculosis,WHO AWaRe / Essential Medicines List export
+297,Rifampicin,Watch,3,Other specified tuberculosis; Leprosy; Tuberculosis,WHO AWaRe / Essential Medicines List export
+298,Rifamycin (injection),Watch,0,,WHO AWaRe / Essential Medicines List export
+299,Rifamycin (oral),Watch,0,,WHO AWaRe / Essential Medicines List export
+300,Rifaximin,Watch,0,,WHO AWaRe / Essential Medicines List export
+301,Rokitamycin,Watch,0,,WHO AWaRe / Essential Medicines List export
+302,Rolitetracycline,Watch,0,,WHO AWaRe / Essential Medicines List export
+303,Rosoxacin,Watch,0,,WHO AWaRe / Essential Medicines List export
+304,Roxithromycin,Watch,0,,WHO AWaRe / Essential Medicines List export
+305,Rufloxacin,Watch,0,,WHO AWaRe / Essential Medicines List export
+306,Sarecycline,Watch,0,,WHO AWaRe / Essential Medicines List export
+307,Satranidazole,Access,0,,WHO AWaRe / Essential Medicines List export
+308,Secnidazole,Access,0,,WHO AWaRe / Essential Medicines List export
+309,Sisomicin,Watch,0,,WHO AWaRe / Essential Medicines List export
+310,Sitafloxacin,Watch,0,,WHO AWaRe / Essential Medicines List export
+311,Solithromycin,Watch,0,,WHO AWaRe / Essential Medicines List export
+312,Sparfloxacin,Watch,0,,WHO AWaRe / Essential Medicines List export
+313,Spectinomycin,Access,1,Gonococcal infection,WHO AWaRe / Essential Medicines List export
+314,Spiramycin,Watch,0,,WHO AWaRe / Essential Medicines List export
+315,Streptoduocin,Watch,0,,WHO AWaRe / Essential Medicines List export
+316,Streptomycin (injection),Watch,1,Multi-drug resistant Mycobacterium tuberculosis,WHO AWaRe / Essential Medicines List export
+317,Streptomycin (oral),Watch,0,,WHO AWaRe / Essential Medicines List export
+318,Sulbactam,Access,0,,WHO AWaRe / Essential Medicines List export
+319,Sulbenicillin,Watch,0,,WHO AWaRe / Essential Medicines List export
+320,Sulfacarbamide + sulfadiazine + sulfadimidine,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+321,Sulfadiazine,Access,2,Toxoplasmosis; Bacterial infection of unspecified site,WHO AWaRe / Essential Medicines List export
+322,Sulfadiazine + sulfamethoxazole + trimethoprim,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+323,Sulfadiazine + tetroxoprim,Access,0,,WHO AWaRe / Essential Medicines List export
+324,Sulfadiazine + trimethoprim,Access,0,,WHO AWaRe / Essential Medicines List export
+325,Sulfadimethoxine,Access,0,,WHO AWaRe / Essential Medicines List export
+326,Sulfadimidine,Access,1,Bacterial infection of unspecified site,WHO AWaRe / Essential Medicines List export
+327,Sulfadimidine + trimethoprim,Access,0,,WHO AWaRe / Essential Medicines List export
+328,Sulfafurazole,Access,0,,WHO AWaRe / Essential Medicines List export
+329,Sulfaisodimidine,Access,0,,WHO AWaRe / Essential Medicines List export
+330,Sulfalene,Access,0,,WHO AWaRe / Essential Medicines List export
+331,Sulfamazone,Access,0,,WHO AWaRe / Essential Medicines List export
+332,Sulfamerazine,Access,0,,WHO AWaRe / Essential Medicines List export
+333,Sulfamerazine + trimethoprim,Access,0,,WHO AWaRe / Essential Medicines List export
+334,Sulfamethizole,Access,0,,WHO AWaRe / Essential Medicines List export
+335,Sulfamethizole + trimethoprim,Access,0,,WHO AWaRe / Essential Medicines List export
+336,Sulfamethoxazole,Access,0,,WHO AWaRe / Essential Medicines List export
+337,Sulfamethoxazole + trimethoprim,Access,2,Infectious cystitis; Infectious gastroenteritis or colitis without specification of infectious agent,WHO AWaRe / Essential Medicines List export
+338,Sulfamethoxypyridazine,Access,0,,WHO AWaRe / Essential Medicines List export
+339,Sulfametomidine,Access,0,,WHO AWaRe / Essential Medicines List export
+340,Sulfametoxydiazine,Access,0,,WHO AWaRe / Essential Medicines List export
+341,Sulfametrole + trimethoprim,Access,0,,WHO AWaRe / Essential Medicines List export
+342,Sulfamoxole,Access,0,,WHO AWaRe / Essential Medicines List export
+343,Sulfamoxole + trimethoprim,Access,0,,WHO AWaRe / Essential Medicines List export
+344,Sulfanilamide,Access,0,,WHO AWaRe / Essential Medicines List export
+345,Sulfaperin,Access,0,,WHO AWaRe / Essential Medicines List export
+346,Sulfaphenazole,Access,0,,WHO AWaRe / Essential Medicines List export
+347,Sulfapyridine,Access,0,,WHO AWaRe / Essential Medicines List export
+348,Sulfathiazole,Access,0,,WHO AWaRe / Essential Medicines List export
+349,Sulfathiourea,Access,0,,WHO AWaRe / Essential Medicines List export
+350,Sulfonamide combinations (excl trimethoprim),Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+351,Sultamicillin,Access,0,,WHO AWaRe / Essential Medicines List export
+352,Talampicillin,Access,0,,WHO AWaRe / Essential Medicines List export
+353,Tazobactam,Watch,0,,WHO AWaRe / Essential Medicines List export
+354,Tebipenem,Watch,0,,WHO AWaRe / Essential Medicines List export
+355,Tedizolid,Reserve,0,,WHO AWaRe / Essential Medicines List export
+356,Teicoplanin,Watch,0,,WHO AWaRe / Essential Medicines List export
+357,Telavancin,Reserve,0,,WHO AWaRe / Essential Medicines List export
+358,Telithromycin,Watch,0,,WHO AWaRe / Essential Medicines List export
+359,Temafloxacin,Watch,0,,WHO AWaRe / Essential Medicines List export
+360,Temocillin,Watch,0,,WHO AWaRe / Essential Medicines List export
+361,Tetracycline,Access,6,Neonatal conjunctivitis or dacryocystitis; Other specified conjunctivitis; Infectious keratitis; Infectious blepharitis; Trachoma; Bacterial infection of unspecified site,WHO AWaRe / Essential Medicines List export
+362,Tetracycline + chlortetracycline + demeclocycline,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+363,Tetracycline + nystatin,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+364,Thiamphenicol,Access,0,,WHO AWaRe / Essential Medicines List export
+365,Ticarcillin,Watch,0,,WHO AWaRe / Essential Medicines List export
+366,Ticarcillin + clavulanic acid,Watch,0,,WHO AWaRe / Essential Medicines List export
+367,Tigecycline,Reserve,1,Other specified bacterial diseases,WHO AWaRe / Essential Medicines List export
+368,Tinidazole (injection),Access,0,,WHO AWaRe / Essential Medicines List export
+369,Tinidazole (oral),Access,0,,WHO AWaRe / Essential Medicines List export
+370,Tinidazole + diloxanide,Not Recommended,0,,WHO AWaRe / Essential Medicines List export
+371,Tobramycin,Watch,0,,WHO AWaRe / Essential Medicines List export
+372,Tosufloxacin,Watch,0,,WHO AWaRe / Essential Medicines List export
+373,Trimethoprim,Access,1,Infectious cystitis,WHO AWaRe / Essential Medicines List export
+374,Troleandomycin,Watch,0,,WHO AWaRe / Essential Medicines List export
+375,Trovafloxacin,Watch,0,,WHO AWaRe / Essential Medicines List export
+376,Vancomycin,Watch,6,Necrotising fasciitis; ceftazidime; Endophthalmitis; ceftriaxone; Intestinal infections due to Clostridioides difficile; Neutropaenia (high-risk),WHO AWaRe / Essential Medicines List export

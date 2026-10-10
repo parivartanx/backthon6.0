@@ -1,0 +1,37 @@
+id,condition_id,source,section_ref,summary,antibiotic_indicated
+1,1,ICMR STG 2022,Respiratory Infections - Mild CAP,Amoxicillin 500mg PO TID for 5 days is first-line. Fluoroquinolones reserved for beta-lactam anaphylaxis.,True
+2,2,ICMR STG 2022,Urinary Tract Infections - Acute Cystitis,Nitrofurantoin 100mg PO BD x 5d or Fosfomycin 3g single dose. Empirical fluoroquinolones contraindicated due to >75% E. coli resistance.,True
+3,3,ICMR STG 2022,Respiratory Infections - Acute Bronchitis,Acute bronchitis in immunocompetent adults is predominantly viral and self-limiting. Antibiotics provide zero clinical benefit and are not indicated.,False
+4,4,ICMR STG 2022,Upper Respiratory - Common Cold,Viral etiology. Symptomatic supportive care only (antipyretics, hydration, saline nasal drops). Antibiotic therapy contraindicated.,False
+5,5,ICMR STG 2022,Upper Respiratory - Viral URTI,Viral etiology. Antibiotic therapy not indicated. Steam inhalation, paracetamol, and rest recommended.,False
+6,6,ICMR STG 2022,ENT - Non-Strep Pharyngitis,Viral pharyngitis. Antibiotics non-indicated unless Centor criteria score >= 3 or positive rapid antigen test for GAS.,False
+7,7,ICMR STG 2022,Gastrointestinal - Acute Watery Diarrhea,Non-cholera watery diarrhea is predominantly viral. First-line therapy is Oral Rehydration Salts (ORS) + Zinc for 14 days. Antimicrobials not indicated.,False
+8,8,ICMR STG 2022,ENT - Streptococcal Pharyngitis,Confirmed Group A Streptococcal pharyngitis: Amoxicillin 500mg TID for 5-10 days or Benzathine Penicillin G single IM dose to prevent rheumatic fever.,True
+9,9,ICMR STG 2022,Pediatric ENT - Acute Otitis Media,Amoxicillin 40-45 mg/kg/day TID for 5 days. Re-evaluate at 48 hours for clinical improvement.,True
+10,10,ICMR STG 2022,Dermatology - Cellulitis & Impetigo,Non-purulent uncomplicated SSTI: Cefalexin 500mg QID or Cloxacillin 500mg QID for 5 days targeting Streptococcus pyogenes and MSSA.,True
+11,11,ICMR STG 2022,Respiratory - Inpatient Moderate CAP,Amoxicillin-Clavulanate 1.2g IV TDS + Clarithromycin 500mg PO BD for 5 days. Step down to oral as soon as afebrile.,True
+12,12,ICMR STG 2022,Critical Care - Severe CAP,Ceftriaxone 2g IV OD + Azithromycin 500mg IV OD for 7 days. Obtain blood and sputum cultures before first dose.,True
+13,13,ICMR STG 2022,Nosocomial - Hospital-Acquired Pneumonia,Antipseudomonal beta-lactam: Piperacillin-Tazobactam 4.5g IV Q6H or Cefepime 2g IV Q8H for 7 days. Guided by hospital antibiogram.,True
+14,14,ICMR STG 2022,Nosocomial - Ventilator-Associated Pneumonia,Meropenem 1g IV Q8H plus targeted MRSA or Polymyxin therapy if high prevalence of carbapenem-resistant Acinetobacter/Klebsiella.,True
+15,15,ICMR STG 2022,Pulmonary - Acute Exacerbation of COPD,Indicated if purulent sputum + increased dyspnea (Anthonisen Type 1): Amoxicillin-Clavulanate 625mg PO BD x 5d or Doxycycline 100mg PO BD x 5d.,True
+16,16,ICMR STG 2022,ENT - Acute Bacterial Rhinosinusitis,Symptoms persisting >10 days without improvement or 'double sickening': Amoxicillin-Clavulanate 625mg PO BD for 5-7 days.,True
+17,17,ICMR STG 2022,ENT - Chronic Suppurative Otitis Media,Topical antibiotic ear drops (Ciprofloxacin or Ofloxacin) preferred over oral antibiotics for active ear discharge.,True
+18,18,ICMR STG 2022,Dental - Odontogenic Abscess,Dental intervention (drainage/extraction) primary. Adjunctive Amoxicillin 500mg TID + Metronidazole 400mg TID x 5d if systemic signs present.,True
+19,19,ICMR STG 2022,Urology - Recurrent Cystitis,Nitrofurantoin 100mg PO BD for 5 days. Avoid routine post-coital prophylaxis unless non-antimicrobial interventions fail.,True
+20,20,ICMR STG 2022,Urology - Acute Pyelonephritis Outpatient,Cefpodoxime 200mg PO BD for 10 days, preceded by single IV Ceftriaxone 1g dose in day-care if mild systemic symptoms.,True
+21,21,ICMR STG 2022,Urology - Complicated Pyelonephritis / Urosepsis,Inpatient IV Ceftriaxone 2g OD or Piperacillin-Tazobactam 4.5g TDS for 10-14 days. Mandatory urine culture before initiating.,True
+22,22,ICMR STG 2022,Obstetrics - Asymptomatic Bacteriuria Pregnancy,Screening and treatment mandatory: Cefalexin 500mg PO QID for 5 days or single-dose Fosfomycin 3g. Nitrofurantoin safe in 2nd trimester.,True
+23,23,ICMR STG 2022,Urology - Acute Bacterial Prostatitis,Co-trimoxazole (Double Strength 960mg) PO BD for 14-28 days due to superior prostatic tissue penetration.,True
+24,24,ICMR STG 2022,Gastroenterology - Bacillary Dysentery,Bloody diarrhea with fever: Azithromycin 500mg PO OD for 3 days or Ciprofloxacin 500mg BD x 3d if local susceptibility confirmed.,True
+25,25,ICMR STG 2022,Infectious Diseases - Enteric Fever (Typhoid),Azithromycin 500mg PO BD for 7 days for uncomplicated outpatient; Ceftriaxone 2g IV OD for 7-10 days for inpatient.,True
+26,26,ICMR STG 2022,Surgery - Secondary Peritonitis Mild,Cefotaxime 1g IV TDS + Metronidazole 500mg IV TDS for 5 days with source control.,True
+27,27,ICMR STG 2022,Critical Care - Severe Intra-Abdominal Sepsis,Piperacillin-Tazobactam 4.5g IV Q6H for 7 days with prompt surgical source control.,True
+28,28,ICMR STG 2022,Gastroenterology - H. Pylori Eradication,Triple therapy: PPI (Esomeprazole 40mg BD) + Amoxicillin 1g BD + Clarithromycin 500mg BD for 14 days.,True
+29,29,ICMR STG 2022,Dermatology - Purulent SSTI / Abscess,Incision and drainage primary. Adjunctive Doxycycline 100mg PO BD for 5-7 days if cellulitis extends >5cm or systemic signs present.,True
+30,30,ICMR STG 2022,Endocrinology - Mild Diabetic Foot Infection,Amoxicillin-Clavulanate 625mg PO BD for 7-14 days with wound debridement and glycemic optimization.,True
+31,31,ICMR STG 2022,Endocrinology - Severe Diabetic Foot Sepsis,Piperacillin-Tazobactam 4.5g IV TDS + Clindamycin 600mg IV TDS for 10-14 days with vascular assessment and surgical debridement.,True
+32,32,ICMR STG 2022,Orthopedics - Acute Septic Arthritis,Cefazolin 2g IV TDS (or Ceftriaxone 2g IV OD) for 14-21 days with urgent joint aspiration / arthroscopic washout.,True
+33,33,ICMR STG 2022,Orthopedics - Acute Osteomyelitis,Cefazolin 2g IV TDS or Cloxacillin 2g IV Q4H for 3-4 weeks (at least 2 weeks IV then oral step-down).,True
+34,34,ICMR STG 2022,Neurology - Bacterial Meningitis Community,Empirical Ceftriaxone 2g IV Q12H + Vancomycin 15-20mg/kg IV Q12H + adjunctive Dexamethasone for 10-14 days.,True
+35,35,ICMR STG 2022,Oncology - High-Risk Febrile Neutropenia,Immediate empirical antipseudomonal monotherapy: Piperacillin-Tazobactam 4.5g IV Q6H or Meropenem 1g IV Q8H within 1 hour of fever.,True
+36,36,ICMR STG 2022,Critical Care - Sepsis / Septic Shock,Broad-spectrum beta-lactam (Piperacillin-Tazobactam 4.5g IV Q6H) + single dose Amikacin 15mg/kg within 1 hour 'Golden Hour' protocol.,True

@@ -1,0 +1,8 @@
+dataset,rows,columns,duplicates,missing_report_year_before_fix,missing_report_year_after_fix,critical_issue,status
+ncdc_rag_clean,1095,15,0,25,0,25 records in amr24.pdf had missing report_year; repaired to 2018 from source_id/source manifest.,cleaned
+ncdc_evidence_clean,346,11,0,25,0,2018 resistance evidence metadata year repaired from source provenance.,cleaned
+ncdc_rag_chunks,749,8,0,0,0,All 749 chunk IDs match the 749 document_chunk records in ncdc_amr_machine_trainable.csv.,verified
+who_relay_raw,214367,55,0,0,0,"Raw RELAY file is a broad 214,367-row indicator warehouse, not an AMR-only dataset.",filtered
+who_amr_canonical,1019,14,0,0,0,Canonicalized to the specific E. coli 3GC and MRSA indicators; generic AMR_INFECT rows were duplicates of these specific indicators for available keys.,cleaned
+who_aware_antibiotics,376,6,0,0,0,"376 antibiotic entries parsed; 94 Access, 145 Watch, 30 Reserve, 107 Not Recommended.",verified
+icmr_surveillance_pages,1353,10,0,0,0,"1,353 non-empty pages retained from 1,355 total pages; two blank cover pages omitted.",cleaned

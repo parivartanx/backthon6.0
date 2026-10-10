@@ -1,0 +1,70 @@
+---
+schema:
+  name: AYUSH AMR Source Index
+  version: '1.0'
+  format: yaml-source-registry
+  record_schema: amr.source.v1
+corpus:
+  id: amr-india-ayush-evidence-kb
+  source_count: 10
+sources:
+  - source_id: AYUSH_NAP_AMR_2_0
+    title: National One Health Mission / NAP-AMR 2.0 (2025-2029)
+    source_type: government_document
+    file_name: National One Health Mission.pdf
+    verification_status: supplied_document_reviewed_at_summary_level
+    evidence_role: policy_context
+  - source_id: AYUSH_RESEARCH_PORTAL_OFFICIAL
+    title: Ministry of AYUSH Research Portal
+    source_type: official_government_webpage
+    url: https://arp.ayush.gov.in/researchabout
+    verification_status: official_page_checked
+    evidence_role: research_discovery
+  - source_id: HOMEO_STAPHYLOCOCCUS_IN_VITRO_2024
+    title: Antibiotic Resistant Staphyloccus sensitivity to Homeopathic drugs
+    source_type: supplied_research_paper
+    file_name: Antibiotic_Resistant_Staphyloccus_sensit.pdf
+    verification_status: abstract_level; full_methods_review_pending
+    evidence_role: in_vitro
+  - source_id: HOMEO_KLEBSIELLA_IN_VITRO_2025
+    title: Exploring the efficacy of homeopathic remedies as antimicrobials against multidrug-resistant Klebsiella pneumoniae
+    source_type: supplied_research_paper
+    file_name: Exploring_the_efficacy_of_homeopathic_re.pdf
+    verification_status: abstract_level; full_methods_review_pending
+    evidence_role: in_vitro
+  - source_id: HOMEO_AMR_REVIEW_2025
+    title: Global Scenario of Antimicrobial Resistance: A Review of the Homoeopathic Perspective in Mitigating this Menace
+    source_type: supplied_review
+    file_name: Global_Scenario_of_Antimicrobial_Resistance_A_Revi.pdf
+    verification_status: review_summary; bibliographic_verification_pending
+    evidence_role: narrative_review
+  - source_id: AYUSH_ONE_HEALTH_REVIEW_ARTICLE
+    title: Advancing the one health approach through integration of Ayush systems: Opportunities and way forward
+    source_type: supplied_review_or_commentary
+    file_name: JFMPC-12-1764.pdf
+    verification_status: summary_level; full bibliographic verification pending
+    evidence_role: policy_perspective
+  - source_id: NCDC_AMR_2025_AND_ICMR_AMRSN_2024
+    title: NCDC AMR Surveillance Network Annual Report 2025 and ICMR AMR Surveillance Network Annual Report 2024
+    source_type: government_surveillance_reports
+    file_names:
+      - amr2025.pdf
+      - icmramrsnannualreport2024.pdf
+    verification_status: previously audited source reports; preserve source-specific denominators
+    evidence_role: surveillance_context
+  - source_id: AMR_GUARD_CLINICAL_SAFETY_POLICY
+    title: AMR-Guard clinical safety workflow
+    source_type: product_policy
+    verification_status: project rule; requires clinical governance review
+    evidence_role: triage_referral_safety
+  - source_id: AMR_GUARD_EVIDENCE_POLICY
+    title: AMR-Guard evidence classification policy
+    source_type: product_policy
+    verification_status: project rule; requires clinical governance review
+    evidence_role: evidence_appraisal
+  - source_id: AYUSH_CROSS_REFERRAL_GUIDANCE
+    title: Ayurveda and Conventional Medicine - Cross Referral Approach for Selected Disease Conditions
+    source_type: official_AYUSH_portal_document
+    url: https://arp.ayush.gov.in/admin/assets/pdf/AYURVEDA_AND_CONVENTIONAL_MEDICINE.pdf
+    verification_status: official portal page checked; document-level review pending
+    evidence_role: referral_and_continuity_of_care
