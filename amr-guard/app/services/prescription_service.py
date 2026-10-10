@@ -22,6 +22,10 @@ from app.schemas.prescription import (
     PrescriptionLine,
 )
 from app.services.audit_service import record_audit
+from app.services.signature_service import compute_audit_signature, canonicalize_audit_input
+from app.services.audit_cache_service import get_cached_audit, save_cached_audit
+from app.schemas.audit import AuditResult
+
 
 # Active session cache for cases created during the current running process
 _RUNTIME_CASES: Dict[str, PrescriptionCase] = {}
@@ -177,21 +181,7 @@ def _audit_and_persist(case: PrescriptionCase, db: Optional[Session] = None) -> 
             )
         )
 
-    # Execute Hybrid RAG-First verification engine with safety guard and offline fallback
-    result = audit_prescription_rag_first(
-        patient=patient_ctx,
-        prescription_lines=lines,
-        canonical_syndrome=p.canonical_syndrome or p.suspectedDiagnosis or None,
-        has_culture_report=bool(p.has_culture_report),
-        has_positive_microbiology=bool(p.has_positive_microbiology),
-        is_outpatient=bool(p.is_outpatient),
-    )
-
-
-    case.auditResult = result.model_dump()
-    case.workflowStatus = "Audited"
-
-    # Persist directly into the database
+    # [PATTERN: Cache-Aside] Check database for exact input signature cache first
     req = PrescriptionAuditRequest(
         patient=patient_ctx,
         prescription_lines=lines,
@@ -200,12 +190,36 @@ def _audit_and_persist(case: PrescriptionCase, db: Optional[Session] = None) -> 
         has_positive_microbiology=bool(p.has_positive_microbiology),
         is_outpatient=bool(p.is_outpatient),
     )
-    new_audit_id = record_audit(req, result, db=db)
+    sig = compute_audit_signature(req)
+    cached = get_cached_audit(sig, db=db)
+    if cached and isinstance(cached, AuditResult):
+        result = cached
+    else:
+        # Execute Hybrid RAG-First verification engine with safety guard and offline fallback
+        result = audit_prescription_rag_first(
+            patient=patient_ctx,
+            prescription_lines=lines,
+            canonical_syndrome=p.canonical_syndrome or p.suspectedDiagnosis or None,
+            has_culture_report=bool(p.has_culture_report),
+            has_positive_microbiology=bool(p.has_positive_microbiology),
+            is_outpatient=bool(p.is_outpatient),
+        )
+        result.signature = sig
+        result.is_cached = False
+        canonical_input = canonicalize_audit_input(req)
+        save_cached_audit(sig, canonical_input, result, db=db)
+
+    case.auditResult = result.model_dump()
+    case.workflowStatus = "Audited"
+
+    # Persist directly into the database
+    new_audit_id = record_audit(req, result, db=db, signature=sig)
     if new_audit_id:
         if not case.id or case.id.startswith("CASE-AUDIT-"):
             case.id = f"CASE-AUDIT-{new_audit_id:04d}"
 
     return case
+
 
 
 def get_all_prescriptions(db: Optional[Session] = None) -> List[PrescriptionCase]:

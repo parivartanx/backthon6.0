@@ -1,11 +1,23 @@
 import os
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from app.api.v1.router import api_router
 from app.api.v1 import extract, audit, remediate, stats, knowledge, prescriptions, health
+from app.db.session import init_db
 
-app = FastAPI(title="AMR-Guard API")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Ensure database tables and safe migrations exist
+    try:
+        init_db()
+    except Exception as e:
+        print(f"[AMR-Guard] DB initialization notice: {e}")
+    yield
+
+app = FastAPI(title="AMR-Guard API", lifespan=lifespan)
+
 
 # CORS Middleware for cross-origin requests (e.g. Next.js, tunnels, external clients)
 app.add_middleware(

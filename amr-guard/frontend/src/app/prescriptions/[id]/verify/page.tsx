@@ -581,7 +581,12 @@ export default function VerifyPrescriptionPage() {
               </div>
 
               <div className="flex items-center gap-2">
-                <LatencyBadge latencyMs={currentCase.auditResult.latency_ms} />
+                <LatencyBadge
+                  latencyMs={currentCase.auditResult.latency_ms}
+                  isCached={currentCase.auditResult.is_cached}
+                  signature={currentCase.auditResult.signature}
+                />
+
                 <Button
                   variant="outline"
                   size="sm"

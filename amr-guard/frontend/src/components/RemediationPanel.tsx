@@ -36,7 +36,8 @@ import {
   ShieldAlert,
   ArrowLeftRight,
   Loader2,
-  Sparkles
+  Sparkles,
+  Info
 } from "lucide-react";
 import { SwitchMedicineDialog } from "@/components/remediation/SwitchMedicineDialog";
 
