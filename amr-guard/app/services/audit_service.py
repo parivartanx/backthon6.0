@@ -13,7 +13,8 @@ from app.services.latency import LatencyService
 def record_audit(
     request: PrescriptionAuditRequest,
     result: AuditResult,
-    db: Optional[Session] = None
+    db: Optional[Session] = None,
+    signature: Optional[str] = None,
 ) -> Optional[int]:
     """
     Persist an audit run into the database for retrospective stewardship surveillance.
@@ -25,6 +26,14 @@ def record_audit(
         should_close = True
 
     try:
+        sig = signature or getattr(result, "signature", None)
+        if not sig:
+            try:
+                from app.services.signature_service import compute_audit_signature
+                sig = compute_audit_signature(request)
+            except Exception:
+                sig = None
+
         audit_entry = Audit(
             created_at=datetime.now(timezone.utc),
             patient_context_json=request.patient.model_dump() if request.patient else None,
@@ -33,6 +42,7 @@ def record_audit(
             score=result.score,
             latency_ms=result.latency_ms,
             remediation_applied=len(result.remediation_options) > 0,
+            signature=sig,
         )
         db.add(audit_entry)
         db.commit()
@@ -46,6 +56,7 @@ def record_audit(
     finally:
         if should_close:
             db.close()
+
 
 
 def get_stewardship_statistics(db: Optional[Session] = None) -> StatsResponse:

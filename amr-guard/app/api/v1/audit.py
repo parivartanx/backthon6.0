@@ -9,6 +9,8 @@ from app.agents.rag_audit import audit_prescription_rag_first
 from app.core.config import settings
 from app.services.extract_service import extract_prescription_from_image
 from app.services.audit_service import record_audit
+from app.services.signature_service import compute_audit_signature, canonicalize_audit_input
+from app.services.audit_cache_service import get_cached_audit, save_cached_audit
 from app.services.latency import LatencyService
 
 router = APIRouter()
@@ -18,13 +20,23 @@ router = APIRouter()
 def audit_prescription_endpoint(request: PrescriptionAuditRequest):
     """
     Audit a prescription against the clinical verification pipeline.
-    Uses Hybrid RAG-First verification (BM25 + vector RRF + LLM) with Tier 1
-    deterministic safety rules and automatic offline fallback.
-    If only an unstructured scenario is provided, triggers the Hybrid RAG Orchestrator.
+    [PATTERN: Cache-Aside]
+    1. Computes deterministic SHA-256 signature of exact input details.
+    2. Searches database cache first: if exact match found, returns cached evaluation immediately.
+    3. If cache miss: executes Hybrid RAG-First verification engine, persists result to cache,
+       and records audit telemetry.
     """
     try:
+        # [PATTERN: Cache-Aside] Check database for exact input signature cache first
+        sig = compute_audit_signature(request)
+        cached_result = get_cached_audit(sig)
+        if cached_result is not None:
+            if isinstance(cached_result, AuditResult):
+                record_audit(request, cached_result, signature=sig)
+            return cached_result
+
         if request.patient and request.prescription_lines:
-            # 1. Hybrid RAG-First verification engine with safety guard & offline fallback
+            # 2. Hybrid RAG-First verification engine with safety guard & offline fallback
             stage_name = "rag_first_verification" if settings.OPENROUTER_API_KEY else "deterministic_verification"
             sla_target = LatencyService.DEFAULT_RAG_SLA_MS if settings.OPENROUTER_API_KEY else LatencyService.DEFAULT_DETERMINISTIC_SLA_MS
             with LatencyService.profile_stage(
@@ -40,11 +52,17 @@ def audit_prescription_endpoint(request: PrescriptionAuditRequest):
                     is_outpatient=request.is_outpatient,
                 )
 
-            # 2. Record audit run in database for dashboard surveillance
-            record_audit(request, result)
+            result.signature = sig
+            result.is_cached = False
+
+            # 3. Store result in database cache for future identical queries
+            canonical_input = canonicalize_audit_input(request)
+            save_cached_audit(sig, canonical_input, result)
+
+            # 4. Record audit run in database for dashboard surveillance
+            record_audit(request, result, signature=sig)
 
             return result
-
 
         elif request.scenario:
             # Hybrid RAG Agent Orchestrator (<3000ms latency SLA)
@@ -53,6 +71,10 @@ def audit_prescription_endpoint(request: PrescriptionAuditRequest):
                 sla_limit_ms=LatencyService.DEFAULT_RAG_SLA_MS,
             ):
                 context = run_verification_orchestrator(request.scenario)
+
+            canonical_input = canonicalize_audit_input(request)
+            save_cached_audit(sig, canonical_input, context)
+
             return context
         else:
             raise HTTPException(
@@ -63,6 +85,7 @@ def audit_prescription_endpoint(request: PrescriptionAuditRequest):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 
 @router.post("/from-image", response_model=PrescriptionExtractionResponse)
