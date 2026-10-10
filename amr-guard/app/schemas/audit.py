@@ -29,6 +29,9 @@ class AuditResult(BaseModel):
     flags: List[RuleViolation] = Field(default_factory=list, description="List of rule violations tripped")
     remediation_options: List[RemediationOption] = Field(default_factory=list, description="Actionable interventions")
     latency_ms: int = Field(0, description="Execution latency in milliseconds")
+    signature: Optional[str] = Field(None, description="Deterministic SHA-256 signature of exact input data")
+    is_cached: bool = Field(False, description="Whether this result was served directly from the exact input database cache")
+
 
 class PrescriptionAuditRequest(BaseModel):
     scenario: Optional[str] = Field(None, description="Unstructured clinical text scenario")

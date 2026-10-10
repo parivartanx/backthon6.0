@@ -76,6 +76,23 @@ class Audit(Base):
     score = Column(Float)
     latency_ms = Column(Integer)
     remediation_applied = Column(Boolean)
+    # [INDEX: signature] Index on signature for relational traceability
+    signature = Column(String(64), index=True, nullable=True)
+
+class AuditCache(Base):
+    """
+    -- [SCHEMA: 3NF] Dedicated memoization cache table for exact input audit results
+    -- [INDEX: unique] signature column is indexed and unique for O(1) B-tree lookup
+    -- [CONSTRAINT: unique] guarantees one canonical result per exact input signature
+    """
+    __tablename__ = "audit_cache"
+    id = Column(Integer, primary_key=True, index=True)
+    signature = Column(String(64), unique=True, index=True, nullable=False)
+    input_payload_json = Column(JSON, nullable=False)
+    result_json = Column(JSON, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    hit_count = Column(Integer, default=1, nullable=False)
 
 class KnowledgeChunk(Base):
     __tablename__ = "knowledge_chunks"
@@ -84,4 +101,5 @@ class KnowledgeChunk(Base):
     chunk_text = Column(Text, nullable=False)
     embedding = Column(Vector(768), nullable=True)
     metadata_json = Column(JSON, default=dict)
+
 
