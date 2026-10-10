@@ -1,0 +1,61 @@
+id,condition_id,drug_id,dose_text,frequency,duration_days,source,verified_by
+1,1,1,500mg,TID,5,ICMR STG CAP 2022,ICMR Stewardship Committee
+2,2,3,100mg,BID,5,ICMR STG UTI 2022,ICMR Stewardship Committee
+3,2,4,3g single sachet,Once,1,ICMR STG UTI 2022,ICMR Stewardship Committee
+4,3,19,650mg SOS,PRN,3,ICMR STG Respiratory 2022,Symptomatic Care Panel
+5,4,19,650mg SOS,PRN,3,ICMR STG Common Cold,Symptomatic Care Panel
+6,5,19,650mg SOS,PRN,3,ICMR STG URTI,Symptomatic Care Panel
+7,7,18,1 sachet in 1L water + 20mg Zinc,Daily,14,ICMR STG Diarrhea & WHO,WHO IMCI Committee
+8,8,1,500mg,TID,5,ICMR STG Pharyngitis,ICMR Stewardship Committee
+9,9,1,40-45 mg/kg/day,TID,5,ICMR Pediatric STG AOM,Pediatric Stewardship Panel
+10,10,5,500mg,QID,5,ICMR STG SSTI,ICMR Stewardship Committee
+11,10,23,500mg,QID,5,ICMR STG SSTI Staph,ICMR Stewardship Committee
+12,11,2,1.2g IV,TDS,5,ICMR STG CAP Inpatient,ICMR Stewardship Committee
+13,11,40,500mg PO,BD,5,ICMR STG CAP Atypical,ICMR Stewardship Committee
+14,12,32,2g IV,OD,7,ICMR STG Severe CAP,ICMR ICU Panel
+15,12,7,500mg IV,OD,7,ICMR STG Severe CAP,ICMR ICU Panel
+16,13,39,4.5g IV,Q6H,7,ICMR STG HAP 2022,ICMR Stewardship Committee
+17,14,13,1g IV,Q8H,7,ICMR STG VAP MDR,ICMR Critical Care Panel
+18,15,2,625mg PO,BD,5,ICMR STG COPD Exacerbation,Pulmonary Stewardship Panel
+19,15,12,100mg PO,BD,5,ICMR STG COPD Alternate,Pulmonary Stewardship Panel
+20,16,2,625mg PO,BD,7,ICMR STG Rhinosinusitis,ENT Stewardship Committee
+21,17,8,4 drops topical ear drops,BD,7,ICMR STG CSOM,ENT Stewardship Committee
+22,18,1,500mg PO,TID,5,ICMR STG Odontogenic Infection,Dental Stewardship Panel
+23,18,27,400mg PO,TID,5,ICMR STG Odontogenic Anaerobic,Dental Stewardship Panel
+24,19,3,100mg PO,BID,5,ICMR STG Recurrent UTI,Urology Stewardship Panel
+25,20,36,200mg PO,BD,10,ICMR STG Pyelonephritis Outpatient,Urology Stewardship Panel
+26,20,32,1g IV,OD,10,ICMR STG Pyelonephritis Initial IV,Urology Stewardship Panel
+27,21,32,2g IV,OD,10,ICMR STG Complicated UTI,Urology Stewardship Panel
+28,21,39,4.5g IV,TDS,10,ICMR STG Urosepsis,ICMR Critical Care Panel
+29,22,5,500mg PO,QID,5,ICMR STG Asymptomatic Bacteriuria Pregnancy,Obstetric Stewardship Panel
+30,22,4,3g single sachet,Once,1,ICMR STG Pregnancy UTI Safe,Obstetric Stewardship Panel
+31,23,26,960mg PO (Double Strength),BD,14,ICMR STG Bacterial Prostatitis,Urology Stewardship Panel
+32,24,7,500mg PO,OD,3,ICMR STG Bacillary Dysentery,Gastroenterology Panel
+33,25,7,500mg PO,BD,7,ICMR STG Enteric Fever Outpatient,Infectious Diseases Committee
+34,25,32,2g IV,OD,7,ICMR STG Enteric Fever Inpatient,Infectious Diseases Committee
+35,26,33,1g IV,TDS,5,ICMR STG Intra-abdominal Mild,Surgical Stewardship Panel
+36,26,27,500mg IV,TDS,5,ICMR STG Intra-abdominal Anaerobic,Surgical Stewardship Panel
+37,27,39,4.5g IV,Q6H,7,ICMR STG Severe Intra-abdominal,Surgical Critical Care Panel
+38,28,1,1000mg PO,BD,14,ICMR STG H. pylori Regimen,Gastroenterology Panel
+39,28,40,500mg PO,BD,14,ICMR STG H. pylori Regimen,Gastroenterology Panel
+40,29,12,100mg PO,BD,7,ICMR STG Purulent MRSA SSTI,Dermatology Stewardship Panel
+41,30,2,625mg PO,BD,7,ICMR STG Mild Diabetic Foot,Endocrinology & Surgery Panel
+42,31,39,4.5g IV,TDS,10,ICMR STG Moderate Diabetic Foot,Endocrinology & Surgery Panel
+43,31,28,600mg IV,TDS,10,ICMR STG Diabetic Foot Anaerobic,Endocrinology & Surgery Panel
+44,32,24,2g IV,TDS,14,ICMR STG Septic Arthritis Staph,Orthopedic Stewardship Panel
+45,32,32,2g IV,OD,14,ICMR STG Septic Arthritis Gram-negative,Orthopedic Stewardship Panel
+46,33,24,2g IV,TDS,21,ICMR STG Acute Osteomyelitis,Orthopedic Stewardship Panel
+47,33,23,2g IV,Q4H,21,ICMR STG Osteomyelitis MSSA,Orthopedic Stewardship Panel
+48,34,32,2g IV,BD,14,ICMR STG Bacterial Meningitis,Neurology Stewardship Panel
+49,34,45,15-20 mg/kg IV,BD,14,ICMR STG Meningitis MRSA/Pneumococcal,Neurology Stewardship Panel
+50,35,39,4.5g IV,Q6H,7,ICMR STG Febrile Neutropenia,Oncology Stewardship Panel
+51,35,13,1g IV,Q8H,7,ICMR STG Febrile Neutropenia High Risk,Oncology Stewardship Panel
+52,36,39,4.5g IV,Q6H,7,ICMR STG Community Sepsis,Critical Care Panel
+53,36,16,15 mg/kg IV,OD,7,ICMR STG Sepsis Synergistic Aminoglycoside,Critical Care Panel
+54,1,12,100mg PO,BD,5,ICMR STG CAP Atypical Outpatient,ICMR Stewardship Committee
+55,10,25,500mg PO,BD,5,ICMR STG Mild Cellulitis,Dermatology Stewardship Panel
+56,8,22,1.2 MU IM,Once,1,ICMR STG Rheumatic Fever Prophylaxis,Pediatric Stewardship Panel
+57,6,19,650mg SOS,PRN,3,ICMR STG Viral Sore Throat,Symptomatic Care Panel
+58,3,74,10mg PO,HS,5,ICMR STG Symptomatic Cough Relief,Respiratory Care Panel
+59,3,78,10mg PO,TDS,5,ICMR STG Antitussive Supportive,Respiratory Care Panel
+60,4,79,2 drops each nostril,TDS,3,ICMR STG Pediatric Rhinorrhea,Pediatric Care Panel

@@ -1,0 +1,401 @@
+schema: amr.source-index.v1
+sources:
+- source_id: NCDC_resistance_2017_NARS-Net
+  publisher: National Centre for Disease Control (NCDC), Government of India
+  network: NARS-Net
+  data_layer: resistance
+  report_year: '2017'
+  reporting_period: '2017'
+  filename: amr23.pdf
+  runtime_filename: amr2017.pdf
+  page_count: 15
+  sha256: 0070d1b36c314a235bf1b744170e8e7bc95655db064c57cbb485f8301ffff6b2
+  sha256_verified_against_manifest: 'True'
+  official_source: 'yes'
+  role: primary_source
+  record_count: 36
+- source_id: NCDC_resistance_2018_NARS-Net
+  publisher: National Centre for Disease Control (NCDC), Government of India
+  network: NARS-Net
+  data_layer: resistance
+  report_year: '2018'
+  reporting_period: '2018'
+  filename: amr24.pdf
+  runtime_filename: amr2018.pdf
+  page_count: 19
+  sha256: a09987ec16fe77b10438cd3340bf1c2c4aae1cd330ba0601b33231453693836f
+  sha256_verified_against_manifest: 'True'
+  official_source: 'yes'
+  role: primary_source
+  record_count: 48
+- source_id: NCDC_resistance_2019_NARS-Net
+  publisher: National Centre for Disease Control (NCDC), Government of India
+  network: NARS-Net
+  data_layer: resistance
+  report_year: '2019'
+  reporting_period: Reporting Period - January to December 2019 National Programme
+    on AMR Containment National Centre for Disease Control 0 Directorate General
+  filename: amr25.pdf
+  runtime_filename: amr2019.pdf
+  page_count: 44
+  sha256: 6056c836ea739dd02cfc0af39295a49c41bffd4da31cfe302085b53a19fd3097
+  sha256_verified_against_manifest: 'True'
+  official_source: 'yes'
+  role: primary_source
+  record_count: 76
+- source_id: NCDC_resistance_2020_NARS-Net
+  publisher: National Centre for Disease Control (NCDC), Government of India
+  network: NARS-Net
+  data_layer: resistance
+  report_year: '2020'
+  reporting_period: Reporting Period- January to December 2020 National Programme
+    on AMR Containment National Centre for Diseases Control Directorate General
+  filename: amr26.pdf
+  runtime_filename: amr2020.pdf
+  page_count: 47
+  sha256: 159858e8674efc6ee4c800a34ef494ddc7d3e88a920f54e4c867a65aba2ec9ad
+  sha256_verified_against_manifest: 'True'
+  official_source: 'yes'
+  role: primary_source
+  record_count: 79
+- source_id: NCDC_resistance_2021_NARS-Net
+  publisher: National Centre for Disease Control (NCDC), Government of India
+  network: NARS-Net
+  data_layer: resistance
+  report_year: '2021'
+  reporting_period: 'Reporting period: 01 January 2021 to 31 December 2021 National
+    Programme on AMR Containment National Centre for Disease Control (NCDC) Dir'
+  filename: amr27.pdf
+  runtime_filename: amr2021.pdf
+  page_count: 45
+  sha256: 976a985af372cbd2f59a5afb7381a6a68edb0bcca33e95b98bc0b3deea306785
+  sha256_verified_against_manifest: 'True'
+  official_source: 'yes'
+  role: primary_source
+  record_count: 80
+- source_id: NCDC_resistance_2022_NARS-Net
+  publisher: National Centre for Disease Control (NCDC), Government of India
+  network: NARS-Net
+  data_layer: resistance
+  report_year: '2022'
+  reporting_period: 'Reporting period: 1 January – 31 December 2022 National Programme
+    on AMR Containment, National Centre for Disease Control (NCDC) Directora'
+  filename: amr28.pdf
+  runtime_filename: amr2022.pdf
+  page_count: 63
+  sha256: 5d3734e4dbcc32fc4070e0b85ae0e164ff4fbcc90df4813ffc5c632a130867e7
+  sha256_verified_against_manifest: 'True'
+  official_source: 'yes'
+  role: primary_source
+  record_count: 99
+- source_id: NCDC_resistance_2023_NARS-Net
+  publisher: National Centre for Disease Control (NCDC), Government of India
+  network: NARS-Net
+  data_layer: resistance
+  report_year: '2023'
+  reporting_period: 'Reporting period: January – December 2023 National Programme
+    on AMR Containment, National Centre for Disease Control (NCDC) Directorate Ge'
+  filename: amr29.pdf
+  runtime_filename: amr2023.pdf
+  page_count: 57
+  sha256: 1c5c9fbe3c6320c9b1e31852f0892aecf705d10c243fbb4505551b4032ebca56
+  sha256_verified_against_manifest: 'True'
+  official_source: 'yes'
+  role: primary_source
+  record_count: 113
+- source_id: NCDC_resistance_2024_NARS-Net
+  publisher: National Centre for Disease Control (NCDC), Government of India
+  network: NARS-Net
+  data_layer: resistance
+  report_year: '2024'
+  reporting_period: 'Reporting period: January – December 2024 National Programme
+    on AMR Containment, National Centre for Disease Control (NCDC) Directorate Ge'
+  filename: amr30.pdf
+  runtime_filename: amr2024.pdf
+  page_count: 68
+  sha256: 48b4bdf8f7f8706a110f9f8b3b95aa792b813b18ecedc7b1bb94b49c8a63c4e5
+  sha256_verified_against_manifest: 'True'
+  official_source: 'yes'
+  role: primary_source
+  record_count: 170
+- source_id: NCDC_resistance_2025_NARS-Net
+  publisher: National Centre for Disease Control (NCDC), Government of India
+  network: NARS-Net
+  data_layer: resistance
+  report_year: '2025'
+  reporting_period: 'Reporting period: January – December 2025 National Programme
+    on AMR Containment, National Centre for Disease Control (NCDC) Directorate Ge'
+  filename: amr31.pdf
+  runtime_filename: amr2025.pdf
+  page_count: 66
+  sha256: fca832b52071980ddbb055d57cdeb34f75396c05f65930f9a6da981358aafc2f
+  sha256_verified_against_manifest: 'True'
+  official_source: 'yes'
+  role: primary_source
+  record_count: 164
+- source_id: NCDC_consumption_2022_NAC-NET
+  publisher: National Centre for Disease Control (NCDC), Government of India
+  network: NAC-NET
+  data_layer: consumption
+  report_year: '2022'
+  reporting_period: '2022'
+  filename: amrc(1).pdf
+  runtime_filename: amrc2022.pdf
+  page_count: 37
+  sha256: c9fceb5f42660cf3df9f891257b76a58c02290297293920562be1951066a3eef
+  sha256_verified_against_manifest: 'True'
+  official_source: 'yes'
+  role: primary_source
+  record_count: 63
+- source_id: NCDC_consumption_2023_NAC-NET
+  publisher: National Centre for Disease Control (NCDC), Government of India
+  network: NAC-NET
+  data_layer: consumption
+  report_year: '2023'
+  reporting_period: '2023'
+  filename: amrc(2).pdf
+  runtime_filename: amrc2023.pdf
+  page_count: 35
+  sha256: a2f72be41d0426f6bfba283b920ba7ca211f0265242389115204e20223d9bbcc
+  sha256_verified_against_manifest: 'True'
+  official_source: 'yes'
+  role: primary_source
+  record_count: 61
+- source_id: NCDC_consumption_2024_NACNET_SACNET
+  publisher: National Centre for Disease Control (NCDC), Government of India
+  network: NACNET/SACNET
+  data_layer: consumption
+  report_year: '2024'
+  reporting_period: '2024'
+  filename: amrc(3).pdf
+  runtime_filename: amrc2024.pdf
+  page_count: 50
+  sha256: 4240efd620dc20b174325585ccd60e2e6b7d116399a94b043101a1386a87e7dc
+  sha256_verified_against_manifest: 'True'
+  official_source: 'yes'
+  role: primary_source
+  record_count: 106
+- source_id: ICMR_AMRSN_2017
+  publisher: Indian Council of Medical Research (ICMR)
+  network: ICMR-AMRSN
+  data_layer: surveillance
+  report_year: '2017'
+  reporting_period: January–December 2017
+  filename: icmramrannualreport2017.pdf
+  runtime_filename: icmramrannualreport2017.pdf
+  page_count: 51
+  sha256: 194f133e2e2505fe05b872995950fc3bc0a6897f506505484f09d9e05206c789
+  sha256_verified_against_manifest: not_available
+  official_source: 'yes'
+  role: primary_source
+  record_count: 51
+- source_id: ICMR_AMRSN_2018
+  publisher: Indian Council of Medical Research (ICMR)
+  network: ICMR-AMRSN
+  data_layer: surveillance
+  report_year: '2018'
+  reporting_period: January–December 2018
+  filename: icmramrannualreport2018.pdf
+  runtime_filename: icmramrannualreport2018.pdf
+  page_count: 98
+  sha256: 9f3dbce7f54933d663cdc9d69161c3bfd25f0201b7b3ff798792ed1694b5bd8c
+  sha256_verified_against_manifest: not_available
+  official_source: 'yes'
+  role: primary_source
+  record_count: 98
+- source_id: ICMR_AMRSN_2019
+  publisher: Indian Council of Medical Research (ICMR)
+  network: ICMR-AMRSN
+  data_layer: surveillance
+  report_year: '2019'
+  reporting_period: January–December 2019
+  filename: icmramrannualreport2019.pdf
+  runtime_filename: icmramrannualreport2019.pdf
+  page_count: 138
+  sha256: 58d2c5fa3cde7a973db0004df45c0332abe256cf88b3da685c710bcf3009f4f5
+  sha256_verified_against_manifest: not_available
+  official_source: 'yes'
+  role: primary_source
+  record_count: 138
+- source_id: ICMR_AMRSN_2020
+  publisher: Indian Council of Medical Research (ICMR)
+  network: ICMR-AMRSN
+  data_layer: surveillance
+  report_year: '2020'
+  reporting_period: January–December 2020
+  filename: icmramrannualreport2020.pdf
+  runtime_filename: icmramrannualreport2020.pdf
+  page_count: 188
+  sha256: 345a560cf8bcc361996f251a81adedc5ac0e95cb38d7c06857b3c8b1b203ed97
+  sha256_verified_against_manifest: not_available
+  official_source: 'yes'
+  role: primary_source
+  record_count: 188
+- source_id: ICMR_AMRSN_2021
+  publisher: Indian Council of Medical Research (ICMR)
+  network: ICMR-AMRSN
+  data_layer: surveillance
+  report_year: '2021'
+  reporting_period: January–December 2021
+  filename: icmramrannualreport2021.pdf
+  runtime_filename: icmramrannualreport2021.pdf
+  page_count: 207
+  sha256: 267eb96a8814b19fbc772d637adef18fc61e30c7862dcf73da1b194032014500
+  sha256_verified_against_manifest: not_available
+  official_source: 'yes'
+  role: primary_source
+  record_count: 206
+- source_id: ICMR_AMRSN_2022
+  publisher: Indian Council of Medical Research (ICMR)
+  network: ICMR-AMRSN
+  data_layer: surveillance
+  report_year: '2022'
+  reporting_period: January–December 2022
+  filename: icmrannualreport2022.pdf
+  runtime_filename: icmrannualreport2022.pdf
+  page_count: 223
+  sha256: cf669d2a8193cdd28987f1e88b983c4474fbeb2ead08ca9352f831f39b272482
+  sha256_verified_against_manifest: not_available
+  official_source: 'yes'
+  role: primary_source
+  record_count: 223
+- source_id: ICMR_AMRSN_2023
+  publisher: Indian Council of Medical Research (ICMR)
+  network: ICMR-AMRSN
+  data_layer: surveillance
+  report_year: '2023'
+  reporting_period: January–December 2023
+  filename: icmrannualreport2023.pdf
+  runtime_filename: icmrannualreport2023.pdf
+  page_count: 244
+  sha256: 09c5afde7a7d1401d275993f60e97ae4b5f12630ba29497331429fa09430dbdc
+  sha256_verified_against_manifest: not_available
+  official_source: 'yes'
+  role: primary_source
+  record_count: 243
+- source_id: ICMR_AMRSN_2024
+  publisher: Indian Council of Medical Research (ICMR)
+  network: ICMR-AMRSN
+  data_layer: surveillance
+  report_year: '2024'
+  reporting_period: January–December 2024
+  filename: icmramrsnannualreport2024.pdf
+  runtime_filename: icmramrsnannualreport2024.pdf
+  page_count: 206
+  sha256: 9a078ba24e7dc052a1bf4b0f623ab5ea3e5bad8d4787c584d96008b55d24d852
+  sha256_verified_against_manifest: not_available
+  official_source: 'yes'
+  role: primary_source
+  record_count: 206
+- source_id: WHO_RELAY_AMR
+  publisher: World Health Organization
+  network: WHO
+  data_layer: WHO AMR indicators
+  report_year: 2016–2023
+  reporting_period: null
+  filename: RELAY_AMR.csv
+  runtime_filename: RELAY_AMR.csv
+  page_count: null
+  sha256: 0ea38387ec8c714fba600c086a1d687700af0b7ece7b4a6e6a58a3336781c486
+  sha256_verified_against_manifest: not_available
+  official_source: 'yes'
+  role: primary_source
+  record_count: 1019
+- source_id: WHO_AWaRe_Essential_Medicines
+  publisher: World Health Organization
+  network: WHO
+  data_layer: antibiotic ontology
+  report_year: null
+  reporting_period: null
+  filename: aware-essentialmeds-org-list.md
+  runtime_filename: aware-essentialmeds-org-list.md
+  page_count: null
+  sha256: 25ac36fe5b0cb26628e6765a1d930323894e337f57f2dc77a8aff3102292da2f
+  sha256_verified_against_manifest: not_available
+  official_source: 'yes'
+  role: primary_source
+  record_count: 376
+- source_id: WHO_AMR_Dashboard_India
+  publisher: World Health Organization
+  network: WHO
+  data_layer: WHO AMR dashboard snapshot
+  report_year: null
+  reporting_period: null
+  filename: IND data-who-int-dashboards-amr-antimicrobial-resistance-profile.md
+  runtime_filename: IND data-who-int-dashboards-amr-antimicrobial-resistance-profile.md
+  page_count: null
+  sha256: 5c5452d59e2e9f9119ef4797bba3a424b9c31f37ad4af0f1054e67fe19b58014
+  sha256_verified_against_manifest: not_available
+  official_source: 'yes'
+  role: primary_source
+  record_count: 0
+- source_id: NCDC_machine_trainable_existing
+  publisher: NCDC / project extraction
+  network: NARS-Net/NACNET/SACNET
+  data_layer: derived corpus
+  report_year: null
+  reporting_period: null
+  filename: ncdc_amr_machine_trainable.csv
+  runtime_filename: ncdc_amr_machine_trainable.csv
+  page_count: null
+  sha256: 927ccdc9961b13e43d6b9752dff4c472fa6b50a033117fc7e139c0d0abfb09f5
+  sha256_verified_against_manifest: not_applicable
+  official_source: no (derived from official sources)
+  role: derived_input
+  record_count: 0
+- source_id: NCDC_resistance_evidence_existing
+  publisher: NCDC / project extraction
+  network: NARS-Net/NACNET/SACNET
+  data_layer: derived evidence index
+  report_year: null
+  reporting_period: null
+  filename: ncdc_resistance_evidence.csv
+  runtime_filename: ncdc_resistance_evidence.csv
+  page_count: null
+  sha256: 79b739d46ebdfe1183cfaf9baf7b886ddacff547e4659b1c731d98781460ac8e
+  sha256_verified_against_manifest: not_applicable
+  official_source: no (derived from official sources)
+  role: derived_input
+  record_count: 0
+- source_id: NCDC_consumption_evidence_existing
+  publisher: NCDC / project extraction
+  network: NARS-Net/NACNET/SACNET
+  data_layer: derived evidence index
+  report_year: null
+  reporting_period: null
+  filename: ncdc_consumption_evidence.csv
+  runtime_filename: ncdc_consumption_evidence.csv
+  page_count: null
+  sha256: 32da58102b4d2266f59845e698b8417fc0ba9d4528064bc0156835735abf3e8a
+  sha256_verified_against_manifest: not_applicable
+  official_source: no (derived from official sources)
+  role: derived_input
+  record_count: 0
+- source_id: NCDC_source_manifest
+  publisher: NCDC / project extraction
+  network: NARS-Net/NACNET/SACNET
+  data_layer: provenance manifest
+  report_year: null
+  reporting_period: null
+  filename: ncdc_source_manifest.csv
+  runtime_filename: ncdc_source_manifest.csv
+  page_count: null
+  sha256: 451dd7b1a62c96a1df4b324b67bc7db43746aa50c1c23669bd5fc3888b0ab305
+  sha256_verified_against_manifest: not_applicable
+  official_source: no (derived from official sources)
+  role: derived_input
+  record_count: 0
+- source_id: NCDC_rag_chunks_existing
+  publisher: NCDC / project extraction
+  network: NARS-Net/NACNET/SACNET
+  data_layer: derived RAG corpus
+  report_year: null
+  reporting_period: null
+  filename: ncdc_rag_chunks.jsonl
+  runtime_filename: ncdc_rag_chunks.jsonl
+  page_count: null
+  sha256: fb7259987d20f909bb04f73222fc6001cc2ef258d490f36185c32762761f39e3
+  sha256_verified_against_manifest: not_applicable
+  official_source: no (derived from official sources)
+  role: derived_input
+  record_count: 0

@@ -1,0 +1,81 @@
+id,generic_name,drug_class,is_antibiotic,aware_class,is_fluoroquinolone,pregnancy_contraindicated,min_age_years
+1,Amoxicillin,Aminopenicillin,True,Access,False,False,0.0
+2,Amoxicillin-Clavulanate,Beta-lactam + Inhibitor,True,Access,False,False,0.0
+3,Nitrofurantoin,Nitrofuran,True,Access,False,False,1.0
+4,Fosfomycin,Phosphonic acid,True,Access,False,False,12.0
+5,Cefalexin,First-gen Cephalosporin,True,Access,False,False,0.0
+6,Cefixime,Third-gen Cephalosporin,True,Watch,False,False,0.5
+7,Azithromycin,Macrolide,True,Watch,False,False,0.5
+8,Ciprofloxacin,Fluoroquinolone,True,Watch,True,True,18.0
+9,Levofloxacin,Fluoroquinolone,True,Watch,True,True,18.0
+10,Ofloxacin,Fluoroquinolone,True,Watch,True,True,18.0
+11,Norfloxacin,Fluoroquinolone,True,Watch,True,True,18.0
+12,Doxycycline,Tetracycline,True,Access,False,True,18.0
+13,Meropenem,Carbapenem,True,Reserve,False,False,0.25
+14,Linezolid,Oxazolidinone,True,Reserve,False,False,0.0
+15,Colistin,Polymyxin,True,Reserve,False,False,0.0
+16,Amikacin,Aminoglycoside,True,Access,False,True,0.0
+17,Gentamicin,Aminoglycoside,True,Access,False,True,0.0
+18,Oral Rehydration Salts (ORS) + Zinc,Supportive Rehydration,False,Access,False,False,0.0
+19,Paracetamol,Antipyretic Analgesic,False,Access,False,False,0.0
+20,Ampicillin,Aminopenicillin,True,Access,False,False,0.0
+21,Benzylpenicillin,Natural Penicillin,True,Access,False,False,0.0
+22,Benzathine Benzylpenicillin,Natural Penicillin,True,Access,False,False,0.0
+23,Cloxacillin,Penicillinase-resistant Penicillin,True,Access,False,False,0.0
+24,Cefazolin,First-gen Cephalosporin,True,Access,False,False,0.0
+25,Cefadroxil,First-gen Cephalosporin,True,Access,False,False,0.0
+26,Co-trimoxazole,Folate Pathway Inhibitor,True,Access,False,True,0.15
+27,Metronidazole,Nitroimidazole,True,Access,False,True,0.0
+28,Clindamycin,Lincosamide,True,Access,False,False,0.0
+29,Chloramphenicol,Amphenicol,True,Access,False,True,0.0
+30,Tetracycline,Tetracycline,True,Access,False,True,18.0
+31,Minocycline,Tetracycline,True,Access,False,True,18.0
+32,Ceftriaxone,Third-gen Cephalosporin,True,Watch,False,False,0.05
+33,Cefotaxime,Third-gen Cephalosporin,True,Watch,False,False,0.0
+34,Cefuroxime,Second-gen Cephalosporin,True,Watch,False,False,0.25
+35,Cefuroxime Axetil,Second-gen Cephalosporin,True,Watch,False,False,0.25
+36,Cefpodoxime,Third-gen Cephalosporin,True,Watch,False,False,0.25
+37,Ceftazidime,Third-gen Cephalosporin,True,Watch,False,False,0.0
+38,Cefoperazone-Sulbactam,Antipseudomonal Cephalosporin + BLI,True,Watch,False,False,0.0
+39,Piperacillin-Tazobactam,Antipseudomonal Penicillin + BLI,True,Watch,False,False,0.15
+40,Clarithromycin,Macrolide,True,Watch,False,True,0.5
+41,Erythromycin,Macrolide,True,Watch,False,False,0.0
+42,Roxithromycin,Macrolide,True,Watch,False,False,0.5
+43,Moxifloxacin,Fluoroquinolone,True,Watch,True,True,18.0
+44,Gemifloxacin,Fluoroquinolone,True,Watch,True,True,18.0
+45,Vancomycin,Glycopeptide,True,Watch,False,False,0.0
+46,Teicoplanin,Glycopeptide,True,Watch,False,False,0.0
+47,Imipenem-Cilastatin,Carbapenem,True,Watch,False,False,0.0
+48,Ertapenem,Carbapenem,True,Watch,False,False,0.25
+49,Cefdinir,Third-gen Cephalosporin,True,Watch,False,False,0.5
+50,Cefprozil,Second-gen Cephalosporin,True,Watch,False,False,0.5
+51,Polymyxin B,Polymyxin,True,Reserve,False,False,0.0
+52,Tigecycline,Glycylcycline,True,Reserve,False,True,18.0
+53,Daptomycin,Lipopeptide,True,Reserve,False,False,1.0
+54,Ceftazidime-Avibactam,Novel Beta-lactam + BLI,True,Reserve,False,False,0.25
+55,Ceftolozane-Tazobactam,Novel Beta-lactam + BLI,True,Reserve,False,False,0.0
+56,Cefiderocol,Siderophore Cephalosporin,True,Reserve,False,False,18.0
+57,Meropenem-Vaborbactam,Carbapenem + Boronic BLI,True,Reserve,False,False,18.0
+58,Plazomicin,Next-gen Aminoglycoside,True,Reserve,False,True,18.0
+59,Tedizolid,Oxazolidinone,True,Reserve,False,False,12.0
+60,Aztreonam,Monobactam,True,Reserve,False,False,0.0
+61,Tobramycin,Aminoglycoside,True,Access,False,True,0.0
+62,Streptomycin,Aminoglycoside,True,Access,False,True,0.0
+63,Kanamycin,Aminoglycoside,True,Access,False,True,0.0
+64,Tinidazole,Nitroimidazole,True,Access,False,True,0.0
+65,Ornidazole,Nitroimidazole,True,Access,False,True,0.0
+66,Ofloxacin + Ornidazole,Irrational Fixed-Dose Combination,True,Discouraged,True,True,18.0
+67,Cefixime + Azithromycin,Irrational Fixed-Dose Combination,True,Discouraged,False,False,0.5
+68,Ciprofloxacin + Tinidazole,Irrational Fixed-Dose Combination,True,Discouraged,True,True,18.0
+69,Norfloxacin + Tinidazole,Irrational Fixed-Dose Combination,True,Discouraged,True,True,18.0
+70,Cefpodoxime + Azithromycin,Irrational Fixed-Dose Combination,True,Discouraged,False,False,0.5
+71,Amoxicillin + Bromhexine,Irrational Fixed-Dose Combination,True,Discouraged,False,False,0.0
+72,Ampicillin-Cloxacillin,Irrational Fixed-Dose Combination,True,Discouraged,False,False,0.0
+73,Ibuprofen,NSAID Analgesic,False,Access,False,True,0.5
+74,Cetirizine,Second-gen Antihistamine,False,Access,False,False,2.0
+75,Levocetirizine,Second-gen Antihistamine,False,Access,False,False,2.0
+76,Montelukast,Leukotriene Receptor Antagonist,False,Access,False,False,0.5
+77,Salbutamol,Short-acting Beta-2 Agonist,False,Access,False,False,0.0
+78,Dextromethorphan,Antitussive,False,Access,False,False,6.0
+79,Normal Saline Nasal Drops,Nasal Decongestant,False,Access,False,False,0.0
+80,Zinc Sulfate,Micronutrient Supplement,False,Access,False,False,0.0
