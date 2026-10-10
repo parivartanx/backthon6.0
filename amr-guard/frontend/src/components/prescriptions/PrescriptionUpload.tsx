@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, useRef, DragEvent, ChangeEvent } from "react";
-import { 
-  UploadCloud, 
-  Image as ImageIcon, 
-  X, 
-  FileCheck, 
-  AlertCircle, 
+import {
+  UploadCloud,
+  Image as ImageIcon,
+  X,
+  FileCheck,
+  AlertCircle,
   Maximize2,
   ZoomIn
 } from "lucide-react";
@@ -122,9 +122,20 @@ export function PrescriptionUpload({
   return (
     <div className="space-y-4">
       {errorMessage && (
-        <Alert variant="destructive" className="py-2.5">
-          <AlertCircle className="w-4 h-4 shrink-0" />
-          <AlertDescription className="text-xs ml-2">{errorMessage}</AlertDescription>
+        <Alert variant="destructive" className="py-2.5 px-3 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <AlertDescription className="text-xs">{errorMessage}</AlertDescription>
+          </div>
+          <button
+            type="button"
+            onClick={() => setErrorMessage(null)}
+            className="text-rose-500 hover:text-rose-700 hover:bg-rose-100/70 p-1 rounded-md transition-colors shrink-0"
+            aria-label="Dismiss error"
+            title="Dismiss error"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </Alert>
       )}
 
@@ -134,11 +145,10 @@ export function PrescriptionUpload({
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           onClick={() => !disabled && fileInputRef.current?.click()}
-          className={`border-2 border-dashed rounded-xl p-6 sm:p-8 text-center cursor-pointer transition-all duration-200 ${
-            isDragging
+          className={`border-2 border-dashed rounded-xl p-6 sm:p-8 text-center cursor-pointer transition-all duration-200 ${isDragging
               ? "border-[#169781] bg-[#E2FAD9]/30 ring-4 ring-[#E2FAD9]"
               : "border-slate-300 hover:border-[#169781] hover:bg-slate-50/60 bg-white"
-          } ${disabled ? "opacity-60 cursor-not-allowed" : ""}`}
+            } ${disabled ? "opacity-60 cursor-not-allowed" : ""}`}
         >
           <input
             type="file"
@@ -219,7 +229,7 @@ export function PrescriptionUpload({
           </div>
 
           {/* Image Preview Box */}
-          <div 
+          <div
             onClick={() => setIsZoomOpen(true)}
             className="relative rounded-lg overflow-hidden border border-slate-200 bg-slate-50 max-h-64 flex items-center justify-center group cursor-pointer"
           >

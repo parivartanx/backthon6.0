@@ -21,6 +21,7 @@ import {
   AlertCircle,
   Info,
   FileText,
+  X,
 } from "lucide-react";
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -80,15 +81,21 @@ function NewPrescriptionContent() {
       });
       return;
     }
-    if (!draftPatient.symptoms.trim()) {
-      const msg = "Presenting symptoms or diagnosis syndrome are required.";
+    const clinicalIndication =
+      draftPatient.symptoms.trim() || draftPatient.suspectedDiagnosis?.trim();
+    if (!clinicalIndication) {
+      const msg = "Presenting symptoms or suspected diagnosis are required.";
       setValidationError(msg);
       showError({
         title: "Clinical Indication Required",
         message: msg,
-        hint: "Provide clinical diagnosis to verify antibiotic indication under ICMR STG guidelines.",
+        hint: "Provide clinical symptoms or suspected diagnosis to verify antibiotic indication under ICMR STG guidelines.",
       });
       return;
+    }
+    // If symptoms was empty but diagnosis was provided, backfill symptoms
+    if (!draftPatient.symptoms.trim() && draftPatient.suspectedDiagnosis?.trim()) {
+      updateDraftPatient({ symptoms: draftPatient.suspectedDiagnosis.trim() });
     }
     try {
       // Execute Real Extraction or Direct Case Creation from Inputs
@@ -146,11 +153,22 @@ function NewPrescriptionContent() {
 
       {/* Validation Error Banner */}
       {validationError && (
-        <Alert variant="destructive" className="py-2.5 rounded-xl shadow-2xs">
-          <AlertCircle className="w-4 h-4 shrink-0" />
-          <AlertDescription className="text-xs ml-2 font-medium">
-            {validationError}
-          </AlertDescription>
+        <Alert variant="destructive" className="py-2.5 px-3 rounded-xl shadow-2xs flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <AlertDescription className="text-xs font-medium">
+              {validationError}
+            </AlertDescription>
+          </div>
+          <button
+            type="button"
+            onClick={() => setValidationError(null)}
+            className="text-rose-500 hover:text-rose-700 hover:bg-rose-100/70 p-1 rounded-md transition-colors shrink-0"
+            aria-label="Dismiss error"
+            title="Dismiss error"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </Alert>
       )}
 

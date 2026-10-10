@@ -29,7 +29,8 @@ import {
   Loader2,
   History,
   FileText,
-  ExternalLink
+  ExternalLink,
+  X
 } from "lucide-react";
 import { generatePrescriptionReportPdf } from "@/lib/pdfReportGenerator";
 import { fetchRemediationGuidance, RemediationResponse } from "@/network/services/remediationService";
@@ -164,11 +165,12 @@ export default function VerifyPrescriptionPage() {
 
   const executeAudit = async () => {
     try {
-      setShowIncompleteDialog(false);
       setValidationWarning(null);
       await auditActiveCase();
+      setShowIncompleteDialog(false);
     } catch (err) {
       setValidationWarning(err instanceof Error ? err.message : "Failed to check prescription safety");
+      setShowIncompleteDialog(false);
     }
   };
 
@@ -430,7 +432,7 @@ export default function VerifyPrescriptionPage() {
                 >
                   <Link href={`/prescriptions/${currentCase.id}/remediate`}>
                     <ExternalLink className="w-3.5 h-3.5" />
-                    <span>Open Remediation Page (Stage 6)</span>
+                    <span>Open Clinical Remediation</span>
                   </Link>
                 </Button>
                 <Button
@@ -461,16 +463,38 @@ export default function VerifyPrescriptionPage() {
         </div>
 
         {successNotice && (
-          <Alert className="py-2.5 bg-emerald-50 border-emerald-300 text-emerald-900">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-            <AlertDescription className="text-xs ml-2 font-medium">{successNotice}</AlertDescription>
+          <Alert className="py-2.5 px-3 bg-emerald-50 border-emerald-300 text-emerald-900 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <AlertDescription className="text-xs font-medium">{successNotice}</AlertDescription>
+            </div>
+            <button
+              type="button"
+              onClick={() => setSuccessNotice(null)}
+              className="text-emerald-700 hover:text-emerald-900 hover:bg-emerald-100/70 p-1 rounded-md transition-colors shrink-0"
+              aria-label="Dismiss notice"
+              title="Dismiss notice"
+            >
+              <X className="w-4 h-4" />
+            </button>
           </Alert>
         )}
 
         {validationWarning && (
-          <Alert variant="destructive" className="py-2.5">
-            <AlertCircle className="w-4 h-4 shrink-0" />
-            <AlertDescription className="text-xs ml-2">{validationWarning}</AlertDescription>
+          <Alert variant="destructive" className="py-2.5 px-3 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <AlertDescription className="text-xs">{validationWarning}</AlertDescription>
+            </div>
+            <button
+              type="button"
+              onClick={() => setValidationWarning(null)}
+              className="text-rose-500 hover:text-rose-700 hover:bg-rose-100/70 p-1 rounded-md transition-colors shrink-0"
+              aria-label="Dismiss warning"
+              title="Dismiss warning"
+            >
+              <X className="w-4 h-4" />
+            </button>
           </Alert>
         )}
 
@@ -671,11 +695,8 @@ export default function VerifyPrescriptionPage() {
               <div className="flex items-center justify-between flex-wrap gap-2 border-b border-slate-100 pb-3">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold text-[#0D607B] tracking-wider uppercase bg-[#F1F8FC] border border-[#C9E9EB] px-2 py-0.5 rounded">
-                      Stage 7
-                    </span>
                     <h3 className="text-sm font-bold text-[#0D607B]">
-                      Final Audit Summary & Clinical Decision History
+                      Audit Summary & Clinical Decision History
                     </h3>
                   </div>
                   <p className="text-[11px] text-slate-500 mt-0.5">
@@ -869,11 +890,24 @@ export default function VerifyPrescriptionPage() {
               </div>
             </div>
           </DialogHeader>
+
+          {/* Circular Progress Indicator when running audit */}
+          {isAuditing && (
+            <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-300 flex items-center gap-2.5 text-xs text-emerald-900 animate-pulse my-1">
+              <svg className="w-5 h-5 animate-spin text-[#169781] shrink-0" viewBox="0 0 24 24" fill="none">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+              </svg>
+              <span>Running ICMR stewardship audit and antimicrobial safety evaluation script...</span>
+            </div>
+          )}
+
           <DialogFooter className="gap-2 pt-2 border-t border-slate-100 flex-wrap sm:justify-between">
             <Button
               type="button"
               variant="outline"
               size="sm"
+              disabled={isAuditing}
               onClick={() => setShowIncompleteDialog(false)}
               className="text-xs font-medium text-slate-600"
             >
@@ -884,6 +918,7 @@ export default function VerifyPrescriptionPage() {
                 type="button"
                 variant="outline"
                 size="sm"
+                disabled={isAuditing}
                 onClick={() => {
                   handleMarkAllAsVerified();
                   setShowIncompleteDialog(false);
@@ -895,13 +930,22 @@ export default function VerifyPrescriptionPage() {
               <Button
                 type="button"
                 size="sm"
-                onClick={() => {
+                disabled={isAuditing}
+                onClick={async () => {
                   handleMarkAllAsVerified();
-                  executeAudit();
+                  await executeAudit();
+                  setShowIncompleteDialog(false);
                 }}
-                className="text-xs font-semibold text-white bg-[#169781] hover:bg-[#117866]"
+                className="text-xs font-semibold text-white bg-[#169781] hover:bg-[#117866] min-w-[130px] gap-1.5"
               >
-                Verify & Proceed
+                {isAuditing ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Auditing...</span>
+                  </>
+                ) : (
+                  <span>Verify &amp; Proceed</span>
+                )}
               </Button>
             </div>
           </DialogFooter>

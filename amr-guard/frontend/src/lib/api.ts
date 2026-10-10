@@ -11,7 +11,7 @@ import {
 } from "@/types/prescription";
 import { prescriptionStore } from "./prescriptionStore";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://nine-peaches-wash.loca.lt/api/v1";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
 
 /**
  * Standard fetch helper with error handling
@@ -263,8 +263,13 @@ export async function auditPrescription(caseData: PrescriptionCase): Promise<Aud
 
 function parseDurationDays(durationStr?: string): number {
   if (!durationStr) return 5;
-  const match = durationStr.match(/(\d+)/);
-  return match ? parseInt(match[1], 10) : 5;
+  const lower = durationStr.toLowerCase();
+  const match = lower.match(/(\d+)/);
+  if (!match) return 5;
+  const num = parseInt(match[1], 10);
+  if (lower.includes("week") || lower.includes("wk")) return num * 7;
+  if (lower.includes("month") || lower.includes("mo")) return num * 30;
+  return num;
 }
 
 function normalize(str?: string): string {

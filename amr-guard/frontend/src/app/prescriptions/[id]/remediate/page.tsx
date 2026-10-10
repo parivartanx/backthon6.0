@@ -21,6 +21,7 @@ import {
   ShieldCheck, 
   ShieldAlert, 
   AlertCircle, 
+  AlertTriangle,
   User, 
   RotateCcw,
   Printer,
@@ -29,7 +30,8 @@ import {
   History,
   FileText,
   ArrowRight,
-  ExternalLink
+  ExternalLink,
+  X
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -306,26 +308,19 @@ export default function RemediationReviewPage() {
 
   return (
     <AppShell
-      title="Remediation & Prescription Review"
+      title="Clinical Remediation & Decision Support"
       breadcrumbs={[
         { label: "Dashboard", href: "/dashboard" },
-        { label: "Cases", href: "/dashboard" },
-        { label: `Verify ${currentCase.id}`, href: `/prescriptions/${currentCase.id}/verify` },
-        { label: "Remediation & Review" },
+        { label: "Clinical Remediation", href: "/remediation" },
+        { label: currentCase.id },
       ]}
     >
       <div className="space-y-6 max-w-7xl mx-auto pb-12">
-        {/* Page Header */}
+        {/* Page Header (No duplicate breadcrumbs) */}
         <PageHeader
-          title="Stage 6: Clinical Remediation & Prescription Review"
-          description="Review proposed first-line guideline alternatives, clinical rationale, and take doctor action (Accept, Modify, or Retain with Rationale)."
-          backHref={`/prescriptions/${currentCase.id}/verify`}
-          breadcrumbs={[
-            { label: "Dashboard", href: "/dashboard" },
-            { label: "Prescriptions", href: "/dashboard" },
-            { label: `Review ${currentCase.id}`, href: `/prescriptions/${currentCase.id}/verify` },
-            { label: "Remediation" },
-          ]}
+          title="Clinical Remediation & Alternative Selection"
+          description="Review ICMR-recommended first-line alternatives, clinical rationale, and take physician action (Accept, Modify, or Retain with Rationale)."
+          backHref="/remediation"
         />
 
         {/* Action Toolbar */}
@@ -339,7 +334,7 @@ export default function RemediationReviewPage() {
                 Patient: {currentCase.patient.patientName}
               </span>
             )}
-            <span className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-md border ${
+            <span className={`inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full border ${
               currentCase.clinicalOverride
                 ? "bg-amber-50 text-amber-900 border-amber-300"
                 : auditRes?.status === "APPROVED"
@@ -348,14 +343,24 @@ export default function RemediationReviewPage() {
                 ? "bg-rose-50 text-rose-800 border-rose-300"
                 : "bg-amber-50 text-amber-800 border-amber-300"
             }`}>
-              <ShieldCheck className="w-3.5 h-3.5" />
-              {currentCase.clinicalOverride
-                ? "Retained with Rationale"
-                : auditRes?.status === "APPROVED"
-                ? "Approved"
-                : auditRes?.status === "BLOCKED"
-                ? "Blocked"
-                : "Review Required"}
+              {currentCase.clinicalOverride ? (
+                <FileText className="w-3.5 h-3.5 text-amber-700" />
+              ) : auditRes?.status === "APPROVED" ? (
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+              ) : auditRes?.status === "BLOCKED" ? (
+                <ShieldAlert className="w-3.5 h-3.5 text-rose-600" />
+              ) : (
+                <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+              )}
+              <span>
+                {currentCase.clinicalOverride
+                  ? "Retained with Rationale"
+                  : auditRes?.status === "APPROVED"
+                  ? "Safe & Approved"
+                  : auditRes?.status === "BLOCKED"
+                  ? "High Risk (Blocked)"
+                  : "Review Required"}
+              </span>
             </span>
           </div>
 
@@ -366,9 +371,9 @@ export default function RemediationReviewPage() {
               size="sm"
               className="text-xs text-[#0D607B] border-[#C9E9EB] hover:bg-[#F1F8FC] gap-1.5"
             >
-              <Link href={`/prescriptions/${currentCase.id}/verify`}>
+              <Link href="/remediation">
                 <ArrowLeft className="w-3.5 h-3.5" />
-                <span>Return to Verification Screen</span>
+                <span>Remediation Queue</span>
               </Link>
             </Button>
             <Button
@@ -376,6 +381,17 @@ export default function RemediationReviewPage() {
               variant="outline"
               size="sm"
               className="text-xs text-[#0D607B] border-[#C9E9EB] hover:bg-[#F1F8FC] gap-1.5"
+            >
+              <Link href={`/prescriptions/${currentCase.id}/verify`}>
+                <FileText className="w-3.5 h-3.5" />
+                <span>Verification Record</span>
+              </Link>
+            </Button>
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="text-xs text-slate-600 border-slate-200 hover:bg-slate-50 gap-1.5"
             >
               <Link href="/history">
                 <History className="w-3.5 h-3.5" />
@@ -387,16 +403,38 @@ export default function RemediationReviewPage() {
 
         {/* Success and Warning Alerts */}
         {successNotice && (
-          <Alert className="py-2.5 bg-emerald-50 border-emerald-300 text-emerald-900">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-            <AlertDescription className="text-xs ml-2 font-medium">{successNotice}</AlertDescription>
+          <Alert className="py-2.5 px-3 bg-emerald-50 border-emerald-300 text-emerald-900 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <AlertDescription className="text-xs font-medium">{successNotice}</AlertDescription>
+            </div>
+            <button
+              type="button"
+              onClick={() => setSuccessNotice(null)}
+              className="text-emerald-700 hover:text-emerald-900 hover:bg-emerald-100/70 p-1 rounded-md transition-colors shrink-0"
+              aria-label="Dismiss notice"
+              title="Dismiss notice"
+            >
+              <X className="w-4 h-4" />
+            </button>
           </Alert>
         )}
 
         {validationWarning && (
-          <Alert variant="destructive" className="py-2.5">
-            <AlertCircle className="w-4 h-4 shrink-0" />
-            <AlertDescription className="text-xs ml-2">{validationWarning}</AlertDescription>
+          <Alert variant="destructive" className="py-2.5 px-3 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <AlertDescription className="text-xs">{validationWarning}</AlertDescription>
+            </div>
+            <button
+              type="button"
+              onClick={() => setValidationWarning(null)}
+              className="text-rose-500 hover:text-rose-700 hover:bg-rose-100/70 p-1 rounded-md transition-colors shrink-0"
+              aria-label="Dismiss warning"
+              title="Dismiss warning"
+            >
+              <X className="w-4 h-4" />
+            </button>
           </Alert>
         )}
 
@@ -471,7 +509,7 @@ export default function RemediationReviewPage() {
         )}
 
         {/* STAGE 6: DEDICATED REMEDIATION PANEL */}
-        <Card className="bg-white border-slate-200/90 shadow-2xs p-6">
+        <Card className="bg-white border-slate-200/90 shadow-2xs p-3.5 sm:p-4">
           <RemediationPanel
             options={displayOptions}
             flags={auditRes?.flags || []}
@@ -495,11 +533,8 @@ export default function RemediationReviewPage() {
             <div className="flex items-center justify-between flex-wrap gap-2 border-b border-slate-100 pb-3">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-bold text-[#0D607B] tracking-wider uppercase bg-[#F1F8FC] border border-[#C9E9EB] px-2 py-0.5 rounded">
-                    Stage 7
-                  </span>
                   <h3 className="text-sm font-bold text-[#0D607B]">
-                    Final Audit Summary & Clinical Decision History
+                    Audit Summary & Clinical Decision History
                   </h3>
                 </div>
                 <p className="text-[11px] text-slate-500 mt-0.5">

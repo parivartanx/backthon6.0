@@ -1,13 +1,17 @@
-// [SOLID: SRP] Animated Circular AMR Risk Score Gauge for AMR Sentinel Clinical Decision Support
+// [SOLID: SRP & UI/UX Pro Max] Clean, Compact Clinical Risk Score Gauge
 "use client";
 
 import React, { useId } from "react";
 import { AuditTriageBand, PenaltiesBreakdown } from "@/types/prescription";
 import { Badge } from "@/components/ui/badge";
-import { ShieldCheck, AlertTriangle, ShieldAlert } from "lucide-react";
+import { 
+  ShieldCheck, 
+  AlertTriangle, 
+  ShieldAlert
+} from "lucide-react";
 
 interface RiskScoreGaugeProps {
-  score: number; // 0.0 to 100.0
+  score: number; // 0.0 to 100.0 (0 = Lowest Risk / Safe, 100 = Critical Risk / Blocked)
   band: AuditTriageBand;
   penalties?: PenaltiesBreakdown;
   status: "APPROVED" | "FLAGGED" | "BLOCKED" | "OVERRIDDEN";
@@ -17,179 +21,153 @@ interface RiskScoreGaugeProps {
 export function RiskScoreGauge({
   score,
   band,
-  penalties = { p_class: 0, p_duration: 0, p_indication: 0 },
   status,
   latencyMs,
 }: RiskScoreGaugeProps) {
   const gradientId = useId();
-  const radius = 78;
+  const radius = 48;
   const circumference = 2 * Math.PI * radius;
-  // Bounded percentage
   const clampedScore = Math.max(0, Math.min(100, score));
   const strokeDashoffset = circumference - (clampedScore / 100) * circumference;
 
-  // Visual theming based on Band
+  // Clinician-friendly color schemes based on triage band
   const bandConfig = {
     GREEN: {
       color: "#169781",
       gradientStart: "#10B981",
       gradientEnd: "#169781",
-      badgeBg: "bg-emerald-50 text-emerald-800 border-emerald-300",
-      label: "Low Risk • Guideline Compliant",
+      badgeClass: "bg-emerald-50 text-emerald-800 border-emerald-200/80",
+      statusLabel: "Safe & Approved",
+      riskTitle: "Low Antimicrobial Risk",
+      description: "Adheres to first-line Access antimicrobials and standard ICMR clinical durations.",
       icon: ShieldCheck,
-      description: "Adheres to first-line Access antimicrobials and recommended clinical durations.",
     },
     AMBER: {
-      color: "#F59E0B",
+      color: "#D97706",
       gradientStart: "#FBBF24",
       gradientEnd: "#D97706",
-      badgeBg: "bg-amber-50 text-amber-800 border-amber-300",
-      label: "Review Required • Escalation Detected",
+      badgeClass: "bg-amber-50 text-amber-800 border-amber-200/80",
+      statusLabel: "Review Required",
+      riskTitle: "Moderate Risk • Stewardship Flag",
+      description: "Watch-tier escalation or duration anomaly flagged for clinical review.",
       icon: AlertTriangle,
-      description: "Watch-tier escalation or duration anomaly requires physician re-evaluation.",
     },
     RED: {
-      color: "#EF4444",
+      color: "#DC2626",
       gradientStart: "#F87171",
       gradientEnd: "#DC2626",
-      badgeBg: "bg-rose-50 text-rose-800 border-rose-300",
-      label: "Critical Alert • Prescription Blocked",
+      badgeClass: "bg-rose-50 text-rose-800 border-rose-200/80",
+      statusLabel: "Prescription Blocked",
+      riskTitle: "Critical Risk • High Alert",
+      description: "Severe clinical contraindication or banned combination intercepted.",
       icon: ShieldAlert,
-      description: "Severe clinical contraindication or banned drug combination detected.",
     },
   }[band] || {
     color: "#169781",
     gradientStart: "#10B981",
     gradientEnd: "#169781",
-    badgeBg: "bg-emerald-50 text-emerald-800 border-emerald-300",
-    label: "Evaluating",
+    badgeClass: "bg-emerald-50 text-emerald-800 border-emerald-200/80",
+    statusLabel: status,
+    riskTitle: "Clinical Safety Assessment",
+    description: "Evaluating against national clinical stewardship guidelines.",
     icon: ShieldCheck,
-    description: "",
   };
 
   const IconComponent = bandConfig.icon;
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-2xs flex flex-col justify-between relative overflow-hidden">
-      {/* Subtle background glow */}
+    <div className="bg-white rounded-2xl border border-slate-200/90 p-4.5 shadow-2xs relative overflow-hidden flex flex-col justify-between">
+      {/* Subtle modern ambient tint */}
       <div 
-        className="absolute top-0 right-0 w-44 h-44 rounded-full blur-3xl opacity-10 pointer-events-none"
+        className="absolute top-0 right-0 w-36 h-36 rounded-full blur-3xl opacity-8 pointer-events-none"
         style={{ backgroundColor: bandConfig.color }}
       />
 
-      {/* Top Header */}
+      {/* Header */}
       <div className="flex items-center justify-between border-b border-slate-100 pb-3">
         <div>
           <span className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">
-            Deterministic Engine
+            Clinical Safety Assessment
           </span>
-          <h3 className="text-sm font-bold text-[#0D607B]">AMR Sentinel Risk Index</h3>
+          <h3 className="text-sm sm:text-base font-bold text-[#0D607B] tracking-tight">
+            Antimicrobial Risk Level
+          </h3>
         </div>
-        <Badge variant="outline" className={`gap-1 font-semibold text-[11px] ${bandConfig.badgeBg}`}>
+
+        <Badge variant="outline" className={`gap-1.5 font-semibold text-xs px-2.5 py-0.5 rounded-full ${bandConfig.badgeClass}`}>
           <IconComponent className="w-3.5 h-3.5" />
-          <span>{status}</span>
+          <span>{bandConfig.statusLabel}</span>
         </Badge>
       </div>
 
-      {/* Center: Radial Animated Gauge */}
-      <div className="flex flex-col sm:flex-row items-center justify-center gap-6 py-4">
-        <div className="relative flex items-center justify-center shrink-0">
-          <svg className="w-44 h-44 -rotate-90 transform" viewBox="0 0 180 180">
+      {/* Compact Body: Gauge + Clinical Summary */}
+      <div className="flex items-center gap-5 py-3.5">
+        {/* Radial Animated Gauge */}
+        <div className="relative shrink-0 flex items-center justify-center">
+          <svg className="w-28 h-28 -rotate-90 transform" viewBox="0 0 120 120">
             <defs>
               <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stopColor={bandConfig.gradientStart} />
                 <stop offset="100%" stopColor={bandConfig.gradientEnd} />
               </linearGradient>
             </defs>
-            {/* Background track */}
+            {/* Background Track */}
             <circle
-              cx="90"
-              cy="90"
+              cx="60"
+              cy="60"
               r={radius}
-              stroke="#E2E8F0"
-              strokeWidth="12"
+              stroke="#F1F5F9"
+              strokeWidth="8"
               fill="transparent"
               strokeLinecap="round"
             />
-            {/* Animated progress arc */}
+            {/* Active Progress Arc */}
             <circle
-              cx="90"
-              cy="90"
+              cx="60"
+              cy="60"
               r={radius}
               stroke={`url(#${gradientId})`}
-              strokeWidth="12"
+              strokeWidth="8"
               fill="transparent"
               strokeDasharray={circumference}
               strokeDashoffset={strokeDashoffset}
               strokeLinecap="round"
-              className="transition-all duration-1000 ease-out"
+              className="transition-all duration-700 ease-out"
             />
           </svg>
 
-          {/* Center text in circle */}
+          {/* In-gauge score text */}
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-            <span className="text-3xl font-extrabold tracking-tight text-slate-800">
-              {score.toFixed(1)}
-            </span>
-            <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
-              Score / 100
-            </span>
-            {latencyMs !== undefined && latencyMs > 0 ? (
-              <span className="text-[9px] font-mono text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded mt-1">
-                {latencyMs}ms check
+            <div className="flex items-baseline justify-center">
+              <span className="text-2xl font-extrabold text-slate-800 tracking-tight">
+                {score.toFixed(0)}
               </span>
-            ) : (
-              <span className="text-[9px] font-medium text-[#169781] bg-[#E2FAD9] px-1.5 py-0.5 rounded mt-1">
-                Verified
-              </span>
-            )}
+              <span className="text-[11px] font-semibold text-slate-400 ml-0.5">/100</span>
+            </div>
+            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">
+              Risk Score
+            </span>
           </div>
         </div>
 
-        {/* Mathematical Penalty Breakdown Pill Grid */}
-        <div className="flex-1 space-y-2.5 w-full">
-          <div>
-            <div className="text-xs font-bold text-slate-700">{bandConfig.label}</div>
-            <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">{bandConfig.description}</p>
-          </div>
-
-          <div className="space-y-1.5 pt-1">
-            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-              Mathematical Weight Breakdown:
-            </div>
-
-            {/* Formula display */}
-            <div className="p-2 bg-slate-50 rounded-lg border border-slate-100 text-[10px] font-mono text-slate-600 space-y-1">
-              <div className="flex justify-between items-center">
-                <span>0.4 × P_class (AWaRe):</span>
-                <span className="font-bold text-slate-800">
-                  {(0.4 * (penalties.p_class || 0)).toFixed(1)} pts
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span>0.2 × P_duration (Days):</span>
-                <span className="font-bold text-slate-800">
-                  {(0.2 * (penalties.p_duration || 0)).toFixed(1)} pts
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span>0.4 × P_indication (Syndrome):</span>
-                <span className="font-bold text-slate-800">
-                  {(0.4 * (penalties.p_indication || 0)).toFixed(1)} pts
-                </span>
-              </div>
-            </div>
-          </div>
+        {/* Clinical Assessment Summary */}
+        <div className="space-y-1 flex-1">
+          <div className="text-sm font-bold text-slate-800">{bandConfig.riskTitle}</div>
+          <p className="text-xs text-slate-500 leading-relaxed">{bandConfig.description}</p>
         </div>
       </div>
 
-      {/* Footer Note */}
-      <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-        <span className="flex items-center gap-1">
+      {/* Clean Footer Citation */}
+      <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+        <span className="flex items-center gap-1.5 text-slate-600 font-medium text-[11px]">
           <ShieldCheck className="w-3.5 h-3.5 text-[#169781]" />
-          <span>ICMR STG / WHO AWaRe 2023 Rules</span>
+          <span>ICMR Standard Treatment Guidelines &amp; WHO AWaRe</span>
         </span>
-        <span className="font-mono text-[10px] text-slate-400">Real-Time Safety Check</span>
+        {latencyMs !== undefined && latencyMs > 0 && (
+          <span className="text-[10px] text-slate-400 font-medium">
+            Evaluated in {latencyMs}ms
+          </span>
+        )}
       </div>
     </div>
   );

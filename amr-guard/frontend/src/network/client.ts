@@ -9,6 +9,8 @@ export const apiClient: AxiosInstance = axios.create({
   headers: {
     // Localtunnel friendly reminder bypass header
     "bypass-tunnel-reminder": "true",
+    // Ngrok free tier browser warning bypass header
+    "ngrok-skip-browser-warning": "true",
     Accept: "application/json",
   },
 });
