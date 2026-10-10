@@ -26,6 +26,7 @@ from app.engine.constraints import (
     is_sulfa_drug,
     is_macrolide_drug,
     PEDIATRIC_DAILY_DOSE_CEILINGS_MG_KG,
+    is_nsaid_drug,
 )
 
 
@@ -965,3 +966,48 @@ def check_uti_fluoroquinolone_resistance(
             )
 
     return None
+
+
+# [PATTERN: Specification] — Tier 2 Therapeutic Duplication: Dual Systemic NSAID Hazard Gate
+def check_nsaid_therapeutic_duplication(
+    prescription_lines: List[PrescriptionLine]
+) -> List[RuleViolation]:
+    """
+    Tier 2.4: Therapeutic Duplication & Co-prescription Safety Gate.
+    Prescribing multiple systemic NSAIDs (e.g. Diclofenac + Ibuprofen) is an irrational
+    therapeutic duplication that offers no additive analgesic benefit while drastically compounding
+    gastrointestinal ulceration/bleeding and renal hemodynamic injury risks.
+    Assigns Indication Penalty P_indication = 50.0 (Severity: HIGH).
+    """
+    nsaid_lines = [
+        line for line in prescription_lines
+        if is_nsaid_drug(line.canonical_drug)
+    ]
+
+    if len(nsaid_lines) >= 2:
+        drug_names = [line.canonical_drug for line in nsaid_lines]
+        combined_names = " + ".join(drug_names)
+        return [
+            RuleViolation(
+                tier=2,
+                rule_id="TIER2_NSAID_DUPLICATION_HAZARD",
+                rule_name="Dual NSAID Therapeutic Duplication Hazard",
+                severity="HIGH",
+                drug=combined_names,
+                penalty_type="indication",
+                penalty_score=50.0,
+                rationale=(
+                    f"Prescription contains multiple concurrent systemic NSAIDs ({combined_names}). "
+                    "Dual NSAID therapy provides no additive analgesia and significantly increases risks of "
+                    "acute gastrointestinal ulceration/bleeding, acute kidney injury, and cardiovascular events."
+                ),
+                remediation=(
+                    f"Discontinue concurrent NSAID regimen ({combined_names}). Deprescribe one agent immediately. "
+                    "For symptomatic relief of fever and pain, use single-agent Paracetamol (e.g. 500-650 mg SOS) "
+                    "or a single NSAID at the lowest effective dose."
+                ),
+                citation="ICMR Standard Treatment Guidelines & WHO Model Formulary / British National Formulary (BNF)"
+            )
+        ]
+    return []
+

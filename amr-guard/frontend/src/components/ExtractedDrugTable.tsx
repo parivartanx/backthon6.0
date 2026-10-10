@@ -13,6 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { getDrugClassificationBadge } from "@/components/RemediationPanel";
 
 interface ExtractedDrugTableProps {
   medicines: MedicineEntry[];
@@ -27,26 +28,13 @@ export function ExtractedDrugTable({ medicines }: ExtractedDrugTableProps) {
     );
   }
 
-  const awareBadgeClass = (tier?: string) => {
-    switch (tier) {
-      case "Access":
-        return "bg-emerald-100 text-emerald-800 border-emerald-300 font-semibold";
-      case "Watch":
-        return "bg-amber-100 text-amber-800 border-amber-300 font-semibold";
-      case "Reserve":
-        return "bg-rose-100 text-rose-800 border-rose-300 font-bold";
-      default:
-        return "bg-slate-100 text-slate-600 border-slate-200";
-    }
-  };
-
   return (
     <div className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-2xs">
       <div className="p-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Pill className="w-4 h-4 text-[#169781]" />
           <span className="text-xs font-bold text-[#0D607B] uppercase tracking-wide">
-            Medication Regimen & WHO AWaRe Classification
+            Medication Regimen & Therapeutic / AWaRe Classification
           </span>
         </div>
         <Badge variant="outline" className="text-[10px] bg-white border-slate-200 text-slate-600">
@@ -58,7 +46,7 @@ export function ExtractedDrugTable({ medicines }: ExtractedDrugTableProps) {
         <TableHeader>
           <TableRow className="bg-slate-50/50 hover:bg-slate-50/50">
             <TableHead className="text-[11px] font-bold text-slate-500">Medication / Molecule</TableHead>
-            <TableHead className="text-[11px] font-bold text-slate-500">AWaRe Tier</TableHead>
+            <TableHead className="text-[11px] font-bold text-slate-500">Therapeutic / AWaRe</TableHead>
             <TableHead className="text-[11px] font-bold text-slate-500">Strength & Dose</TableHead>
             <TableHead className="text-[11px] font-bold text-slate-500">Frequency</TableHead>
             <TableHead className="text-[11px] font-bold text-slate-500">Duration</TableHead>
@@ -68,7 +56,7 @@ export function ExtractedDrugTable({ medicines }: ExtractedDrugTableProps) {
         <TableBody>
           {medicines.map((med) => {
             const isFdc = med.is_fdc;
-            const aware = med.aware_tier || "Access";
+            const badgeConfig = getDrugClassificationBadge(med);
 
             return (
               <TableRow key={med.id} className="hover:bg-slate-50/60 transition-colors">
@@ -89,8 +77,8 @@ export function ExtractedDrugTable({ medicines }: ExtractedDrugTableProps) {
                 </TableCell>
 
                 <TableCell className="py-3">
-                  <Badge variant="outline" className={`text-[10px] px-2 py-0.5 ${awareBadgeClass(aware)}`}>
-                    {aware}
+                  <Badge variant="outline" className={`text-[10px] px-2 py-0.5 ${badgeConfig.className}`}>
+                    {badgeConfig.label}
                   </Badge>
                 </TableCell>
 

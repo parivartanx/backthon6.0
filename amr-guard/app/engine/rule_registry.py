@@ -22,6 +22,7 @@ from app.engine.rules import (
     check_cap_duration,
     check_uti_duration,
     check_uti_fluoroquinolone_resistance,
+    check_nsaid_therapeutic_duplication,
 )
 
 RULE_METADATA = [
@@ -102,6 +103,13 @@ RULE_METADATA = [
         "name": "Unapproved Irrational FDC Gate",
         "description": "Flags irrational dual-antimicrobial fixed dose combinations.",
         "citation": "CDSCO Banned FDCs Gazette"
+    },
+    {
+        "id": "TIER2_NSAID_DUPLICATION_HAZARD",
+        "tier": 2,
+        "name": "Dual NSAID Therapeutic Duplication Hazard",
+        "description": "Flags concurrent systemic NSAID co-prescriptions (P_indication = 50.0).",
+        "citation": "ICMR Standard Treatment Guidelines & WHO Model Formulary"
     },
     {
         "id": "TIER2_UNMAPPED_SYNDROME_ADVISORY",
@@ -246,4 +254,10 @@ def evaluate_all_rules(
         if v_uti_fq:
             violations.append(v_uti_fq)
 
+    # Prescription-wide cross-drug checks: Tier 2 Therapeutic Duplication Gate
+    v_nsaid = check_nsaid_therapeutic_duplication(prescription_lines)
+    if v_nsaid:
+        violations.extend(v_nsaid)
+
     return violations
+

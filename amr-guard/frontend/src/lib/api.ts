@@ -284,6 +284,12 @@ const AMINOGLYCOSIDES = ["amikacin", "gentamicin", "tobramycin", "streptomycin",
 const GLYCOPEPTIDES = ["vancomycin", "teicoplanin", "vancocin", "targocid"];
 const RESERVE_DRUGS = ["colistin", "linezolid", "tigecycline", "meropenem", "imipenem", "polymyxin b", "ceftazidime-avibactam", "aztreonam"];
 const NEPHROTOXIC_DRUGS = ["vancomycin", "teicoplanin", "amikacin", "gentamicin", "tobramycin", "colistin", "polymyxin b", "nitrofurantoin"];
+const NSAID_DRUGS = ["diclofenac", "ibuprofen", "naproxen", "ketorolac", "piroxicam", "indomethacin", "meloxicam", "mefenamic", "etoricoxib", "celecoxib", "aceclofenac"];
+
+function isNSAID(drug: string): boolean {
+  const norm = normalize(drug);
+  return NSAID_DRUGS.some((n) => norm.includes(n));
+}
 
 function isFQ(drug: string): boolean {
   const norm = normalize(drug);
@@ -323,6 +329,7 @@ function classifyAwareTier(drug: string): "Access" | "Watch" | "Reserve" {
 }
 
 function detectDrugClass(drug: string): string {
+  if (isNSAID(drug)) return "NSAID";
   if (isFQ(drug)) return "Fluoroquinolone";
   if (isTC(drug)) return "Tetracycline";
   if (GLYCOPEPTIDES.some((g) => normalize(drug).includes(g))) return "Glycopeptide (Watch)";
@@ -473,16 +480,16 @@ function evaluateDeterministicRules(caseData: PrescriptionCase, startTime: numbe
       }
     }
 
-    // Tier 1.4: Banned Irrational FDCs
+    // Tier 2.2: Banned Irrational FDCs
     if (med.is_fdc || detectIrrationalFdc(med.brandName, med.genericName)) {
       violations.push({
-        tier: 1,
-        rule_id: "TIER1_BANNED_IRRATIONAL_FDC",
-        rule_name: "Banned Irrational Fixed-Dose Combination",
-        severity: "BLOCKED",
+        tier: 2,
+        rule_id: "TIER2_UNAPPROVED_FDC",
+        rule_name: "Unapproved Irrational Fixed-Dose Combination",
+        severity: "HIGH",
         drug: `${med.brandName} (${med.genericName})`,
-        penalty_type: "fdc",
-        penalty_score: 100.0,
+        penalty_type: "indication",
+        penalty_score: 30.0,
         rationale: "Dual-antimicrobial FDC banned by Central Drugs Standard Control Organisation (CDSCO). Promotes multi-drug resistance.",
         remediation: "De-escalate to single targeted monotherapy agent.",
         citation: "Gazette of India Banned FDC Notification / ICMR STG",
@@ -495,6 +502,32 @@ function evaluateDeterministicRules(caseData: PrescriptionCase, startTime: numbe
         source_citation: "CDSCO Ban Order",
       });
     }
+  }
+
+  // --- TIER 2: Therapeutic Duplication & Indication Appropriateness ---
+  // Tier 2.4: Dual NSAID Therapeutic Duplication Hazard
+  const nsaidsPrescribed = caseData.medicines.filter((m) => isNSAID(m.genericName || m.brandName));
+  if (nsaidsPrescribed.length >= 2) {
+    const combinedNames = nsaidsPrescribed.map((m) => m.genericName || m.brandName).join(" + ");
+    violations.push({
+      tier: 2,
+      rule_id: "TIER2_NSAID_DUPLICATION_HAZARD",
+      rule_name: "Dual NSAID Therapeutic Duplication Hazard",
+      severity: "HIGH",
+      drug: combinedNames,
+      penalty_type: "indication",
+      penalty_score: 50.0,
+      rationale: `Prescription contains multiple concurrent systemic NSAIDs (${combinedNames}). Dual NSAID therapy provides no additive analgesia and significantly increases risks of acute gastrointestinal ulceration/bleeding and renal hemodynamic injury.`,
+      remediation: `Discontinue concurrent NSAID regimen (${combinedNames}). For symptomatic relief of fever and pain, use single-agent Paracetamol (500-650 mg SOS) or a single NSAID at lowest effective dose.`,
+      citation: "ICMR Standard Treatment Guidelines & WHO Model Formulary",
+    });
+    remediations.push({
+      recommendation_type: "SWITCH_DRUG",
+      suggested_drug: "Paracetamol (single-agent symptomatic therapy)",
+      suggested_duration_days: 3,
+      guidance: "Deprescribe duplicate NSAID. Switch to single-agent Paracetamol for symptomatic relief.",
+      source_citation: "ICMR STG & BNF",
+    });
   }
 
   // --- TIER 2: Indication Appropriateness ---

@@ -102,7 +102,11 @@ def audit_prescription_rag_first(
             "3. Tier 3 AWaRe Spectrum: Outpatient empirical Watch-group drugs when Access alternatives exist (Class penalty: 45.0); "
             "Reserve drugs without positive microbiology (Class penalty: 85.0).\n"
             "4. Tier 4 Duration: Mild CAP > 5 days or cystitis > 5 days (Duration penalty).\n"
-            "5. Tier 5 Resistance: Empirical Fluoroquinolones in UTI (>75% local E. coli resistance).\n\n"
+            "5. Tier 5 Resistance: Empirical Fluoroquinolones in UTI (>75% local E. coli resistance).\n"
+            "6. FDA Indications & Boxed Warnings: Cross-reference prescribed antimicrobials against their FDA-approved usage and serious adverse reaction/boxed warning profiles in the drug monograph. Flag any agent contraindicated for the diagnosis (e.g. Daptomycin in pulmonary infections) or whose boxed warnings conflict with patient comorbidities (e.g. Ciprofloxacin in Myasthenia Gravis or arrhythmia).\n"
+            "7. Therapeutic Duplication & Co-prescription Hazard: Prescribing multiple concurrent systemic NSAIDs (e.g. Diclofenac + Ibuprofen) is an irrational duplication with severe GI/renal toxicity risk. Assign Indication penalty: 50.0.\n\n"
+            "SCORING CALIBRATION:\n"
+            "AMR Risk Score is calculated mathematically as: min(100.0, 0.4 * p_class + 0.2 * p_duration + 0.4 * p_indication). Do NOT assign 100.0 unless a lethal Tier 1 contraindication is tripped.\n\n"
             "You MUST respond strictly in valid JSON matching this schema:\n"
             "{\n"
             '  "status": "APPROVED" | "FLAGGED" | "BLOCKED",\n'
@@ -212,9 +216,12 @@ def audit_prescription_rag_first(
         )
 
         existing_rule_ids = {f.rule_id for f in flags}
+        prepended_flags = []
         for sv in safety_violations:
             if sv.rule_id not in existing_rule_ids:
-                flags.append(sv)
+                prepended_flags.append(sv)
+                existing_rule_ids.add(sv.rule_id)
+        flags = prepended_flags + flags
 
         has_tier_1 = any(v.tier == 1 or v.severity == "BLOCKED" for v in flags)
 
@@ -240,9 +247,9 @@ def audit_prescription_rag_first(
         else:
             raw_math_score = (0.4 * p_class) + (0.2 * p_duration) + (0.4 * p_indication)
             calc_score = round(min(100.0, raw_math_score), 1)
-            score = max(calc_score, score)
+            score = calc_score
 
-            if len(flags) > 0:
+            if len(flags) > 0 or score > 0.0:
                 status = "FLAGGED"
                 if score >= 75.0:
                     band = "RED"

@@ -8,6 +8,8 @@ from app.engine.constraints import (
     is_aminoglycoside,
     get_aware_tier,
     is_irrational_fdc,
+    is_antibiotic_drug,
+    is_nsaid_drug,
 )
 
 def test_normalize_text():
@@ -37,6 +39,14 @@ def test_aware_tier_mapping():
     assert get_aware_tier("Azithromycin") == "Watch"
     assert get_aware_tier("Meropenem") == "Reserve"
     assert get_aware_tier("Colistin") == "Reserve"
+
+def test_non_antibiotic_aware_tier_mapping():
+    # [TDD: RED] Non-antimicrobials must NOT have AWaRe tiers (Access/Watch/Reserve/Unknown)
+    assert is_nsaid_drug("Diclofenac 50 mg") is True
+    assert is_antibiotic_drug("Diclofenac 50 mg") is False
+    assert is_antibiotic_drug("Paracetamol") is False
+    assert get_aware_tier("Diclofenac 50 mg") == "Not Applicable"
+    assert get_aware_tier("Paracetamol") == "Not Applicable"
 
 def test_irrational_fdc_detection():
     assert is_irrational_fdc("Ofloxacin + Ornidazole") is True

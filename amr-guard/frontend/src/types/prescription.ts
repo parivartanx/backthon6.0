@@ -9,7 +9,7 @@ export type PregnancyStatusOption =
   | "Not pregnant"
   | "Unknown";
 
-export type AwareTier = "Access" | "Watch" | "Reserve" | "Unclassified";
+export type AwareTier = "Access" | "Watch" | "Reserve" | "Unclassified" | "Not Applicable";
 
 export type MedicineVerificationStatus =
   | "Verified"
