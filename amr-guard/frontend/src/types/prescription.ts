@@ -120,7 +120,10 @@ export interface AuditResult {
   remediation_options: RemediationOption[];
   latency_ms: number;
   timestamp?: string;
+  signature?: string;
+  is_cached?: boolean;
 }
+
 
 export interface PrescriptionCase {
   id: string;
