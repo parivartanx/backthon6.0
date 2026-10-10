@@ -12,7 +12,8 @@ import {
   Building2, 
   Eye, 
   EyeOff,
-  AlertCircle
+  AlertCircle,
+  X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -130,9 +131,20 @@ export default function LoginPage() {
 
             <CardContent className="space-y-4">
               {errorMessage && (
-                <Alert variant="destructive" className="py-2.5 text-xs">
-                  <AlertCircle className="w-4 h-4 shrink-0" />
-                  <AlertDescription className="ml-2">{errorMessage}</AlertDescription>
+                <Alert variant="destructive" className="py-2.5 px-3 text-xs flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <AlertCircle className="w-4 h-4 shrink-0" />
+                    <AlertDescription>{errorMessage}</AlertDescription>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setErrorMessage(null)}
+                    className="text-rose-500 hover:text-rose-700 hover:bg-rose-100/70 p-1 rounded-md transition-colors shrink-0"
+                    aria-label="Dismiss error"
+                    title="Dismiss error"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
                 </Alert>
               )}
 

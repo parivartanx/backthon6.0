@@ -8,7 +8,8 @@ import {
   X, 
   Plus, 
   CheckCircle2, 
-  AlertCircle
+  AlertCircle,
+  Loader2
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -56,6 +57,7 @@ export function AddMedicineModal({ isOpen, onClose, onAdd }: AddMedicineModalPro
   const [duration, setDuration] = useState("5 days");
   const [error, setError] = useState<string | null>(null);
   const [lastAddedNotice, setLastAddedNotice] = useState<string | null>(null);
+  const [isAdding, setIsAdding] = useState(false);
 
   const brandInputRef = useRef<HTMLInputElement>(null);
 
@@ -131,26 +133,36 @@ export function AddMedicineModal({ isOpen, onClose, onAdd }: AddMedicineModalPro
     };
   };
 
-  const handleSaveAndClose = (e?: React.FormEvent) => {
+  const handleSaveAndClose = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     const med = buildMedicine();
     if (!med) return;
-    onAdd(med);
-    resetForm();
-    onClose();
+    try {
+      setIsAdding(true);
+      await Promise.resolve(onAdd(med));
+      resetForm();
+      onClose();
+    } finally {
+      setIsAdding(false);
+    }
   };
 
-  const handleAddAndMore = (e?: React.MouseEvent) => {
+  const handleAddAndMore = async (e?: React.MouseEvent) => {
     if (e) e.preventDefault();
     const med = buildMedicine();
     if (!med) return;
-    onAdd(med);
-    const addedName = med.brandName || med.genericName;
-    setLastAddedNotice(`Added "${addedName}". Ready for next medicine.`);
-    resetForm();
-    setTimeout(() => {
-      brandInputRef.current?.focus();
-    }, 50);
+    try {
+      setIsAdding(true);
+      await Promise.resolve(onAdd(med));
+      const addedName = med.brandName || med.genericName;
+      setLastAddedNotice(`Added "${addedName}". Ready for next medicine.`);
+      resetForm();
+      setTimeout(() => {
+        brandInputRef.current?.focus();
+      }, 50);
+    } finally {
+      setIsAdding(false);
+    }
   };
 
   const currentTier = (genericName || brandName) ? detectAwareTier(genericName || brandName) : null;
@@ -212,9 +224,20 @@ export function AddMedicineModal({ isOpen, onClose, onAdd }: AddMedicineModalPro
             )}
 
             {error && (
-              <Alert variant="destructive" className="py-2 px-3 text-xs rounded-lg">
-                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                <AlertDescription className="text-xs ml-1.5">{error}</AlertDescription>
+              <Alert variant="destructive" className="py-2 px-3 text-xs rounded-lg flex items-center justify-between gap-2">
+                <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                  <AlertDescription className="text-xs">{error}</AlertDescription>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setError(null)}
+                  className="text-rose-500 hover:text-rose-700 hover:bg-rose-100/70 p-0.5 rounded transition-colors shrink-0"
+                  aria-label="Dismiss error"
+                  title="Dismiss error"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
               </Alert>
             )}
 
@@ -397,6 +420,7 @@ export function AddMedicineModal({ isOpen, onClose, onAdd }: AddMedicineModalPro
               type="button"
               variant="outline"
               size="sm"
+              disabled={isAdding}
               onClick={onClose}
               className="text-xs h-8 px-3 border-slate-300 text-slate-600 hover:bg-slate-100"
             >
@@ -408,20 +432,29 @@ export function AddMedicineModal({ isOpen, onClose, onAdd }: AddMedicineModalPro
                 type="button"
                 variant="secondary"
                 size="sm"
+                disabled={isAdding}
                 onClick={handleAddAndMore}
                 className="text-xs h-8 px-3 font-semibold bg-slate-200/80 hover:bg-slate-300 text-slate-800 gap-1"
               >
-                <Plus className="w-3.5 h-3.5" />
+                {isAdding ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
                 <span>Add &amp; Add More</span>
               </Button>
 
               <Button
                 type="button"
                 size="sm"
+                disabled={isAdding}
                 onClick={() => handleSaveAndClose()}
-                className="text-xs h-8 px-3.5 font-semibold bg-[#169781] hover:bg-[#117866] text-white"
+                className="text-xs h-8 px-3.5 font-semibold bg-[#169781] hover:bg-[#117866] text-white min-w-[100px] gap-1.5"
               >
-                Add Medicine
+                {isAdding ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Adding...</span>
+                  </>
+                ) : (
+                  <span>Add Medicine</span>
+                )}
               </Button>
             </div>
           </footer>

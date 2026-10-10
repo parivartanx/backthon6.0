@@ -12,6 +12,7 @@ import {
   RuleViolation 
 } from "@/types/prescription";
 import { fetchRemediationGuidance } from "@/network/services/remediationService";
+import { RemediationDataTable } from "@/components/remediation/RemediationDataTable";
 import { 
   ShieldAlert, 
   AlertTriangle, 
@@ -30,7 +31,9 @@ import {
   AlertCircle,
   Stethoscope,
   ExternalLink,
-  ChevronRight
+  ChevronRight,
+  Loader2,
+  X
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -49,7 +52,17 @@ import {
 
 export default function ClinicalRemediationPage() {
   const router = useRouter();
-  const { cases, fetchCases, saveCase, isLoading } = usePrescriptionStore();
+  const { 
+    cases, 
+    fetchCases, 
+    saveCase, 
+    switchCaseDrug,
+    retainCaseWithRationale,
+    isSwitching,
+    isRetaining,
+    actionLoadingId,
+    isLoading 
+  } = usePrescriptionStore();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [filterTab, setFilterTab] = useState<"ACTIONABLE" | "BLOCKED" | "FLAGGED" | "RESOLVED" | "ALL">("ACTIONABLE");
@@ -117,53 +130,17 @@ export default function ClinicalRemediationPage() {
     });
   }, [cases, filterTab, searchQuery]);
 
-  // Direct 1-Click Action: Accept Recommended Alternative
-  const handleAcceptAlternative = async (c: PrescriptionCase) => {
+  // Confirmed Action: Accept Recommended Alternative
+  const handleAcceptAlternative = async (c: PrescriptionCase, confirmedDays?: number) => {
     try {
       setErrorMessage(null);
-      const updatedMeds = [...c.medicines];
-
-      // Find first-line alternative
       const firstOpt = c.auditResult?.remediation_options?.[0];
       const suggestedDrug = firstOpt?.suggested_drug || "Amoxicillin";
-      const suggestedDays = firstOpt?.suggested_duration_days || 5;
+      const suggestedDays = confirmedDays || firstOpt?.suggested_duration_days || 5;
 
-      // Replace flagged or first antibiotic
-      if (updatedMeds.length > 0) {
-        const originalName = updatedMeds[0].genericName || updatedMeds[0].brandName;
-        updatedMeds[0] = {
-          ...updatedMeds[0],
-          brandName: suggestedDrug,
-          genericName: suggestedDrug,
-          dose: "250 mg",
-          duration: `${suggestedDays} days`,
-          duration_days: suggestedDays,
-          aware_tier: "Access",
-          verificationStatus: "Verified",
-        };
-
-        const updatedCase: PrescriptionCase = {
-          ...c,
-          medicines: updatedMeds,
-          workflowStatus: "Audited",
-          auditResult: {
-            score: 10.0,
-            band: "GREEN",
-            status: "APPROVED",
-            flags: [],
-            remediation_options: [],
-            penalties: { p_class: 0, p_duration: 0, p_indication: 0 },
-            latency_ms: 18,
-            timestamp: new Date().toISOString(),
-          },
-          clinicalOverride: undefined,
-          updatedAt: new Date().toISOString(),
-        };
-
-        await saveCase(updatedCase);
-        setSuccessMessage(`Prescription ${c.id} remediated: Switched ${originalName} to recommended first-line ${suggestedDrug} (${suggestedDays} days). Status is now Safe & Approved.`);
-        setTimeout(() => setSuccessMessage(null), 6000);
-      }
+      await switchCaseDrug(c.id, suggestedDrug, suggestedDays);
+      setSuccessMessage(`Prescription ${c.id} remediated: Switched to recommended first-line ${suggestedDrug} (${suggestedDays} days). Status is now Safe & Approved.`);
+      setTimeout(() => setSuccessMessage(null), 6000);
     } catch (err) {
       console.error("Failed to apply remediation:", err);
       setErrorMessage("Could not apply alternative: " + (err instanceof Error ? err.message : "Unknown error"));
@@ -186,23 +163,11 @@ export default function ClinicalRemediationPage() {
     }
 
     try {
-      const targetDrug = 
-        retainModalCase.auditResult?.flags?.find(f => f.drug)?.drug ||
-        retainModalCase.medicines[0]?.genericName || 
-        "Prescribed antimicrobial";
-
-      const updatedCase: PrescriptionCase = {
-        ...retainModalCase,
-        clinicalOverride: {
-          rationale: doctorRationale.trim(),
-          retainedDrug: targetDrug,
-          doctorName: doctorName.trim(),
-          timestamp: new Date().toISOString(),
-        },
-        updatedAt: new Date().toISOString(),
-      };
-
-      await saveCase(updatedCase);
+      await retainCaseWithRationale(
+        retainModalCase.id,
+        doctorRationale.trim(),
+        doctorName.trim()
+      );
       setSuccessMessage(`Prescription ${retainModalCase.id} retained with documented clinical rationale by ${doctorName}.`);
       setRetainModalCase(null);
       setTimeout(() => setSuccessMessage(null), 6000);
@@ -311,16 +276,38 @@ export default function ClinicalRemediationPage() {
 
         {/* Success & Error Notices */}
         {successMessage && (
-          <Alert className="py-3 bg-emerald-50 border-emerald-300 text-emerald-900 rounded-2xl">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-            <AlertDescription className="text-xs ml-2 font-medium">{successMessage}</AlertDescription>
+          <Alert className="py-2.5 px-3 bg-emerald-50 border-emerald-300 text-emerald-900 rounded-2xl flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <AlertDescription className="text-xs font-medium">{successMessage}</AlertDescription>
+            </div>
+            <button
+              type="button"
+              onClick={() => setSuccessMessage(null)}
+              className="text-emerald-700 hover:text-emerald-900 hover:bg-emerald-100/70 p-1 rounded-md transition-colors shrink-0"
+              aria-label="Dismiss notice"
+              title="Dismiss notice"
+            >
+              <X className="w-4 h-4" />
+            </button>
           </Alert>
         )}
 
         {errorMessage && (
-          <Alert variant="destructive" className="py-3 rounded-2xl">
-            <AlertCircle className="w-4 h-4 shrink-0" />
-            <AlertDescription className="text-xs ml-2">{errorMessage}</AlertDescription>
+          <Alert variant="destructive" className="py-2.5 px-3 rounded-2xl flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <AlertDescription className="text-xs">{errorMessage}</AlertDescription>
+            </div>
+            <button
+              type="button"
+              onClick={() => setErrorMessage(null)}
+              className="text-rose-500 hover:text-rose-700 hover:bg-rose-100/70 p-1 rounded-md transition-colors shrink-0"
+              aria-label="Dismiss error"
+              title="Dismiss error"
+            >
+              <X className="w-4 h-4" />
+            </button>
           </Alert>
         )}
 
@@ -379,287 +366,17 @@ export default function ClinicalRemediationPage() {
           </Card>
         </div>
 
-        {/* Filter Toolbar */}
-        <div className="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-3">
-          {/* Search */}
-          <div className="relative flex-1 max-w-sm">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-            <Input
-              type="text"
-              placeholder="Search by Patient, Case ID, diagnosis, or medicine..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 h-9 text-xs bg-slate-50/60 border-slate-200 focus-visible:bg-white"
-            />
-          </div>
-
-          {/* Filter Tabs */}
-          <div className="flex items-center gap-1.5 overflow-x-auto">
-            <div className="flex items-center gap-1 text-slate-400 text-xs mr-1 shrink-0">
-              <Filter className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Filter:</span>
-            </div>
-
-            {[
-              { label: `All Actionable (${stats.actionable})`, value: "ACTIONABLE" },
-              { label: `Critical Blocked (${stats.blocked})`, value: "BLOCKED" },
-              { label: `Needs Review (${stats.flagged})`, value: "FLAGGED" },
-              { label: `Resolved (${stats.resolved})`, value: "RESOLVED" },
-              { label: `All (${stats.total})`, value: "ALL" },
-            ].map((tab) => (
-              <Button
-                key={tab.value}
-                type="button"
-                variant={filterTab === tab.value ? "default" : "outline"}
-                size="sm"
-                onClick={() => setFilterTab(tab.value as typeof filterTab)}
-                className={`h-8 text-xs px-2.5 rounded-lg shrink-0 ${
-                  filterTab === tab.value
-                    ? "bg-[#0D607B] hover:bg-[#09475c] text-white font-medium"
-                    : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
-                }`}
-              >
-                {tab.label}
-              </Button>
-            ))}
-          </div>
-        </div>
-
-        {/* Case Remediation Cards Queue */}
-        <div className="space-y-4">
-          {filteredCases.length === 0 ? (
-            <div className="bg-white p-12 rounded-2xl border border-slate-200/90 text-center space-y-3 shadow-2xs">
-              <div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto">
-                <CheckCircle2 className="w-6 h-6" />
-              </div>
-              <h3 className="text-sm font-bold text-slate-800">No Prescriptions Require Remediation in this View</h3>
-              <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                All prescriptions in this filter have either complied with ICMR guidelines or already received physician resolution.
-              </p>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setFilterTab("ALL")}
-                className="text-xs text-[#0D607B] border-[#C9E9EB]"
-              >
-                View All Clinic Records
-              </Button>
-            </div>
-          ) : (
-            filteredCases.map((c) => {
-              const audit = c.auditResult;
-              const status = audit?.status || "APPROVED";
-              const isBlocked = status === "BLOCKED";
-              const isFlagged = status === "FLAGGED";
-              const isRetained = Boolean(c.clinicalOverride);
-              const flags = audit?.flags || [];
-              const mainFlag = flags[0];
-              const remediationOpt = audit?.remediation_options?.[0];
-              const primaryMed = c.medicines[0];
-              const suggestedAlternative = remediationOpt?.suggested_drug || "Amoxicillin 250mg";
-              const suggestedDays = remediationOpt?.suggested_duration_days || 5;
-
-              return (
-                <div
-                  key={c.id}
-                  className="bg-white rounded-2xl border border-slate-200/90 hover:border-[#169781]/40 transition-all p-5 shadow-2xs space-y-4"
-                >
-                  {/* Top Header: Case ID, Patient, Status Badge */}
-                  <div className="flex items-center justify-between flex-wrap gap-2 pb-3 border-b border-slate-100">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
-                        isRetained
-                          ? "bg-amber-50 text-amber-600 border border-amber-200"
-                          : isBlocked
-                          ? "bg-rose-50 text-rose-600 border border-rose-200"
-                          : isFlagged
-                          ? "bg-amber-50 text-amber-600 border border-amber-200"
-                          : "bg-emerald-50 text-emerald-600 border border-emerald-200"
-                      }`}>
-                        {isRetained ? (
-                          <FileText className="w-4 h-4" />
-                        ) : isBlocked ? (
-                          <ShieldAlert className="w-4 h-4" />
-                        ) : isFlagged ? (
-                          <AlertTriangle className="w-4 h-4" />
-                        ) : (
-                          <ShieldCheck className="w-4 h-4" />
-                        )}
-                      </div>
-
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-mono font-bold text-xs text-[#0D607B]">
-                            {c.id}
-                          </span>
-                          <span className="text-xs font-semibold text-slate-800">
-                            {c.patient.patientName || "Outpatient"}
-                          </span>
-                          <span className="text-xs text-slate-400">
-                            • {c.patient.age ? `${c.patient.age}y` : "Age N/A"} {c.patient.sex}
-                          </span>
-                        </div>
-                        <div className="text-[11px] text-slate-500 mt-0.5">
-                          <strong>Diagnosis:</strong> {c.patient.suspectedDiagnosis || c.patient.symptoms || "General OPD"}
-                          {c.patient.canonical_syndrome ? ` (${c.patient.canonical_syndrome})` : ""}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      {isRetained ? (
-                        <Badge variant="outline" className="gap-1.5 text-[11px] px-2.5 py-0.5 font-semibold bg-amber-50 text-amber-800 border-amber-300 rounded-full">
-                          <FileText className="w-3.5 h-3.5 text-amber-600" />
-                          <span>Retained with Rationale</span>
-                        </Badge>
-                      ) : isBlocked ? (
-                        <Badge variant="outline" className="gap-1.5 text-[11px] px-2.5 py-0.5 font-semibold bg-rose-50 text-rose-700 border-rose-300 rounded-full">
-                          <ShieldAlert className="w-3.5 h-3.5 text-rose-600" />
-                          <span>High Risk (Blocked)</span>
-                        </Badge>
-                      ) : isFlagged ? (
-                        <Badge variant="outline" className="gap-1.5 text-[11px] px-2.5 py-0.5 font-semibold bg-amber-50 text-amber-800 border-amber-300 rounded-full">
-                          <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
-                          <span>Needs Review</span>
-                        </Badge>
-                      ) : (
-                        <Badge variant="outline" className="gap-1.5 text-[11px] px-2.5 py-0.5 font-semibold bg-[#E2FAD9] text-[#0d5c36] border-[#169781]/30 rounded-full">
-                          <ShieldCheck className="w-3.5 h-3.5 text-[#169781]" />
-                          <span>Safe &amp; Approved</span>
-                        </Badge>
-                      )}
-
-                      <Button
-                        asChild
-                        size="sm"
-                        variant="ghost"
-                        className="h-7 px-2 text-xs text-[#0D607B] hover:text-[#169781] hover:bg-[#F1F8FC]"
-                      >
-                        <Link href={`/prescriptions/${encodeURIComponent(c.id)}/remediate`}>
-                          <span>Full Detail</span>
-                          <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
-                        </Link>
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* Overridden / Retained Note */}
-                  {c.clinicalOverride && (
-                    <div className="p-3 rounded-xl bg-amber-50/80 border border-amber-200 text-xs text-amber-900 space-y-1">
-                      <div className="flex items-center gap-1.5 font-semibold text-amber-800">
-                        <FileText className="w-3.5 h-3.5" />
-                        <span>Doctor Justification Recorded:</span>
-                      </div>
-                      <p className="italic pl-5">&quot;{c.clinicalOverride.rationale}&quot;</p>
-                      <div className="text-[10px] text-amber-700 pl-5">
-                        Recorded by {c.clinicalOverride.doctorName} • {new Date(c.clinicalOverride.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Why Flagged Banner */}
-                  {mainFlag && !isRetained && (
-                    <div className="p-3 rounded-xl bg-rose-50/50 border border-rose-200/80 text-xs space-y-1">
-                      <div className="flex items-center gap-1.5 font-bold text-rose-800">
-                        <ShieldAlert className="w-3.5 h-3.5 text-rose-600 shrink-0" />
-                        <span>Safety Alert: {mainFlag.rule_name}</span>
-                      </div>
-                      <p className="text-[11px] text-rose-900/90 pl-5 leading-relaxed">
-                        {mainFlag.rationale || mainFlag.rule_name || "Prescription deviates from recommended first-line ICMR STG antimicrobial choice."}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Side-by-Side Comparison Preview */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
-                    {/* Current Regimen */}
-                    <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-1.5">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] uppercase font-bold text-slate-500">
-                          Current Prescribed Molecule
-                        </span>
-                        <Badge variant="outline" className="text-[9px] bg-white text-slate-700 border-slate-300">
-                          {primaryMed?.aware_tier || "Watch"} Tier
-                        </Badge>
-                      </div>
-                      <div className="font-bold text-slate-900">
-                        {primaryMed ? `${primaryMed.brandName} (${primaryMed.genericName}) ${primaryMed.dose || ""}` : "Prescribed Medication"}
-                      </div>
-                      <div className="text-[11px] text-slate-500">
-                        Course: <span className="font-medium text-slate-700">{primaryMed?.duration || "10 days"}</span> • {primaryMed?.frequency || "BD"}
-                      </div>
-                    </div>
-
-                    {/* Proposed Guideline Choice */}
-                    <div className="p-3 rounded-xl bg-emerald-50/50 border border-emerald-200 text-xs space-y-1.5">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] uppercase font-bold text-emerald-800">
-                          Recommended First-Line Option
-                        </span>
-                        <Badge variant="outline" className="text-[9px] bg-emerald-100 text-emerald-800 border-emerald-200 font-semibold">
-                          Access Choice
-                        </Badge>
-                      </div>
-                      <div className="font-bold text-emerald-950">
-                        {suggestedAlternative}
-                      </div>
-                      <div className="text-[11px] text-slate-600">
-                        Recommended Duration: <span className="font-semibold text-emerald-900">{suggestedDays} days</span> (ICMR STG Protocol)
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Direct Doctor Actions Bar */}
-                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between flex-wrap gap-2">
-                    <span className="text-xs text-slate-500">
-                      Doctor Clinical Actions:
-                    </span>
-
-                    <div className="flex items-center gap-2 flex-wrap">
-                      {/* Action 1: Retain with Rationale */}
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleOpenRetain(c)}
-                        className="h-8 text-xs gap-1.5 text-amber-800 border-amber-300 hover:bg-amber-50"
-                      >
-                        <FileText className="w-3.5 h-3.5 text-amber-600" />
-                        <span>Keep Current (Add Reason)</span>
-                      </Button>
-
-                      {/* Action 2: Deep Review Page */}
-                      <Button
-                        asChild
-                        variant="outline"
-                        size="sm"
-                        className="h-8 text-xs gap-1.5 text-slate-700 hover:text-[#0D607B] hover:border-[#0D607B]/40"
-                      >
-                        <Link href={`/prescriptions/${encodeURIComponent(c.id)}/remediate`}>
-                          <ExternalLink className="w-3.5 h-3.5" />
-                          <span>Detailed Review</span>
-                        </Link>
-                      </Button>
-
-                      {/* Action 3: Accept 1-Click Alternative */}
-                      <Button
-                        type="button"
-                        size="sm"
-                        onClick={() => handleAcceptAlternative(c)}
-                        className="h-8 text-xs gap-1.5 bg-[#169781] hover:bg-[#117866] text-white font-semibold shadow-xs"
-                      >
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        <span>Switch to Recommended Medicine</span>
-                        <ArrowRight className="w-3 h-3 ml-0.5" />
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              );
-            })
-          )}
-        </div>
+        {/* Modern Clinical Remediation Data Table */}
+        <RemediationDataTable
+          cases={filteredCases}
+          onAcceptAlternative={handleAcceptAlternative}
+          onOpenRetain={handleOpenRetain}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          filterTab={filterTab}
+          onFilterTabChange={setFilterTab}
+          stats={stats}
+        />
       </div>
 
       {/* Retain with Rationale Modal */}
@@ -726,11 +443,23 @@ export default function ClinicalRemediationPage() {
             </div>
           </div>
 
+          {/* Circular Progress Indicator when saving rationale */}
+          {isRetaining && (
+            <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 flex items-center gap-2.5 text-xs text-amber-900 animate-pulse">
+              <svg className="w-5 h-5 animate-spin text-amber-600 shrink-0" viewBox="0 0 24 24" fill="none">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+              </svg>
+              <span>Documenting clinical justification into hospital stewardship audit trail...</span>
+            </div>
+          )}
+
           <DialogFooter className="gap-2">
             <Button
               type="button"
               variant="outline"
               size="sm"
+              disabled={isRetaining}
               onClick={() => setRetainModalCase(null)}
               className="text-xs"
             >
@@ -739,10 +468,18 @@ export default function ClinicalRemediationPage() {
             <Button
               type="button"
               size="sm"
+              disabled={isRetaining}
               onClick={handleConfirmRetain}
-              className="text-xs bg-amber-600 hover:bg-amber-700 text-white font-semibold"
+              className="text-xs bg-amber-600 hover:bg-amber-700 text-white font-semibold min-w-[170px] gap-1.5"
             >
-              Confirm &amp; Retain with Rationale
+              {isRetaining ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Recording Rationale...</span>
+                </>
+              ) : (
+                <span>Confirm &amp; Retain with Rationale</span>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

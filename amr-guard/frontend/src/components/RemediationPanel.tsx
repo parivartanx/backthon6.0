@@ -34,9 +34,11 @@ import {
   AlertTriangle,
   ShieldCheck,
   ShieldAlert,
-  Sparkles,
-  ArrowLeftRight
+  ArrowLeftRight,
+  Loader2,
+  Sparkles
 } from "lucide-react";
+import { SwitchMedicineDialog } from "@/components/remediation/SwitchMedicineDialog";
 
 interface RemediationPanelProps {
   options: RemediationOption[];
@@ -71,6 +73,14 @@ export function RemediationPanel({
   const [doctorRationale, setDoctorRationale] = useState("");
   const [doctorName, setDoctorName] = useState("Dr. Ananya Sharma, MD");
   const [rationaleError, setRationaleError] = useState<string | null>(null);
+  const [isRetaining, setIsRetaining] = useState(false);
+
+  // Switch Medication Confirmation Dialog State
+  const [selectedOptionForSwitch, setSelectedOptionForSwitch] = useState<{
+    option: RemediationOption;
+    originalMedicine?: MedicineEntry;
+    matchingFlag?: RuleViolation;
+  } | null>(null);
 
   // Common clinical justification presets
   const clinicalPresets = [
@@ -87,20 +97,27 @@ export function RemediationPanel({
     setIsRetainDialogOpen(true);
   };
 
-  const handleConfirmRetain = () => {
+  const handleConfirmRetain = async () => {
     if (!doctorRationale.trim()) {
       setRationaleError("Please enter a clinical justification before retaining this medication.");
       return;
     }
-    if (onRetainWithRationale) {
-      const targetDrug = 
-        flags.find(f => f.drug)?.drug ||
-        selectedOptionForRetain?.suggested_drug ||
-        medicines[0]?.genericName || 
-        "Prescribed antimicrobial";
-      onRetainWithRationale(doctorRationale.trim(), targetDrug);
+    try {
+      setIsRetaining(true);
+      if (onRetainWithRationale) {
+        const targetDrug = 
+          flags.find(f => f.drug)?.drug ||
+          selectedOptionForRetain?.suggested_drug ||
+          medicines[0]?.genericName || 
+          "Prescribed antimicrobial";
+        await onRetainWithRationale(doctorRationale.trim(), targetDrug);
+      }
+      setIsRetainDialogOpen(false);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsRetaining(false);
     }
-    setIsRetainDialogOpen(false);
   };
 
   if (!options || options.length === 0) {
@@ -368,7 +385,13 @@ export function RemediationPanel({
                     <Button
                       type="button"
                       size="sm"
-                      onClick={() => onApply(opt)}
+                      onClick={() => {
+                        setSelectedOptionForSwitch({
+                          option: opt,
+                          originalMedicine,
+                          matchingFlag,
+                        });
+                      }}
                       className="h-7 text-[11px] px-3 gap-1 bg-[#169781] hover:bg-[#117866] text-white font-semibold shadow-2xs"
                     >
                       <CheckCircle2 className="w-3 h-3" />
@@ -447,11 +470,23 @@ export function RemediationPanel({
             </div>
           </div>
 
+          {/* Circular Progress Indicator when processing */}
+          {isRetaining && (
+            <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 flex items-center gap-2.5 text-xs text-amber-900 animate-pulse">
+              <svg className="w-5 h-5 animate-spin text-amber-600 shrink-0" viewBox="0 0 24 24" fill="none">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+              </svg>
+              <span>Documenting clinical justification into hospital stewardship audit trail...</span>
+            </div>
+          )}
+
           <DialogFooter className="gap-2">
             <Button
               type="button"
               variant="outline"
               size="sm"
+              disabled={isRetaining}
               onClick={() => setIsRetainDialogOpen(false)}
               className="text-xs"
             >
@@ -460,14 +495,58 @@ export function RemediationPanel({
             <Button
               type="button"
               size="sm"
+              disabled={isRetaining}
               onClick={handleConfirmRetain}
-              className="text-xs bg-amber-600 hover:bg-amber-700 text-white font-semibold"
+              className="text-xs bg-amber-600 hover:bg-amber-700 text-white font-semibold min-w-[170px] gap-1.5"
             >
-              Confirm &amp; Retain with Rationale
+              {isRetaining ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Recording Rationale...</span>
+                </>
+              ) : (
+                <span>Confirm &amp; Retain with Rationale</span>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Switch Medication Confirmation Dialog */}
+      {selectedOptionForSwitch && (
+        <SwitchMedicineDialog
+          isOpen={Boolean(selectedOptionForSwitch)}
+          onClose={() => setSelectedOptionForSwitch(null)}
+          onConfirm={(confirmedDays) => {
+            if (onApply) {
+              onApply({
+                ...selectedOptionForSwitch.option,
+                suggested_duration_days: confirmedDays || selectedOptionForSwitch.option.suggested_duration_days,
+              });
+            }
+            setSelectedOptionForSwitch(null);
+          }}
+          currentMedicine={{
+            name: selectedOptionForSwitch.originalMedicine
+              ? `${selectedOptionForSwitch.originalMedicine.genericName || selectedOptionForSwitch.originalMedicine.brandName} ${selectedOptionForSwitch.originalMedicine.dose || ""}`
+              : (selectedOptionForSwitch.matchingFlag?.drug || "Prescribed Molecule"),
+            dose: selectedOptionForSwitch.originalMedicine?.dose,
+            duration: selectedOptionForSwitch.originalMedicine?.duration || "5 days",
+            frequency: selectedOptionForSwitch.originalMedicine?.frequency || "BD",
+            tier: selectedOptionForSwitch.originalMedicine?.aware_tier ? `${selectedOptionForSwitch.originalMedicine.aware_tier} Tier` : "Watch Tier",
+            reasonFlagged: selectedOptionForSwitch.matchingFlag?.rationale || selectedOptionForSwitch.matchingFlag?.rule_name || "Safety alert: Irrational antimicrobial selection.",
+          }}
+          targetMedicine={{
+            name: selectedOptionForSwitch.option.suggested_drug || (firstLineRegimen || "Rational single-agent narrow-spectrum alternative"),
+            dose: "250mg",
+            duration: `${selectedOptionForSwitch.option.suggested_duration_days || 5} days`,
+            durationDays: selectedOptionForSwitch.option.suggested_duration_days || 5,
+            frequency: "Twice daily (BD)",
+            tier: "Access (Safe Choice)",
+            clinicalBenefit: "First-line ICMR STG recommendation with lowest antimicrobial resistance risk.",
+          }}
+        />
+      )}
     </div>
   );
 }
