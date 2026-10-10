@@ -53,6 +53,84 @@ interface RemediationPanelProps {
   isLoadingMore?: boolean;
 }
 
+// [SOLID: SRP] Helper to determine if a medicine is a non-antimicrobial supportive therapy
+export function isSupportiveMedicine(medicine?: MedicineEntry): boolean {
+  if (!medicine) return false;
+  const name = `${medicine.genericName || ""} ${medicine.brandName || ""}`.toLowerCase();
+  const nonAntimicrobialTerms = [
+    "diclofenac", "voveran", "ibuprofen", "combiflam", "naproxen", "paracetamol", 
+    "dolo", "calpol", "crocin", "cetirizine", "cetzine", "1-al", "aceclofenac", 
+    "zerodol", "pantoprazole", "omeprazole", "ranitidine", "salbutamol", "asthalin", 
+    "ors", "zinc", "dextromethorphan", "nimesulide", "etoricoxib"
+  ];
+  return (
+    medicine.drug_class === "NSAID" || 
+    (medicine.aware_tier as string) === "Not Applicable" || 
+    nonAntimicrobialTerms.some((t) => name.includes(t))
+  );
+}
+
+// [SOLID: SRP] Clean therapeutic badge resolution preventing 'Unknown Tier' false alarms
+export function getDrugClassificationBadge(medicine?: MedicineEntry) {
+  if (!medicine) {
+    return {
+      label: "Flagged Regimen",
+      className: "bg-rose-100 text-rose-800 border-rose-200 font-semibold",
+      isSupportive: false,
+    };
+  }
+
+  const name = `${medicine.genericName || ""} ${medicine.brandName || ""}`.toLowerCase();
+  const nsaids = ["diclofenac", "voveran", "ibuprofen", "combiflam", "naproxen", "aceclofenac", "zerodol", "etoricoxib", "piroxicam", "nimesulide", "ketorolac", "mefenamic"];
+  
+  if (medicine.drug_class === "NSAID" || nsaids.some((n) => name.includes(n))) {
+    return {
+      label: "Supportive / NSAID",
+      className: "bg-indigo-50 text-indigo-700 border-indigo-200 font-semibold",
+      isSupportive: true,
+    };
+  }
+
+  const generalSupportive = ["paracetamol", "dolo", "crocin", "calpol", "cetirizine", "cetzine", "1-al", "pantoprazole", "omeprazole", "salbutamol", "ors", "zinc"];
+  if (generalSupportive.some((g) => name.includes(g))) {
+    return {
+      label: "Supportive Therapy",
+      className: "bg-teal-50 text-teal-700 border-teal-200 font-semibold",
+      isSupportive: true,
+    };
+  }
+
+  const tier = medicine.aware_tier?.toLowerCase();
+  if (tier === "access") {
+    return {
+      label: "Access Tier",
+      className: "bg-emerald-100 text-emerald-800 border-emerald-200 font-semibold",
+      isSupportive: false,
+    };
+  }
+  if (tier === "watch") {
+    return {
+      label: "Watch Tier",
+      className: "bg-amber-100 text-amber-800 border-amber-200 font-semibold",
+      isSupportive: false,
+    };
+  }
+  if (tier === "reserve") {
+    return {
+      label: "Reserve Tier",
+      className: "bg-rose-100 text-rose-800 border-rose-200 font-bold",
+      isSupportive: false,
+    };
+  }
+
+  const supportive = isSupportiveMedicine(medicine);
+  return {
+    label: medicine.drug_class || (supportive ? "Supportive Care" : "Unclassified Agent"),
+    className: "bg-slate-100 text-slate-700 border-slate-200 font-medium",
+    isSupportive: supportive,
+  };
+}
+
 export function RemediationPanel({ 
   options, 
   flags = [],
@@ -248,12 +326,16 @@ export function RemediationPanel({
             (f.remediation && f.remediation.toLowerCase().includes(opt.suggested_drug?.toLowerCase() || ""))
           ) || flags[idx] || flags[0];
 
+          // Prioritize matching flagged antimicrobial if available, or first antibiotic in regimen
           const originalMedicine = medicines.find(m => 
             matchingFlag?.drug && (
               m.genericName.toLowerCase().includes(matchingFlag.drug.toLowerCase()) ||
               m.brandName.toLowerCase().includes(matchingFlag.drug.toLowerCase())
             )
-          ) || medicines[0];
+          ) || medicines.find(m => !isSupportiveMedicine(m)) || medicines[0];
+
+          const badgeConfig = getDrugClassificationBadge(originalMedicine);
+          const isSupportive = badgeConfig.isSupportive;
 
           return (
             <div
@@ -276,14 +358,24 @@ export function RemediationPanel({
               {/* SIDE-BY-SIDE REGIMEN COMPARISON (Original vs Proposed Alternative) */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
                 {/* Left: Original Prescribed */}
-                <div className="p-3 rounded-lg bg-rose-50/40 border border-rose-200/70 space-y-1.5">
+                <div className={`p-3 rounded-lg border space-y-1.5 ${
+                  isSupportive 
+                    ? "bg-slate-50/80 border-slate-200" 
+                    : "bg-rose-50/40 border-rose-200/70"
+                }`}>
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-rose-800 uppercase tracking-wider flex items-center gap-1">
-                      <ShieldAlert className="w-3 h-3 text-rose-600" />
-                      Original Prescription
+                    <span className={`text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 ${
+                      isSupportive ? "text-slate-700" : "text-rose-800"
+                    }`}>
+                      {isSupportive ? (
+                        <Info className="w-3 h-3 text-slate-500" />
+                      ) : (
+                        <ShieldAlert className="w-3 h-3 text-rose-600" />
+                      )}
+                      {isSupportive ? "Current Supportive Therapy" : "Original Prescription"}
                     </span>
-                    <Badge variant="outline" className="text-[9px] bg-rose-100 text-rose-800 border-rose-200">
-                      {originalMedicine?.aware_tier ? `${originalMedicine.aware_tier} Tier` : "Flagged"}
+                    <Badge variant="outline" className={`text-[9px] ${badgeConfig.className}`}>
+                      {badgeConfig.label}
                     </Badge>
                   </div>
                   <div className="text-xs font-bold text-slate-900">
@@ -304,7 +396,7 @@ export function RemediationPanel({
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-bold text-emerald-800 uppercase tracking-wider flex items-center gap-1">
                       <ShieldCheck className="w-3 h-3 text-emerald-600" />
-                      Proposed Alternative
+                      {isSupportive ? "Initiate Guideline Antibiotic" : "Proposed Alternative"}
                     </span>
                     <Badge variant="outline" className="text-[9px] bg-emerald-100 text-emerald-800 border-emerald-200">
                       Access (First-Line)

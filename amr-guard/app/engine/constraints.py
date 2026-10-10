@@ -297,8 +297,63 @@ def is_aminoglycoside(drug_name: str) -> bool:
     aminos = {"amikacin", "gentamicin", "tobramycin", "streptomycin", "kanamycin"}
     return any(am in norm for am in aminos)
 
+# [PATTERN: Domain Data Structure] — Systemic NSAID registry for therapeutic duplication detection
+NSAID_DRUGS: Set[str] = {
+    "diclofenac",
+    "diclofenac sodium",
+    "diclofenac potassium",
+    "ibuprofen",
+    "naproxen",
+    "ketorolac",
+    "piroxicam",
+    "indomethacin",
+    "meloxicam",
+    "mefenamic acid",
+    "etoricoxib",
+    "celecoxib",
+    "aceclofenac",
+    "ketoprofen",
+    "nimesulide",
+}
+
+def is_nsaid_drug(drug_name: str) -> bool:
+    """Check if drug is a systemic non-steroidal anti-inflammatory drug (NSAID)."""
+    norm = normalize_text(drug_name)
+    return any(nsaid in norm for nsaid in NSAID_DRUGS)
+
+
+def is_antibiotic_drug(drug_name: str) -> bool:
+    """Check if the drug entity is an antimicrobial agent rather than supportive therapy."""
+    norm = normalize_text(drug_name)
+    if is_nsaid_drug(drug_name):
+        return False
+    non_antibiotics = {
+        "paracetamol", "acetaminophen", "dolo", "calpol", "crocin",
+        "cetirizine", "cetzine", "alerid", "levocetirizine", "1-al",
+        "ibuprofen", "combiflam", "brufen", "salbutamol", "asthalin",
+        "ors", "oral rehydration", "zinc", "zinc sulfate", "electral",
+        "dextromethorphan", "saline", "normal saline", "pantoprazole",
+        "omeprazole", "ranitidine", "ondansetron", "chlorpheniramine",
+        "diclofenac", "voveran", "aceclofenac", "zerodol",
+    }
+    if any(na in norm for na in non_antibiotics):
+        return False
+    return (
+        any(r in norm for r in AWARE_RESERVE_DRUGS)
+        or any(w in norm for w in AWARE_WATCH_DRUGS)
+        or any(a in norm for a in AWARE_ACCESS_DRUGS)
+        or is_fluoroquinolone(drug_name)
+        or is_tetracycline(drug_name)
+        or is_aminoglycoside(drug_name)
+    )
+
+
 def get_aware_tier(drug_name: str, fallback_tier: Optional[str] = None) -> str:
-    """Determine the WHO AWaRe classification tier."""
+    """
+    Determine the WHO AWaRe classification tier.
+    WHO AWaRe strictly applies to antibacterial agents.
+    Non-antimicrobial supportive drugs (NSAIDs, analgesics, antihistamines) return 'Not Applicable'.
+    """
     if fallback_tier and fallback_tier.capitalize() in {"Access", "Watch", "Reserve"}:
         return fallback_tier.capitalize()
 
@@ -319,7 +374,11 @@ def get_aware_tier(drug_name: str, fallback_tier: Optional[str] = None) -> str:
         if a in norm:
             return "Access"
 
-    return "Unknown"
+    # Non-antimicrobial supportive drugs do not belong to WHO AWaRe framework
+    if is_nsaid_drug(drug_name) or not is_antibiotic_drug(drug_name):
+        return "Not Applicable"
+
+    return "Unclassified"
 
 def is_irrational_fdc(drug_name: str) -> bool:
     """Check if the formulation matches an irrational fixed-dose combination."""
@@ -328,27 +387,6 @@ def is_irrational_fdc(drug_name: str) -> bool:
         if part1 in norm and part2 in norm:
             return True
     return False
-
-
-def is_antibiotic_drug(drug_name: str) -> bool:
-    """Check if the drug entity is an antimicrobial agent rather than supportive therapy."""
-    norm = normalize_text(drug_name)
-    non_antibiotics = {
-        "paracetamol", "acetaminophen", "dolo", "calpol", "crocin",
-        "cetirizine", "cetzine", "alerid", "levocetirizine", "1-al",
-        "ibuprofen", "combiflam", "brufen", "salbutamol", "asthalin",
-        "ors", "oral rehydration", "zinc", "zinc sulfate", "electral",
-        "dextromethorphan", "saline", "normal saline", "pantoprazole",
-        "omeprazole", "ranitidine", "ondansetron", "chlorpheniramine",
-    }
-    if any(na in norm for na in non_antibiotics):
-        return False
-    return (
-        get_aware_tier(drug_name) in {"Access", "Watch", "Reserve"}
-        or is_fluoroquinolone(drug_name)
-        or is_tetracycline(drug_name)
-        or is_aminoglycoside(drug_name)
-    )
 
 
 # [SOLID: SRP] — Drug family classification helpers for allergy & safety verification
@@ -378,31 +416,6 @@ def is_macrolide_drug(drug_name: str) -> bool:
     """Check if drug is a macrolide-class antimicrobial."""
     norm = normalize_text(drug_name)
     return any(m in norm for m in MACROLIDE_DRUGS)
-
-
-# [PATTERN: Domain Data Structure] — Systemic NSAID registry for therapeutic duplication detection
-NSAID_DRUGS: Set[str] = {
-    "diclofenac",
-    "diclofenac sodium",
-    "diclofenac potassium",
-    "ibuprofen",
-    "naproxen",
-    "ketorolac",
-    "piroxicam",
-    "indomethacin",
-    "meloxicam",
-    "mefenamic acid",
-    "etoricoxib",
-    "celecoxib",
-    "aceclofenac",
-    "ketoprofen",
-    "nimesulide",
-}
-
-def is_nsaid_drug(drug_name: str) -> bool:
-    """Check if drug is a systemic non-steroidal anti-inflammatory drug (NSAID)."""
-    norm = normalize_text(drug_name)
-    return any(nsaid in norm for nsaid in NSAID_DRUGS)
 
 
 

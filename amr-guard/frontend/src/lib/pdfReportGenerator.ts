@@ -235,7 +235,16 @@ export async function generatePrescriptionReportPdf(
     (idx + 1).toString(),
     m.brandName || "—",
     m.genericName || "—",
-    m.aware_tier ? m.aware_tier.toUpperCase() : "UNCLASSIFIED",
+    (() => {
+      const gLower = `${m.genericName || ""} ${m.brandName || ""}`.toLowerCase();
+      const nsaids = ["diclofenac", "ibuprofen", "naproxen", "aceclofenac", "etoricoxib", "piroxicam", "nimesulide"];
+      if (nsaids.some((n) => gLower.includes(n)) || m.drug_class === "NSAID") return "N/A (NSAID)";
+      if (["paracetamol", "dolo", "crocin", "cetirizine", "pantoprazole", "ors"].some((s) => gLower.includes(s))) return "N/A (SUPPORTIVE)";
+      if (m.aware_tier === "Access") return "ACCESS";
+      if (m.aware_tier === "Watch") return "WATCH";
+      if (m.aware_tier === "Reserve") return "RESERVE";
+      return m.aware_tier && m.aware_tier !== "Not Applicable" ? m.aware_tier.toUpperCase() : "N/A (SUPPORTIVE)";
+    })(),
     `${m.dose || "—"}${m.route ? ` (${m.route})` : ""}`,
     m.frequency || "—",
     m.duration ? `${m.duration}` : "—",

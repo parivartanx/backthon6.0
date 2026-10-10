@@ -324,6 +324,7 @@ function classifyAwareTier(drug: string): "Access" | "Watch" | "Reserve" {
 }
 
 function detectDrugClass(drug: string): string {
+  if (isNSAID(drug)) return "NSAID";
   if (isFQ(drug)) return "Fluoroquinolone";
   if (isTC(drug)) return "Tetracycline";
   if (GLYCOPEPTIDES.some((g) => normalize(drug).includes(g))) return "Glycopeptide (Watch)";

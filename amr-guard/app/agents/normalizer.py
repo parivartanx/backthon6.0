@@ -22,6 +22,8 @@ from app.engine.constraints import (
     is_tetracycline,
     is_aminoglycoside,
     is_irrational_fdc,
+    is_antibiotic_drug,
+    is_nsaid_drug,
     AWARE_ACCESS_DRUGS,
     AWARE_WATCH_DRUGS,
     AWARE_RESERVE_DRUGS,
@@ -104,6 +106,8 @@ COMMON_BRAND_CATALOG: Dict[str, Dict[str, Any]] = {
     "1-al": {"generic": "Levocetirizine", "strength": "5mg", "is_fdc": False},
     "electral": {"generic": "Oral Rehydration Salts (ORS) + Zinc", "strength": "21.8g", "is_fdc": True},
     "combiflam": {"generic": "Ibuprofen", "strength": "400mg", "is_fdc": True},
+    "voveran": {"generic": "Diclofenac", "strength": "50mg", "is_fdc": False},
+    "zerodol": {"generic": "Aceclofenac", "strength": "100mg", "is_fdc": False},
     "norflox-tz": {"generic": "Norfloxacin + Tinidazole", "strength": "400mg/600mg", "is_fdc": True},
     "oflox-oz": {"generic": "Ofloxacin + Ornidazole", "strength": "200mg/500mg", "is_fdc": True},
     "zenflox-oz": {"generic": "Ofloxacin + Ornidazole", "strength": "200mg/500mg", "is_fdc": True},
@@ -239,13 +243,14 @@ class DrugNormalizerAgent:
         if cleaned_base in COMMON_BRAND_CATALOG:
             brand_info = COMMON_BRAND_CATALOG[cleaned_base]
             generic = brand_info["generic"]
+            is_anti = is_antibiotic_drug(generic)
             return NormalizedDrug(
                 raw_name=raw_input,
                 generic_name=generic,
                 brand_name=cleaned_base.title(),
                 strength=extracted_strength or brand_info.get("strength"),
-                aware_tier=get_aware_tier(generic),
-                is_antibiotic=True,
+                aware_tier=get_aware_tier(generic) if is_anti else "Not Applicable",
+                is_antibiotic=is_anti,
                 is_fdc=brand_info.get("is_fdc", False),
                 confidence=0.98,
             )
@@ -253,12 +258,13 @@ class DrugNormalizerAgent:
         # 2. Exact Generic Match
         for generic in self._all_known_generics:
             if generic == cleaned_base or generic in cleaned_base:
+                is_anti = is_antibiotic_drug(generic)
                 return NormalizedDrug(
                     raw_name=raw_input,
                     generic_name=generic.title(),
                     strength=extracted_strength,
-                    aware_tier=get_aware_tier(generic),
-                    is_antibiotic=True,
+                    aware_tier=get_aware_tier(generic) if is_anti else "Not Applicable",
+                    is_antibiotic=is_anti,
                     is_fdc=is_irrational_fdc(raw_input),
                     confidence=0.95,
                 )
@@ -273,13 +279,14 @@ class DrugNormalizerAgent:
             matched_brand = best_brand_match[0]
             brand_info = COMMON_BRAND_CATALOG[matched_brand]
             generic = brand_info["generic"]
+            is_anti = is_antibiotic_drug(generic)
             return NormalizedDrug(
                 raw_name=raw_input,
                 generic_name=generic,
                 brand_name=matched_brand.title(),
                 strength=extracted_strength or brand_info.get("strength"),
-                aware_tier=get_aware_tier(generic),
-                is_antibiotic=True,
+                aware_tier=get_aware_tier(generic) if is_anti else "Not Applicable",
+                is_antibiotic=is_anti,
                 is_fdc=brand_info.get("is_fdc", False),
                 confidence=round(best_brand_match[1] / 100.0, 2),
             )
@@ -292,12 +299,13 @@ class DrugNormalizerAgent:
         )
         if best_generic_match and best_generic_match[1] >= self.fuzzy_threshold:
             matched_generic = best_generic_match[0]
+            is_anti = is_antibiotic_drug(matched_generic)
             return NormalizedDrug(
                 raw_name=raw_input,
                 generic_name=matched_generic.title(),
                 strength=extracted_strength,
-                aware_tier=get_aware_tier(matched_generic),
-                is_antibiotic=True,
+                aware_tier=get_aware_tier(matched_generic) if is_anti else "Not Applicable",
+                is_antibiotic=is_anti,
                 is_fdc=is_irrational_fdc(matched_generic),
                 confidence=round(best_generic_match[1] / 100.0, 2),
             )
@@ -312,12 +320,13 @@ class DrugNormalizerAgent:
                 pass
 
         # 6. Fallback Generic Return
+        is_anti = is_antibiotic_drug(cleaned_base)
         return NormalizedDrug(
             raw_name=raw_input,
             generic_name=cleaned_base.title() or raw_input.strip(),
             strength=extracted_strength,
-            aware_tier=get_aware_tier(cleaned_base),
-            is_antibiotic=True,
+            aware_tier=get_aware_tier(cleaned_base) if is_anti else "Not Applicable",
+            is_antibiotic=is_anti,
             is_fdc=is_irrational_fdc(raw_input),
             confidence=0.5,
         )
@@ -344,13 +353,14 @@ class DrugNormalizerAgent:
         if not generic:
             return None
 
+        is_anti = is_antibiotic_drug(generic)
         return NormalizedDrug(
             raw_name=raw_input,
             generic_name=generic,
             brand_name=data.get("brand_name"),
             strength=data.get("strength") or self.extract_strength(raw_input),
-            aware_tier=get_aware_tier(generic),
-            is_antibiotic=True,
+            aware_tier=get_aware_tier(generic) if is_anti else "Not Applicable",
+            is_antibiotic=is_anti,
             is_fdc=bool(data.get("is_fdc", False)),
             confidence=float(data.get("confidence", 0.8)),
         )
