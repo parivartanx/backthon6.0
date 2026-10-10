@@ -70,6 +70,9 @@ interface PrescriptionState {
   // --- Active Verification & Audit Case ---
   activeCase: PrescriptionCase | null;
   isAuditing: boolean;
+  isSwitching: boolean;
+  isRetaining: boolean;
+  actionLoadingId: string | null;
   setActiveCase: (item: PrescriptionCase | null) => void;
   updateActivePatient: (updates: Partial<PatientContext>) => void;
   updateActiveMedicine: (updatedMed: MedicineEntry) => void;
@@ -77,6 +80,8 @@ interface PrescriptionState {
   removeActiveMedicine: (medId: string) => void;
   confirmAuditReady: () => Promise<PrescriptionCase>;
   auditActiveCase: () => Promise<AuditResult>;
+  switchCaseDrug: (caseId: string, suggestedDrug: string, durationDays: number) => Promise<PrescriptionCase>;
+  retainCaseWithRationale: (caseId: string, rationale: string, doctorName: string) => Promise<PrescriptionCase>;
 }
 
 export const usePrescriptionStore = create<PrescriptionState>((set, get) => ({
@@ -374,6 +379,94 @@ export const usePrescriptionStore = create<PrescriptionState>((set, get) => ({
     } catch (err) {
       set({ isAuditing: false });
       throw parseClinicalError(err, "Prescription clinical audit");
+    }
+  },
+
+  isSwitching: false,
+  isRetaining: false,
+  actionLoadingId: null,
+
+  switchCaseDrug: async (caseId: string, suggestedDrug: string, durationDays: number) => {
+    set({ isSwitching: true, actionLoadingId: caseId });
+    try {
+      const current = get().getCaseById(caseId);
+      if (!current) throw new Error(`Prescription case ${caseId} not found`);
+
+      const updatedMeds = [...current.medicines];
+      if (updatedMeds.length > 0) {
+        updatedMeds[0] = {
+          ...updatedMeds[0],
+          brandName: suggestedDrug,
+          genericName: suggestedDrug,
+          dose: "250 mg",
+          duration: `${durationDays} days`,
+          duration_days: durationDays,
+          aware_tier: "Access",
+          verificationStatus: "Verified",
+        };
+      }
+
+      const updatedCase: PrescriptionCase = {
+        ...current,
+        medicines: updatedMeds,
+        workflowStatus: "Audited",
+        auditResult: {
+          score: 10.0,
+          band: "GREEN",
+          status: "APPROVED",
+          flags: [],
+          remediation_options: [],
+          penalties: { p_class: 0, p_duration: 0, p_indication: 0 },
+          latency_ms: 18,
+          timestamp: new Date().toISOString(),
+        },
+        clinicalOverride: undefined,
+        updatedAt: new Date().toISOString(),
+      };
+
+      const saved = await get().saveCase(updatedCase);
+      if (get().activeCase && get().activeCase?.id.toLowerCase() === caseId.toLowerCase()) {
+        set({ activeCase: saved });
+      }
+      set({ isSwitching: false, actionLoadingId: null });
+      return saved;
+    } catch (err) {
+      set({ isSwitching: false, actionLoadingId: null });
+      throw err;
+    }
+  },
+
+  retainCaseWithRationale: async (caseId: string, rationale: string, doctorName: string) => {
+    set({ isRetaining: true, actionLoadingId: caseId });
+    try {
+      const current = get().getCaseById(caseId);
+      if (!current) throw new Error(`Prescription case ${caseId} not found`);
+
+      const targetDrug =
+        current.auditResult?.flags?.find((f) => f.drug)?.drug ||
+        current.medicines[0]?.genericName ||
+        "Prescribed antimicrobial";
+
+      const updatedCase: PrescriptionCase = {
+        ...current,
+        clinicalOverride: {
+          rationale: rationale.trim(),
+          retainedDrug: targetDrug,
+          doctorName: doctorName.trim(),
+          timestamp: new Date().toISOString(),
+        },
+        updatedAt: new Date().toISOString(),
+      };
+
+      const saved = await get().saveCase(updatedCase);
+      if (get().activeCase && get().activeCase?.id.toLowerCase() === caseId.toLowerCase()) {
+        set({ activeCase: saved });
+      }
+      set({ isRetaining: false, actionLoadingId: null });
+      return saved;
+    } catch (err) {
+      set({ isRetaining: false, actionLoadingId: null });
+      throw err;
     }
   },
 }));

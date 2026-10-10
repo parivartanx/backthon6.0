@@ -30,7 +30,8 @@ import {
   History,
   FileText,
   ArrowRight,
-  ExternalLink
+  ExternalLink,
+  X
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -402,16 +403,38 @@ export default function RemediationReviewPage() {
 
         {/* Success and Warning Alerts */}
         {successNotice && (
-          <Alert className="py-2.5 bg-emerald-50 border-emerald-300 text-emerald-900">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-            <AlertDescription className="text-xs ml-2 font-medium">{successNotice}</AlertDescription>
+          <Alert className="py-2.5 px-3 bg-emerald-50 border-emerald-300 text-emerald-900 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <AlertDescription className="text-xs font-medium">{successNotice}</AlertDescription>
+            </div>
+            <button
+              type="button"
+              onClick={() => setSuccessNotice(null)}
+              className="text-emerald-700 hover:text-emerald-900 hover:bg-emerald-100/70 p-1 rounded-md transition-colors shrink-0"
+              aria-label="Dismiss notice"
+              title="Dismiss notice"
+            >
+              <X className="w-4 h-4" />
+            </button>
           </Alert>
         )}
 
         {validationWarning && (
-          <Alert variant="destructive" className="py-2.5">
-            <AlertCircle className="w-4 h-4 shrink-0" />
-            <AlertDescription className="text-xs ml-2">{validationWarning}</AlertDescription>
+          <Alert variant="destructive" className="py-2.5 px-3 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <AlertDescription className="text-xs">{validationWarning}</AlertDescription>
+            </div>
+            <button
+              type="button"
+              onClick={() => setValidationWarning(null)}
+              className="text-rose-500 hover:text-rose-700 hover:bg-rose-100/70 p-1 rounded-md transition-colors shrink-0"
+              aria-label="Dismiss warning"
+              title="Dismiss warning"
+            >
+              <X className="w-4 h-4" />
+            </button>
           </Alert>
         )}
 
